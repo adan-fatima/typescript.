@@ -2,13 +2,13 @@
 yield(foo);
 >yield(foo) : any
 >yield : any
->foo : () => IterableIterator<typeof foo>
+>foo : type Anon = () => IterableIterator<Anon>
 
 function* foo() {
->foo : () => IterableIterator<typeof foo>
+>foo : type Anon = () => IterableIterator<Anon>
 
   yield(foo);
 >yield(foo) : any
->(foo) : () => IterableIterator<typeof foo>
->foo : () => IterableIterator<typeof foo>
+>(foo) : type Anon = () => IterableIterator<Anon>
+>foo : type Anon = () => IterableIterator<Anon>
 }

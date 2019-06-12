@@ -6,33 +6,33 @@ module M {
 >i : I
 
    function f(p: I) { return f };
->f : (p: I) => typeof f
+>f : type Anon = (p: I) => Anon
 >p : I
->f : (p: I) => typeof f
+>f : type Anon = (p: I) => Anon
 
    var i: I;
 >i : I
 
    f(i);
->f(i) : (p: I) => typeof f
->f : (p: I) => typeof f
+>f(i) : type Anon = (p: I) => Anon
+>f : type Anon = (p: I) => Anon
 >i : I
 
    f(f(i));
->f(f(i)) : (p: I) => typeof f
->f : (p: I) => typeof f
->f(i) : (p: I) => typeof f
->f : (p: I) => typeof f
+>f(f(i)) : type Anon = (p: I) => Anon
+>f : type Anon = (p: I) => Anon
+>f(i) : type Anon = (p: I) => Anon
+>f : type Anon = (p: I) => Anon
 >i : I
 
    f((f(f(i))));
->f((f(f(i)))) : (p: I) => typeof f
->f : (p: I) => typeof f
->(f(f(i))) : (p: I) => typeof f
->f(f(i)) : (p: I) => typeof f
->f : (p: I) => typeof f
->f(i) : (p: I) => typeof f
->f : (p: I) => typeof f
+>f((f(f(i)))) : type Anon = (p: I) => Anon
+>f : type Anon = (p: I) => Anon
+>(f(f(i))) : type Anon = (p: I) => Anon
+>f(f(i)) : type Anon = (p: I) => Anon
+>f : type Anon = (p: I) => Anon
+>f(i) : type Anon = (p: I) => Anon
+>f : type Anon = (p: I) => Anon
 >i : I
 
 }

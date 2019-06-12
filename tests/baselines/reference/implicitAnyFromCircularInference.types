@@ -19,8 +19,8 @@ var d: Array<typeof d>;
 >d : any
 
 function f() { return f; }
->f : () => typeof f
->f : () => typeof f
+>f : type Anon = () => Anon
+>f : type Anon = () => Anon
 
 // Error expected
 function g() { return g(); }

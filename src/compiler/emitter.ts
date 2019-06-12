@@ -1230,6 +1230,8 @@ namespace ts {
                         return emitLiteralType(<LiteralTypeNode>node);
                     case SyntaxKind.ImportType:
                         return emitImportTypeNode(<ImportTypeNode>node);
+                    case SyntaxKind.InlineTypeAliasDeclaration:
+                        return emitInlineTypeAliasDeclaration(<InlineTypeAliasDeclaration>node);
                     case SyntaxKind.JSDocAllType:
                         writePunctuation("*");
                         return;
@@ -2081,6 +2083,16 @@ namespace ts {
                 emit(node.qualifier);
             }
             emitTypeArguments(node, node.typeArguments);
+        }
+
+        function emitInlineTypeAliasDeclaration(node: InlineTypeAliasDeclaration) {
+            writeKeyword("type");
+            writeSpace();
+            emit(node.name);
+            writeSpace();
+            writePunctuation("=");
+            writeSpace();
+            emit(node.type);
         }
 
         //

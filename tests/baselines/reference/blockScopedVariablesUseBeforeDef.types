@@ -68,14 +68,14 @@ function foo5() {
 >foo5 : () => void
 
     let x = () => y;
->x : () => () => any
->() => y : () => () => any
->y : () => () => any
+>x : type Anon = () => () => Anon
+>() => y : type Anon = () => () => Anon
+>y : type Anon = () => () => Anon
 
     let y = () => x;
->y : () => () => any
->() => x : () => () => any
->x : () => () => any
+>y : type Anon = () => () => Anon
+>() => x : type Anon = () => () => Anon
+>x : type Anon = () => () => Anon
 }
 
 function foo6() {

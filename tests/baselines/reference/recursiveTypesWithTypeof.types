@@ -46,127 +46,127 @@ var f3: any;
 // None of these declarations should have any errors!
 // Truly recursive types
 var g: { x: typeof g; };
->g : { x: any; }
->x : { x: any; }
->g : { x: any; }
+>g : type Anon = { x: Anon; }
+>x : type Anon = { x: Anon; }
+>g : type Anon = { x: Anon; }
 
 var g: typeof g.x;
->g : { x: any; }
->g.x : { x: any; }
->g : { x: any; }
->x : { x: any; }
+>g : type Anon = { x: Anon; }
+>g.x : type Anon = { x: Anon; }
+>g : type Anon = { x: Anon; }
+>x : type Anon = { x: Anon; }
 
 var h: () => typeof h;
->h : () => any
->h : () => any
+>h : type Anon = () => Anon
+>h : type Anon = () => Anon
 
 var h = h();
->h : () => any
->h() : () => any
->h : () => any
+>h : type Anon = () => Anon
+>h() : type Anon = () => Anon
+>h : type Anon = () => Anon
 
 var i: (x: typeof i) => typeof x;
->i : (x: any) => any
->x : (x: any) => any
->i : (x: any) => any
->x : (x: any) => any
+>i : type Anon = (x: Anon) => Anon
+>x : type Anon = (x: Anon) => Anon
+>i : type Anon = (x: Anon) => Anon
+>x : type Anon = (x: Anon) => Anon
 
 var i = i(i);
->i : (x: any) => any
->i(i) : (x: any) => any
->i : (x: any) => any
->i : (x: any) => any
+>i : type Anon = (x: Anon) => Anon
+>i(i) : type Anon = (x: Anon) => Anon
+>i : type Anon = (x: Anon) => Anon
+>i : type Anon = (x: Anon) => Anon
 
 var j: <T extends typeof j>(x: T) => T;
->j : <T extends any>(x: T) => T
->j : <T extends any>(x: T) => T
+>j : type Anon = <T extends Anon>(x: T) => T
+>j : type Anon = <T extends Anon>(x: T) => T
 >x : T
 
 var j = j(j);
->j : <T extends any>(x: T) => T
->j(j) : <T extends any>(x: T) => T
->j : <T extends any>(x: T) => T
->j : <T extends any>(x: T) => T
+>j : type Anon = <T extends Anon>(x: T) => T
+>j(j) : type Anon = <T extends Anon>(x: T) => T
+>j : type Anon = <T extends Anon>(x: T) => T
+>j : type Anon = <T extends Anon>(x: T) => T
 
 // Same as h, i, j with construct signatures
 var h2: new () => typeof h2;
->h2 : new () => any
->h2 : new () => any
+>h2 : type Anon = new () => Anon
+>h2 : type Anon = new () => Anon
 
 var h2 = new h2();
->h2 : new () => any
->new h2() : new () => any
->h2 : new () => any
+>h2 : type Anon = new () => Anon
+>new h2() : type Anon = new () => Anon
+>h2 : type Anon = new () => Anon
 
 var i2: new (x: typeof i2) => typeof x;
->i2 : new (x: any) => any
->x : new (x: any) => any
->i2 : new (x: any) => any
->x : new (x: any) => any
+>i2 : type Anon = new (x: Anon) => Anon
+>x : type Anon = new (x: Anon) => Anon
+>i2 : type Anon = new (x: Anon) => Anon
+>x : type Anon = new (x: Anon) => Anon
 
 var i2 = new i2(i2);
->i2 : new (x: any) => any
->new i2(i2) : new (x: any) => any
->i2 : new (x: any) => any
->i2 : new (x: any) => any
+>i2 : type Anon = new (x: Anon) => Anon
+>new i2(i2) : type Anon = new (x: Anon) => Anon
+>i2 : type Anon = new (x: Anon) => Anon
+>i2 : type Anon = new (x: Anon) => Anon
 
 var j2: new <T extends typeof j2>(x: T) => T;
->j2 : new <T extends any>(x: T) => T
->j2 : new <T extends any>(x: T) => T
+>j2 : type Anon = new <T extends Anon>(x: T) => T
+>j2 : type Anon = new <T extends Anon>(x: T) => T
 >x : T
 
 var j2 = new j2(j2);
->j2 : new <T extends any>(x: T) => T
->new j2(j2) : new <T extends any>(x: T) => T
->j2 : new <T extends any>(x: T) => T
->j2 : new <T extends any>(x: T) => T
+>j2 : type Anon = new <T extends Anon>(x: T) => T
+>new j2(j2) : type Anon = new <T extends Anon>(x: T) => T
+>j2 : type Anon = new <T extends Anon>(x: T) => T
+>j2 : type Anon = new <T extends Anon>(x: T) => T
 
 // Indexers
 var k: { [n: number]: typeof k;[s: string]: typeof k };
->k : { [s: string]: any; [n: number]: any; }
+>k : type Anon = { [s: string]: Anon; [n: number]: Anon; }
 >n : number
->k : { [s: string]: any; [n: number]: any; }
+>k : type Anon = { [s: string]: Anon; [n: number]: Anon; }
 >s : string
->k : { [s: string]: any; [n: number]: any; }
+>k : type Anon = { [s: string]: Anon; [n: number]: Anon; }
 
 var k = k[0];
->k : { [s: string]: any; [n: number]: any; }
->k[0] : { [s: string]: any; [n: number]: any; }
->k : { [s: string]: any; [n: number]: any; }
+>k : type Anon = { [s: string]: Anon; [n: number]: Anon; }
+>k[0] : type Anon = { [s: string]: Anon; [n: number]: Anon; }
+>k : type Anon = { [s: string]: Anon; [n: number]: Anon; }
 >0 : 0
 
 var k = k[''];
->k : { [s: string]: any; [n: number]: any; }
->k[''] : { [s: string]: any; [n: number]: any; }
->k : { [s: string]: any; [n: number]: any; }
+>k : type Anon = { [s: string]: Anon; [n: number]: Anon; }
+>k[''] : type Anon = { [s: string]: Anon; [n: number]: Anon; }
+>k : type Anon = { [s: string]: Anon; [n: number]: Anon; }
 >'' : ""
 
 // Hybrid - contains type literals as well as type arguments
 // These two are recursive
 var hy1: { x: typeof hy1 }[];
->hy1 : { x: any[]; }[]
->x : { x: any[]; }[]
->hy1 : { x: any[]; }[]
+>hy1 : type Anon = { x: Anon[]; }[]
+>x : type Anon = { x: Anon[]; }[]
+>hy1 : type Anon = { x: Anon[]; }[]
 
 var hy1 = hy1[0].x;
->hy1 : { x: any[]; }[]
->hy1[0].x : { x: any[]; }[]
->hy1[0] : { x: any[]; }
->hy1 : { x: any[]; }[]
+>hy1 : type Anon = { x: Anon[]; }[]
+>hy1[0].x : type Anon = { x: Anon[]; }[]
+>hy1[0] : type Anon = { x: Anon[]; }
+>hy1 : type Anon = { x: Anon[]; }[]
 >0 : 0
->x : { x: any[]; }[]
+>x : type Anon = { x: Anon[]; }[]
 
 var hy2: { x: Array<typeof hy2> };
->hy2 : { x: any[]; }
->x : { x: any[]; }[]
->hy2 : { x: any[]; }
+>hy2 : type Anon = { x: Anon[]; }
+>x : type Anon = { x: Anon[]; }[]
+>hy2 : type Anon = { x: Anon[]; }
 
 var hy2 = hy2.x[0];
->hy2 : { x: any[]; }
->hy2.x[0] : { x: any[]; }
->hy2.x : { x: any[]; }[]
->hy2 : { x: any[]; }
->x : { x: any[]; }[]
+>hy2 : type Anon = { x: Anon[]; }
+>hy2.x[0] : type Anon = { x: Anon[]; }
+>hy2.x : type Anon = { x: Anon[]; }[]
+>hy2 : type Anon = { x: Anon[]; }
+>x : type Anon = { x: Anon[]; }[]
 >0 : 0
 
 interface Foo2<T, U> { }
