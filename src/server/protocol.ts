@@ -3263,6 +3263,7 @@ namespace ts.server.protocol {
         jsx?: JsxEmit | ts.JsxEmit;
         lib?: string[];
         locale?: string;
+        looseClassInheritanceStaticCheck?: boolean;
         mapRoot?: string;
         maxNodeModuleJsDepth?: number;
         module?: ModuleKind | ts.ModuleKind;
