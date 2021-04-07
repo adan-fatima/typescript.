@@ -427,6 +427,7 @@ namespace ts {
             createUnparsedSyntheticReference,
             createInputFiles,
             createSyntheticExpression,
+            createSyntheticCallExpression,
             createSyntaxList,
             createNotEmittedStatement,
             createPartiallyEmittedExpression,
@@ -5102,6 +5103,17 @@ namespace ts {
             node.type = type;
             node.isSpread = isSpread;
             node.tupleNameSource = tupleNameSource;
+            return node;
+        }
+
+        // @api
+        function createSyntheticCallExpression(thisArg: LeftHandSideExpression | SyntheticExpression | undefined, expression: Expression | SyntheticExpression, typeArguments: readonly TypeNode[] | undefined, argumentList: readonly Expression[], containingMessageChain?: () => DiagnosticMessageChain | undefined): SyntheticCallExpression {
+            const node = createBaseNode<SyntheticCallExpression>(SyntaxKind.SyntheticCallExpression);
+            node.thisArg = thisArg;
+            node.expression = expression;
+            node.typeArguments = typeArguments;
+            node.arguments = argumentList;
+            node.containingMessageChain = containingMessageChain;
             return node;
         }
 
