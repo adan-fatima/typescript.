@@ -126,6 +126,8 @@ namespace ts.server {
             stat(path: string, callback?: (err: NodeJS.ErrnoException, stats: Stats) => any): void;
         } = require("fs");
 
+        rpc.RIL.install();
+
         class Logger extends BaseLogger {
             private fd = -1;
             constructor(
@@ -668,14 +670,8 @@ namespace ts.server {
             }
         }
 
-        class IOSession extends Session {
-            private eventPort: number | undefined;
-            private eventSocket: NodeSocket | undefined;
-            private socketEventQueue: { body: any, eventName: string }[] | undefined;
-            /** No longer needed if syntax target is es6 or above. Any access to "this" before initialized will be a runtime error. */
-            private constructed: boolean | undefined;
-
-            constructor() {
+        class NodeSession<TMessage = string, TRequest = protocol.Request> extends Session<TMessage, TRequest> {
+            constructor(canUseEvents: boolean) {
                 const event = (body: object, eventName: string) => {
                     this.event(body, eventName);
                 };
@@ -694,9 +690,28 @@ namespace ts.server {
                     byteLength: Buffer.byteLength,
                     hrtime: process.hrtime,
                     logger,
-                    canUseEvents: true,
+                    canUseEvents,
                     typesMapLocation,
                 });
+            }
+
+            exit(): never {
+                this.logger.info("Exiting...");
+                this.projectService.closeLog();
+                tracing?.stopTracing();
+                process.exit(0);
+            }
+        }
+
+        class IOSession extends NodeSession {
+            private eventPort: number | undefined;
+            private eventSocket: NodeSocket | undefined;
+            private socketEventQueue: { body: any, eventName: string }[] | undefined;
+            /** No longer needed if syntax target is es6 or above. Any access to "this" before initialized will be a runtime error. */
+            private constructed: boolean | undefined;
+
+            constructor(canUseEvents: boolean) {
+                super(canUseEvents);
 
                 this.eventPort = eventPort;
                 if (this.canUseEvents && this.eventPort) {
@@ -740,13 +755,6 @@ namespace ts.server {
                 this.eventSocket!.write(formatMessage(toEvent(eventName, body), this.logger, this.byteLength, this.host.newLine), "utf8");
             }
 
-            exit() {
-                this.logger.info("Exiting...");
-                this.projectService.closeLog();
-                tracing?.stopTracing();
-                process.exit(0);
-            }
-
             listen() {
                 rl.on("line", (input: string) => {
                     const message = input.trim();
@@ -756,6 +764,131 @@ namespace ts.server {
                 rl.on("close", () => {
                     this.exit();
                 });
+            }
+
+            protected override getFileFromRequest(request: protocol.FileRequest): protocol.FileRequestArgs | undefined {
+                return request.arguments && request.arguments.file ? request.arguments : undefined;
+            }
+
+            protected override getCommandFromRequest(request: protocol.Request) {
+                return request.command;
+            }
+
+            protected override getSeqFromRequest(request: protocol.Request) {
+                return request.seq;
+            }
+
+            protected override getHandlers() {
+                return this.handlers;
+            }
+        }
+
+        class LSPSession extends NodeSession<rpc.Message, rpc.RequestMessage | rpc.NotificationMessage> {
+            readonly reader = new rpc.StreamMessageReader(process.stdin);
+            readonly writer = new rpc.StreamMessageWriter(process.stdout);
+            readonly messageQueue = new LinkedMap<string, rpc.Message>();
+            timer: rpc.Disposable | undefined;
+            notificationSequenceNumber = 0;
+
+            listen() {
+                this.reader.listen(message => {
+                    this.onMessage(message);
+                });
+
+                rl.on("close", () => {
+                    this.exit();
+                });
+            }
+
+            public override onMessage(message: rpc.Message) {
+                try {
+                    // todo
+                    this.addMessageToQueue(message);
+                }
+                finally {
+                    this.triggerMessageQueue();
+                }
+            }
+
+            private addMessageToQueue(message: rpc.Message) {
+                // eslint-disable-next-line no-in-operator, no-null/no-null
+                if (rpc.isRequestMessage(message) && message.id !== null) {
+                    this.messageQueue.set("req-" + message.id.toString(), message);
+                }
+                else {
+                    this.messageQueue.set("not-" + (this.notificationSequenceNumber++).toString(), message);
+                }
+            }
+
+            private triggerMessageQueue() {
+                if (this.timer || this.messageQueue.size === 0) {
+                    return;
+                }
+
+                this.timer = rpc.RAL().timer.setImmediate(() => {
+                    this.timer = undefined;
+                    this.processMessageQueue();
+                });
+            }
+
+            private processMessageQueue() {
+                if (this.messageQueue.size === 0) {
+                    return;
+                }
+
+                const message = this.messageQueue.shift()!;
+                try {
+                    super.onMessage(message);
+                }
+                finally {
+                    this.triggerMessageQueue();
+                }
+            }
+
+            protected override parseMessage(message: rpc.Message): rpc.RequestMessage | rpc.NotificationMessage {
+                return lsp.parseMessage(message);
+            }
+
+            protected override getCommandFromRequest(request: rpc.RequestMessage | rpc.NotificationMessage) {
+                return lsp.getCommandFromRequest(request);
+            }
+
+            protected override getSeqFromRequest(request: rpc.RequestMessage | rpc.NotificationMessage) {
+                return lsp.getSeqFromRequest(request);
+            }
+
+            protected override toStringMessage(message: rpc.RequestMessage) {
+                return lsp.toStringMessage(message as lsp.RequestMessage); // cast required because rpc allows null id
+            }
+
+            protected override getHandlers() {
+                return lsp.getHandlers({
+                    change: this.change.bind(this),
+                    exit: this.exit.bind(this),
+                    getQuickInfoWorker: this.getQuickInfoWorker.bind(this),
+                    getSignatureHelpItems: this.getSignatureHelpItems.bind(this),
+                    notRequired: this.notRequired.bind(this),
+                    openClientFile: this.openClientFile.bind(this),
+                    projectService: this.projectService,
+                    requiredResponse: this.requiredResponse.bind(this),
+                });
+            }
+
+            public override send(msg: protocol.Message) {
+                if (msg.type === "event") {
+                    if (this.logger.hasLevel(LogLevel.verbose)) {
+                        this.logger.info(`Session does not support events: ignored event: ${JSON.stringify(msg)}`);
+                    }
+                    return;
+                }
+                const body = (msg as protocol.Response).body;
+                const lspMsg: rpc.ResponseMessage = {
+                    jsonrpc: "2.0",
+                    id: (msg as protocol.Response).request_seq,
+                    // eslint-disable-next-line no-null/no-null
+                    result: typeof body === "undefined" ? null : body // LSP doesn't allow returning undefined unless there's an error
+                };
+                this.writer.write(lspMsg);
             }
         }
 
@@ -774,7 +907,7 @@ namespace ts.server {
             startTracing("server", traceDir);
         }
 
-        const ioSession = new IOSession();
+        const ioSession = options.useLsp ? new LSPSession(/*canUseEvents*/false) : new IOSession(/*canUseEvents*/true);
         process.on("uncaughtException", err => {
             ioSession.logError(err, "unknown");
         });

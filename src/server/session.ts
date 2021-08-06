@@ -1,5 +1,5 @@
 namespace ts.server {
-    interface StackTraceError extends Error {
+    export interface StackTraceError extends Error {
         stack?: string;
     }
 
@@ -708,9 +708,10 @@ namespace ts.server {
         pluginProbeLocations?: readonly string[];
         allowLocalPluginLoads?: boolean;
         typesMapLocation?: string;
+        useLsp?: boolean;
     }
 
-    export class Session<TMessage = string> implements EventSender {
+    export class Session<TMessage = string, TRequest = protocol.Request> implements EventSender {
         private readonly gcTimer: GcTimer;
         protected projectService: ProjectService;
         private changeSeq = 0;
@@ -891,7 +892,7 @@ namespace ts.server {
             this.logErrorWorker(err, cmd);
         }
 
-        private logErrorWorker(err: Error & PossibleProgramFileInfo, cmd: string, fileRequest?: protocol.FileRequestArgs): void {
+        protected logErrorWorker(err: Error & PossibleProgramFileInfo, cmd: string, fileRequest?: protocol.FileRequestArgs): void {
             let msg = "Exception on executing command " + cmd;
             if (err.message) {
                 msg += ":\n" + indent(err.message);
@@ -956,7 +957,7 @@ namespace ts.server {
             this.doOutput(info, cmdName, reqSeq!, /*success*/ !errorMsg, errorMsg); // TODO: GH#18217
         }
 
-        private doOutput(info: {} | undefined, cmdName: string, reqSeq: number, success: boolean, message?: string): void {
+        protected doOutput(info: {} | undefined, cmdName: string, reqSeq: number, success: boolean, message?: string): void {
             const res: protocol.Response = {
                 seq: 0,
                 type: "response",
@@ -1619,7 +1620,7 @@ namespace ts.server {
          * @param fileName is the name of the file to be opened
          * @param fileContent is a version of the file content that is known to be more up to date than the one on disk
          */
-        private openClientFile(fileName: NormalizedPath, fileContent?: string, scriptKind?: ScriptKind, projectRootPath?: NormalizedPath) {
+        protected openClientFile(fileName: NormalizedPath, fileContent?: string, scriptKind?: ScriptKind, projectRootPath?: NormalizedPath) {
             this.projectService.openClientFileWithNormalizedPath(fileName, fileContent, scriptKind, /*hasMixedContent*/ false, projectRootPath);
         }
 
@@ -1718,7 +1719,7 @@ namespace ts.server {
             return languageService.isValidBraceCompletionAtPosition(file, position, args.openingBrace.charCodeAt(0));
         }
 
-        private getQuickInfoWorker(args: protocol.FileLocationRequestArgs, simplifiedResult: boolean): protocol.QuickInfoResponseBody | QuickInfo | undefined {
+        protected getQuickInfoWorker(args: protocol.FileLocationRequestArgs, simplifiedResult: boolean): protocol.QuickInfoResponseBody | QuickInfo | undefined {
             const { file, project } = this.getFileAndProject(args);
             const scriptInfo = this.projectService.getScriptInfoForNormalizedPath(file)!;
             const quickInfo = project.getLanguageService().getQuickInfoAtPosition(file, this.getPosition(args, scriptInfo));
@@ -1947,7 +1948,7 @@ namespace ts.server {
                 !emitSkipped;
         }
 
-        private getSignatureHelpItems(args: protocol.SignatureHelpRequestArgs, simplifiedResult: boolean): protocol.SignatureHelpItems | SignatureHelpItems | undefined {
+        protected getSignatureHelpItems(args: protocol.SignatureHelpRequestArgs, simplifiedResult: boolean): protocol.SignatureHelpItems | SignatureHelpItems | undefined {
             const { file, project } = this.getFileAndProject(args);
             const scriptInfo = this.projectService.getScriptInfoForNormalizedPath(file)!;
             const position = this.getPosition(args, scriptInfo);
@@ -1991,16 +1992,16 @@ namespace ts.server {
             }
         }
 
-        private change(args: protocol.ChangeRequestArgs) {
-            const scriptInfo = this.projectService.getScriptInfo(args.file)!;
+        protected change(filePath: string, line: number, offset: number, endLine: number, endOffset: number, insertString: string | undefined) {
+            const scriptInfo = this.projectService.getScriptInfo(filePath)!;
             Debug.assert(!!scriptInfo);
-            const start = scriptInfo.lineOffsetToPosition(args.line, args.offset);
-            const end = scriptInfo.lineOffsetToPosition(args.endLine, args.endOffset);
+            const start = scriptInfo.lineOffsetToPosition(line, offset);
+            const end = scriptInfo.lineOffsetToPosition(endLine, endOffset);
             if (start >= 0) {
                 this.changeSeq++;
                 this.projectService.applyChangesToFile(scriptInfo, singleIterator({
                     span: { start, length: end - start },
-                    newText: args.insertString! // TODO: GH#18217
+                    newText: insertString! // TODO: GH#18217
                 }));
             }
         }
@@ -2580,15 +2581,15 @@ namespace ts.server {
 
         exit() { /*overridden*/ }
 
-        private notRequired(): HandlerResponse {
+        protected notRequired(): HandlerResponse {
             return { responseRequired: false };
         }
 
-        private requiredResponse(response: {} | undefined): HandlerResponse {
+        protected requiredResponse(response: {} | undefined): HandlerResponse {
             return { response, responseRequired: true };
         }
 
-        private handlers = new Map(getEntries<(request: protocol.Request) => HandlerResponse>({
+        protected handlers = new Map(getEntries<(request: protocol.Request) => HandlerResponse>({
             [CommandNames.Status]: () => {
                 const response: protocol.StatusResponseBody = { version: ts.version }; // eslint-disable-line @typescript-eslint/no-unnecessary-qualifier
                 return this.requiredResponse(response);
@@ -2825,7 +2826,8 @@ namespace ts.server {
                 return this.notRequired();
             },
             [CommandNames.Change]: (request: protocol.ChangeRequest) => {
-                this.change(request.arguments);
+                const { file: filePath, line, offset, endLine, endOffset, insertString } = request.arguments;
+                this.change(filePath, line, offset, endLine, endOffset, insertString);
                 return this.notRequired();
             },
             [CommandNames.Configure]: (request: protocol.ConfigureRequest) => {
@@ -3011,14 +3013,25 @@ namespace ts.server {
             }
         }
 
-        public executeCommand(request: protocol.Request): HandlerResponse {
-            const handler = this.handlers.get(request.command);
+        protected getHandlers(): ESMap<string, (request: TRequest) => HandlerResponse> {
+            return new Map();
+        }
+
+        public executeCommand(request: TRequest, command?: string, seq?: number): HandlerResponse {
+            const handlers = this.getHandlers();
+            if (!command) {
+                command = this.getCommandFromRequest(request);
+            }
+            if (!seq) {
+                seq = this.getSeqFromRequest(request);
+            }
+            const handler = handlers.get(command);
             if (handler) {
-                return this.executeWithRequestId(request.seq, () => handler(request));
+                return this.executeWithRequestId(seq, () => handler(request));
             }
             else {
                 this.logger.msg(`Unrecognized JSON command:${stringifyIndented(request)}`, Msg.Err);
-                this.doOutput(/*info*/ undefined, CommandNames.Unknown, request.seq, /*success*/ false, `Unrecognized JSON command: ${request.command}`);
+                this.doOutput(/*info*/ undefined, CommandNames.Unknown, seq, /*success*/ false, `Unrecognized JSON command: ${command}`);
                 return { responseRequired: false };
             }
         }
@@ -3036,37 +3049,41 @@ namespace ts.server {
                 }
             }
 
-            let request: protocol.Request | undefined;
+            let request: TRequest | undefined;
             let relevantFile: protocol.FileRequestArgs | undefined;
+            let command: string | undefined;
+            let seq: number | undefined;
             try {
                 request = this.parseMessage(message);
-                relevantFile = request.arguments && (request as protocol.FileRequest).arguments.file ? (request as protocol.FileRequest).arguments : undefined;
+                relevantFile = this.getFileFromRequest(request);
+                command = this.getCommandFromRequest(request);
+                seq = this.getSeqFromRequest(request);
 
-                tracing?.instant(tracing.Phase.Session, "request", { seq: request.seq, command: request.command });
-                perfLogger.logStartCommand("" + request.command, this.toStringMessage(message).substring(0, 100));
+                tracing?.instant(tracing.Phase.Session, "request", { seq, command });
+                perfLogger.logStartCommand("" + command, this.toStringMessage(message).substring(0, 100));
 
-                tracing?.push(tracing.Phase.Session, "executeCommand", { seq: request.seq, command: request.command }, /*separateBeginAndEnd*/ true);
-                const { response, responseRequired } = this.executeCommand(request);
+                tracing?.push(tracing.Phase.Session, "executeCommand", { seq, command }, /*separateBeginAndEnd*/ true);
+                const { response, responseRequired } = this.executeCommand(request, command, seq);
                 tracing?.pop();
 
                 if (this.logger.hasLevel(LogLevel.requestTime)) {
                     const elapsedTime = hrTimeToMilliseconds(this.hrtime(start)).toFixed(4);
                     if (responseRequired) {
-                        this.logger.perftrc(`${request.seq}::${request.command}: elapsed time (in milliseconds) ${elapsedTime}`);
+                        this.logger.perftrc(`${seq}::${command}: elapsed time (in milliseconds) ${elapsedTime}`);
                     }
                     else {
-                        this.logger.perftrc(`${request.seq}::${request.command}: async elapsed time (in milliseconds) ${elapsedTime}`);
+                        this.logger.perftrc(`${seq}::${command}: async elapsed time (in milliseconds) ${elapsedTime}`);
                     }
                 }
 
                 // Note: Log before writing the response, else the editor can complete its activity before the server does
-                perfLogger.logStopCommand("" + request.command, "Success");
-                tracing?.instant(tracing.Phase.Session, "response", { seq: request.seq, command: request.command, success: !!response });
+                perfLogger.logStopCommand("" + command, "Success");
+                tracing?.instant(tracing.Phase.Session, "response", { seq, command, success: !!response });
                 if (response) {
-                    this.doOutput(response, request.command, request.seq, /*success*/ true);
+                    this.doOutput(response, command, seq, /*success*/ true);
                 }
                 else if (responseRequired) {
-                    this.doOutput(/*info*/ undefined, request.command, request.seq, /*success*/ false, "No content available.");
+                    this.doOutput(/*info*/ undefined, command, seq, /*success*/ false, "No content available.");
                 }
             }
             catch (err) {
@@ -3075,27 +3092,38 @@ namespace ts.server {
 
                 if (err instanceof OperationCanceledException) {
                     // Handle cancellation exceptions
-                    perfLogger.logStopCommand("" + (request && request.command), "Canceled: " + err);
-                    tracing?.instant(tracing.Phase.Session, "commandCanceled", { seq: request?.seq, command: request?.command });
-                    this.doOutput({ canceled: true }, request!.command, request!.seq, /*success*/ true);
+                    perfLogger.logStopCommand("" + command, "Canceled: " + err);
+                    tracing?.instant(tracing.Phase.Session, "commandCanceled", { seq, command });
+                    this.doOutput({ canceled: true }, command!, seq!, /*success*/ true);
                     return;
                 }
 
                 this.logErrorWorker(err, this.toStringMessage(message), relevantFile);
-                perfLogger.logStopCommand("" + (request && request.command), "Error: " + err);
-                tracing?.instant(tracing.Phase.Session, "commandError", { seq: request?.seq, command: request?.command, message: (err as Error).message });
+                perfLogger.logStopCommand("" + command, "Error: " + err);
+                tracing?.instant(tracing.Phase.Session, "commandError", { seq, command, message: (err as Error).message });
 
                 this.doOutput(
                     /*info*/ undefined,
-                    request ? request.command : CommandNames.Unknown,
-                    request ? request.seq : 0,
+                    command ?? CommandNames.Unknown,
+                    seq ?? 0,
                     /*success*/ false,
                     "Error processing request. " + (err as StackTraceError).message + "\n" + (err as StackTraceError).stack);
             }
         }
+        protected getSeqFromRequest(_request: TRequest): number {
+            return 0;
+        }
 
-        protected parseMessage(message: TMessage): protocol.Request {
-            return JSON.parse(message as any as string) as protocol.Request;
+        protected getCommandFromRequest(_request: TRequest): string {
+            return "";
+        }
+
+        protected getFileFromRequest(_request: TRequest): protocol.FileRequestArgs | undefined {
+            return undefined;
+        }
+
+        protected parseMessage(message: TMessage): TRequest {
+            return JSON.parse(message as any as string) as TRequest;
         }
 
         protected toStringMessage(message: TMessage): string {
