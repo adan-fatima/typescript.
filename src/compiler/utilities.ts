@@ -5797,7 +5797,7 @@ namespace ts {
         this.escapedName = name;
         this.declarations = undefined;
         this.valueDeclaration = undefined;
-        this.id = undefined;
+        this.id = 0;
         this.mergeId = undefined;
         this.parent = undefined;
     }

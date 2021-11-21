@@ -4900,7 +4900,7 @@ namespace ts {
         members?: SymbolTable;                  // Class, interface or object literal instance members
         exports?: SymbolTable;                  // Module exports
         globalExports?: SymbolTable;            // Conditional global UMD exports
-        /* @internal */ id?: SymbolId;          // Unique id (used to look up SymbolLinks)
+        /* @internal */ id: SymbolId;          // Unique id (used to look up SymbolLinks)
         /* @internal */ mergeId?: number;       // Merge id (used to look up merged symbol)
         /* @internal */ parent?: Symbol;        // Parent symbol
         /* @internal */ exportSymbol?: Symbol;  // Exported symbol associated with this symbol
@@ -4946,7 +4946,7 @@ namespace ts {
         lateSymbol?: Symbol;                        // Late-bound symbol for a computed property
         specifierCache?: ESMap<string, string>;     // For symbols corresponding to external modules, a cache of incoming path -> module specifier name mappings
         extendedContainers?: Symbol[];              // Containers (other than the parent) which this symbol is aliased in
-        extendedContainersByFile?: ESMap<NodeId, Symbol[]>; // Containers (other than the parent) which this symbol is aliased in
+        extendedContainersByFile?: ESMap<Node, Symbol[]>; // Containers (other than the parent) which this symbol is aliased in
         variances?: VarianceFlags[];                // Alias symbol type argument variance cache
         deferralConstituents?: Type[];              // Calculated list of constituents for a deferred type
         deferralParent?: Type;                      // Source union/intersection of a deferred type
@@ -5107,7 +5107,7 @@ namespace ts {
         jsxNamespace?: Symbol | false;      // Resolved jsx namespace symbol for this node
         jsxImplicitImportContainer?: Symbol | false; // Resolved module symbol the implicit jsx import of this file should refer to
         contextFreeType?: Type;             // Cached context-free type used by the first pass of inference; used when a function's return is partially contextually sensitive
-        deferredNodes?: ESMap<NodeId, Node>; // Set of nodes whose checking has been deferred
+        deferredNodes?: Node[];             // Sparse array of nodes whose checking has been deferred
         capturedBlockScopeBindings?: Symbol[]; // Block-scoped bindings captured beneath this part of an IterationStatement
         outerTypeParameters?: TypeParameter[]; // Outer type parameters of anonymous object type
         isExhaustive?: boolean;             // Is node an exhaustive switch statement

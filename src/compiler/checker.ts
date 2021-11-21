@@ -278,20 +278,22 @@ namespace ts {
     }
 
     export function getNodeId(node: Node): number {
-        if (!node.id) {
-            node.id = nextNodeId;
+        let id = node.id;
+        if (!id) {
+            node.id = id = nextNodeId;
             nextNodeId++;
         }
-        return node.id;
+        return id;
     }
 
     export function getSymbolId(symbol: Symbol): SymbolId {
-        if (!symbol.id) {
-            symbol.id = nextSymbolId;
+        let id = symbol.id;
+        if (!id) {
+            symbol.id = id = nextSymbolId;
             nextSymbolId++;
         }
 
-        return symbol.id;
+        return id;
     }
 
     export function isInstantiatedModule(node: ModuleDeclaration, preserveConstEnums: boolean) {
@@ -3885,10 +3887,9 @@ namespace ts {
 
         function getAlternativeContainingModules(symbol: Symbol, enclosingDeclaration: Node): Symbol[] {
             const containingFile = getSourceFileOfNode(enclosingDeclaration);
-            const id = getNodeId(containingFile);
             const links = getSymbolLinks(symbol);
             let results: Symbol[] | undefined;
-            if (links.extendedContainersByFile && (results = links.extendedContainersByFile.get(id))) {
+            if (links.extendedContainersByFile && (results = links.extendedContainersByFile.get(containingFile))) {
                 return results;
             }
             if (containingFile && containingFile.imports) {
@@ -3902,7 +3903,7 @@ namespace ts {
                     results = append(results, resolvedModule);
                 }
                 if (length(results)) {
-                    (links.extendedContainersByFile || (links.extendedContainersByFile = new Map())).set(id, results!);
+                    (links.extendedContainersByFile ||= new Map()).set(containingFile, results!);
                     return results!;
                 }
             }
@@ -33895,7 +33896,7 @@ namespace ts {
             const type = checkExpression(node);
             // If control flow analysis was required to determine the type, it is worth caching.
             if (flowInvocationCount !== startInvocationCount) {
-                const cache = flowTypeCache || (flowTypeCache = []);
+                const cache = (flowTypeCache ||= []);
                 cache[getNodeId(node)] = type;
                 setNodeFlags(node, node.flags | NodeFlags.TypeCached);
             }
@@ -40422,9 +40423,8 @@ namespace ts {
             const enclosingFile = getSourceFileOfNode(node);
             const links = getNodeLinks(enclosingFile);
             if (!(links.flags & NodeCheckFlags.TypeChecked)) {
-                links.deferredNodes = links.deferredNodes || new Map();
-                const id = getNodeId(node);
-                links.deferredNodes.set(id, node);
+                links.deferredNodes ||= [];
+                links.deferredNodes[getNodeId(node)] = node;
             }
         }
 
