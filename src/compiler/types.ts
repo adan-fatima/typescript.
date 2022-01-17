@@ -6146,6 +6146,7 @@ namespace ts {
         skipLibCheck?: boolean;
         skipDefaultLibCheck?: boolean;
         sourceMap?: boolean;
+        sourceMapVersion?: 3 | 4;
         sourceRoot?: string;
         strict?: boolean;
         strictFunctionTypes?: boolean;  // Always combine with strict property
@@ -6352,30 +6353,35 @@ namespace ts {
         affectsProgramStructure?: true;                         // true if program should be reconstructed from root files if option changes and does not affect module resolution as affectsModuleResolution indirectly means program needs to reconstructed
         transpileOptionValue?: boolean | undefined;             // If set this means that the option should be set to this value when transpiling
         extraValidation?: (value: CompilerOptionsValue) => [DiagnosticMessage, ...string[]] | undefined; // Additional validation to be performed for the value to be valid
+        defaultInitValue?: string | number | boolean;           // A custom default value to be used when generating tsconfig.json
     }
 
     /* @internal */
     export interface CommandLineOptionOfStringType extends CommandLineOptionBase {
         type: "string";
         defaultValueDescription?: string | undefined | DiagnosticMessage;
+        defaultInitValue?: string | undefined;
     }
 
     /* @internal */
     export interface CommandLineOptionOfNumberType extends CommandLineOptionBase {
         type: "number";
         defaultValueDescription: number | undefined | DiagnosticMessage;
+        defaultInitValue?: number | undefined;
     }
 
     /* @internal */
     export interface CommandLineOptionOfBooleanType extends CommandLineOptionBase {
         type: "boolean";
         defaultValueDescription: boolean | undefined | DiagnosticMessage;
+        defaultInitValue?: boolean | undefined;
     }
 
     /* @internal */
     export interface CommandLineOptionOfCustomType extends CommandLineOptionBase {
         type: ESMap<string, number | string>;  // an object literal mapping named values to actual values
         defaultValueDescription: number | string | undefined | DiagnosticMessage;
+        defaultInitValue?: number | string | undefined;
     }
 
     /* @internal */
@@ -8234,7 +8240,7 @@ namespace ts {
     }
 
     /* @internal */
-    export interface RawSourceMap {
+    export interface RawSourceMapV3 {
         version: 3;
         file: string;
         sourceRoot?: string | null;
@@ -8243,6 +8249,22 @@ namespace ts {
         mappings: string;
         names?: string[] | null;
     }
+
+    /* @internal */
+    export interface RawSourceMapV4 {
+        version: 4;
+        file: string;
+        sourceRoot?: string | null;
+        sources: string[];
+        sourcesContent?: (string | null)[] | null;
+        mappings: string;
+        names?: string[] | null;
+        scopeNames: string[];
+        scopes: string;
+    }
+
+    /* @internal */
+    export type RawSourceMap = RawSourceMapV3 | RawSourceMapV4;
 
     /**
      * Generates a source map.
@@ -8274,6 +8296,20 @@ namespace ts {
          * Appends a source map.
          */
         appendSourceMap(generatedLine: number, generatedCharacter: number, sourceMap: RawSourceMap, sourceMapPath: string, start?: LineAndCharacter, end?: LineAndCharacter): void;
+        /**
+         * Appends a 'scope name,' a concept in V4 of Source Maps which represents the original-source name of a function scope.
+         */
+        addScopeName(name: string): number;
+        /**
+         * Appends a 'scope mapping,' a concept in V4 of Source Maps which associates a runtime name of a function to the original source name.
+         */
+        addScopeMapping(sourceIndex: number, start: LineAndCharacter, end: LineAndCharacter, scopeNameIndex: number): void;
+        /**
+         * Whether the compiler should collect scope names during compilation. This should be true for version 4+ of
+         * source maps, and false for version 3. This is exposed because collecting scope names might negatively
+         * impact the performance of compilation.
+         */
+        shouldCollectScopeNames(): boolean;
         /**
          * Gets the source map as a `RawSourceMap` object.
          */

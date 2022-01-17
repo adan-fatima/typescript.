@@ -19,6 +19,12 @@ namespace ts {
         let nameToNameIndexMap: ESMap<string, number> | undefined;
         const mappingCharCodes: number[] = [];
         let mappings = "";
+        const scopeNames: string[] = [];
+        let scopeNamesToNameIndexMap: ESMap<string, number> | undefined;
+        const scopeMappingCharCodes: number[] = [];
+        let scopes = "";
+
+        const version = host.getCompilerOptions().sourceMapVersion;
 
         // Last recorded and encoded mappings
         let lastGeneratedLine = 0;
@@ -39,6 +45,11 @@ namespace ts {
         let hasPendingSource = false;
         let hasPendingName = false;
 
+        let lastScopeSourceIndex = 0;
+        let lastScopeStartingLine = 0;
+        let lastScopeNameIndex = 0;
+        let hasScopeMappings = false;
+
         return {
             getSources: () => rawSources,
             addSource,
@@ -46,6 +57,9 @@ namespace ts {
             addName,
             addMapping,
             appendSourceMap,
+            addScopeName,
+            addScopeMapping,
+            shouldCollectScopeNames: () => !!version && version >= 4,
             toJSON,
             toString: () => JSON.stringify(toJSON())
         };
@@ -96,6 +110,22 @@ namespace ts {
             return nameIndex;
         }
 
+        function addScopeName(name: string): number {
+            if (version !== 4) {
+                return 0;
+            }
+            enter();
+            if (!scopeNamesToNameIndexMap) scopeNamesToNameIndexMap = new Map();
+            let nameIndex = scopeNamesToNameIndexMap.get(name);
+            if (nameIndex === undefined) {
+                nameIndex = scopeNames.length;
+                scopeNames.push(name);
+                scopeNamesToNameIndexMap.set(name, nameIndex);
+            }
+            exit();
+            return nameIndex;
+        }
+
         function isNewGeneratedPosition(generatedLine: number, generatedCharacter: number) {
             return !hasPending
                 || pendingGeneratedLine !== generatedLine
@@ -139,6 +169,42 @@ namespace ts {
                     hasPendingName = true;
                 }
             }
+            exit();
+        }
+
+        function addScopeMapping(sourceIndex: number, start: LineAndCharacter, end: LineAndCharacter, scopeNameIndex: number) {
+            if (version !== 4) {
+                return;
+            }
+            enter();
+
+            if (hasScopeMappings) {
+                appendScopeMappingCharCode(CharacterCodes.comma);
+            }
+
+            // 1. Relative source index
+            appendBase64VLQForScopeMapping(sourceIndex - lastScopeSourceIndex);
+            lastScopeSourceIndex = sourceIndex;
+
+            // 2. Relative starting line
+            appendBase64VLQForScopeMapping(start.line - lastScopeStartingLine);
+            lastScopeStartingLine = start.line;
+
+            // 3. Starting column, absolute
+            appendBase64VLQForScopeMapping(start.character);
+
+            // 4. Ending line, relative to STARTING LINE
+            appendBase64VLQForScopeMapping(end.line - start.line);
+
+            // 5. Ending column, absolute
+            appendBase64VLQForScopeMapping(end.character);
+
+            // 6. Relative index into scopeNames array
+            appendBase64VLQForScopeMapping(scopeNameIndex - lastScopeNameIndex);
+            lastScopeNameIndex = scopeNameIndex;
+
+            hasScopeMappings = true;
+
             exit();
         }
 
@@ -211,6 +277,15 @@ namespace ts {
                 || lastNameIndex !== pendingNameIndex;
         }
 
+        function appendScopeMappingCharCode(charCode: number) {
+            scopeMappingCharCodes.push(charCode);
+            // String.fromCharCode accepts its arguments on the stack, so we have to chunk the input,
+            // otherwise we can get stack overflows for large source maps
+            if (scopeMappingCharCodes.length >= 1024) {
+                flushScopeMappingBuffer();
+            }
+        }
+
         function appendMappingCharCode(charCode: number) {
             mappingCharCodes.push(charCode);
             // String.fromCharCode accepts its arguments on the stack, so we have to chunk the input,
@@ -274,6 +349,13 @@ namespace ts {
             exit();
         }
 
+        function flushScopeMappingBuffer(): void {
+            if (scopeMappingCharCodes.length > 0) {
+                scopes += String.fromCharCode.apply(undefined, scopeMappingCharCodes);
+                scopeMappingCharCodes.length = 0;
+            }
+        }
+
         function flushMappingBuffer(): void {
             if (mappingCharCodes.length > 0) {
                 mappings += String.fromCharCode.apply(undefined, mappingCharCodes);
@@ -284,6 +366,22 @@ namespace ts {
         function toJSON(): RawSourceMap {
             commitPendingMapping();
             flushMappingBuffer();
+            flushScopeMappingBuffer();
+
+            if (version === 4) {
+                return {
+                    version,
+                    file,
+                    sourceRoot,
+                    sources,
+                    names,
+                    mappings,
+                    sourcesContent,
+                    scopeNames,
+                    scopes,
+                };
+            }
+
             return {
                 version: 3,
                 file,
@@ -293,6 +391,31 @@ namespace ts {
                 mappings,
                 sourcesContent,
             };
+        }
+
+        function appendBase64VLQForScopeMapping(inValue: number): void {
+            // Add a new least significant bit that has the sign of the value.
+            // if negative number the least significant bit that gets added to the number has value 1
+            // else least significant bit value that gets added is 0
+            // eg. -1 changes to binary : 01 [1] => 3
+            //     +1 changes to binary : 01 [0] => 2
+            if (inValue < 0) {
+                inValue = ((-inValue) << 1) + 1;
+            }
+            else {
+                inValue = inValue << 1;
+            }
+
+            // Encode 5 bits at a time starting from least significant bits
+            do {
+                let currentDigit = inValue & 31; // 11111
+                inValue = inValue >> 5;
+                if (inValue > 0) {
+                    // There are still more digits to decode, set the msb (6th bit)
+                    currentDigit = currentDigit | 32;
+                }
+                appendScopeMappingCharCode(base64FormatEncode(currentDigit));
+            } while (inValue > 0);
         }
 
         function appendBase64VLQ(inValue: number): void {

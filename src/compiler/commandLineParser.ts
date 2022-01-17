@@ -517,6 +517,16 @@ namespace ts {
             description: Diagnostics.Create_source_map_files_for_emitted_JavaScript_files,
         },
         {
+            name: "sourceMapVersion",
+            type: "number",
+            affectsEmit: true,
+            showInSimplifiedHelpView: false,
+            category: Diagnostics.Emit,
+            defaultValueDescription: 3,
+            description: Diagnostics.Specifies_the_version_3_or_4_of_source_maps_that_should_be_generated_by_compiler_Requires_the_sourceMap_option_to_be_enabled,
+            defaultInitValue: 3,
+        },
+        {
             name: "outFile",
             type: "string",
             affectsEmit: true,
@@ -3611,6 +3621,10 @@ namespace ts {
 
 
     function getDefaultValueForOption(option: CommandLineOption) {
+        if ("defaultInitValue" in option && option.defaultInitValue !== undefined) {
+            return option.defaultInitValue;
+        }
+
         switch (option.type) {
             case "number":
                 return 1;
