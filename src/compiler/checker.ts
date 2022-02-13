@@ -30141,6 +30141,47 @@ namespace ts {
                 result = chooseOverload(candidates, assignableRelation, isSingleNonGenericCandidate, signatureHelpTrailingComma);
             }
             if (result) {
+                if (args.some(isPartialApplicationPlaceholderElement)) {
+                    const callSignature = result;
+                    if (!getReturnTypeOfSignature(callSignature)) {
+                        return result;
+                    }
+
+                    const optionalParamsOmitted = callSignature.parameters
+                        .filter((_param, i) => args[i] !== undefined);
+                    const typeParams: Symbol[] = optionalParamsOmitted
+                        .map((param, i) => ({
+                            originalParam: param,
+                            isPartial: isPartialApplicationPlaceholderElement(args[i]),
+                        }))
+                        .filter(({ isPartial }) => isPartial)
+                        .map(({ originalParam }) => originalParam);
+
+                    const partiallyAppliedType = {
+                        ...createObjectType(ObjectFlags.Anonymous),
+                        members: emptySymbols,
+                        properties: emptyArray,
+                        callSignatures: [createSignature(
+                            /*declaration*/ undefined,
+                            /*typeParameters*/ undefined,
+                            /*thisParameter*/ undefined,
+                            typeParams,
+                            getReturnTypeOfSignature(callSignature),
+                            getTypePredicateOfSignature(callSignature),
+                            args.filter(isPartialApplicationPlaceholderElement).length,
+                            (typeParams.length - args.filter(isPartialApplicationPlaceholderElement).length > 0)
+                                ? SignatureFlags.HasLiteralTypes
+                                : SignatureFlags.None
+                            )
+                        ],
+                        constructSignatures: emptyArray,
+                        indexInfos: emptyArray, // This might drop some info we might want, or might not.
+                    };
+
+                    const partiallyAppliedSignature = cloneSignature(callSignature);
+                    partiallyAppliedSignature.resolvedReturnType = partiallyAppliedType;
+                    return partiallyAppliedSignature;
+                }
                 return result;
             }
 
@@ -33751,6 +33792,10 @@ namespace ts {
             try {
                 context.contextualType = contextualType;
                 context.inferenceContext = inferenceContext;
+                // TODO: Check if this is correct place or should it be moved up.
+                if (node.kind === SyntaxKind.PartialApplicationPlaceholderElement) {
+                    return contextualType;
+                }
                 const type = checkExpression(node, checkMode | CheckMode.Contextual | (inferenceContext ? CheckMode.Inferential : 0));
                 // We strip literal freshness when an appropriate contextual type is present such that contextually typed
                 // literals always preserve their literal types (otherwise they might widen during type inference). An alternative
@@ -34097,6 +34142,62 @@ namespace ts {
             // Optimize for the common case of a call to a function with a single non-generic call
             // signature where we can just fetch the return type without checking the arguments.
             if (isCallExpression(expr) && expr.expression.kind !== SyntaxKind.SuperKeyword && !isRequireCall(expr, /*checkArgumentIsStringLiteralLike*/ true) && !isSymbolOrSymbolForCall(expr)) {
+                if (expr.arguments.some(isPartialApplicationPlaceholderElement)) {
+                    const funcType = checkNonNullExpression(expr.expression);
+
+                    const callSignature = getSingleCallSignature(funcType);
+                    if (!callSignature) {
+                        return undefined;
+                    }
+
+                    const args = expr.arguments;
+                    // Fix when partially applying a function that has rest params.
+                    const extraParams = args.slice(callSignature.parameters.length);
+                    // const extraParams = callSignature.hasRestParam
+                    //     ? []
+                    //     : expr.arguments.slice(callSignature.parameters.length);
+
+                    extraParams
+                        .forEach(_extraParam =>
+                            console.log("Partial application extra parameter: "/*, extraParam.symbol*/)
+                        );
+
+                    const omittedParams = callSignature.parameters
+                        .filter((_param, i) => args[i] === undefined);
+                    const omittedParamsWithoutInitializer = omittedParams
+                        .filter(param => !(param.valueDeclaration as any)?.initializer);
+
+                    omittedParamsWithoutInitializer
+                        .forEach(() => console.log("Partial application omits non-optional parameter"));
+                    const optionalParamsOmitted = callSignature.parameters
+                        .filter((_param, i) => args[i] !== undefined);
+                    const typeParams: Symbol[] = optionalParamsOmitted
+                        .map((param, i) => ({
+                            originalParam: param,
+                            isPartial: isPartialApplicationPlaceholderElement(args[i]),
+                        }))
+                        .filter(({ isPartial }) => isPartial)
+                        .map(({ originalParam }) => originalParam);
+
+                    const partialApplicationType = createObjectType(ObjectFlags.Anonymous, funcType.symbol);
+                    partialApplicationType.members = emptySymbols;
+                    partialApplicationType.properties = emptyArray;
+                    partialApplicationType.callSignatures = [createSignature(
+                        /*declaration*/ undefined,
+                        /*typeParameters*/ undefined,
+                        /*thisParameter*/ undefined,
+                        typeParams,
+                        getReturnTypeOfSingleNonGenericCallSignature(funcType),
+                        callSignature.resolvedTypePredicate,
+                        expr.arguments.filter(isPartialApplicationPlaceholderElement).length,
+                        (typeParams.length - expr.arguments.filter(isPartialApplicationPlaceholderElement).length > 0)
+                            ? SignatureFlags.HasLiteralTypes
+                            : SignatureFlags.None
+                    )];
+                    partialApplicationType.constructSignatures = emptyArray;
+                    partialApplicationType.indexInfos = emptyArray; // This might drop some info we might want, or might not.
+                    return partialApplicationType;
+                }
                 const type = isCallChain(expr) ? getReturnTypeOfSingleNonGenericSignatureOfCallChain(expr) :
                     getReturnTypeOfSingleNonGenericCallSignature(checkNonNullExpression(expr.expression));
                 if (type) {
@@ -34256,6 +34357,10 @@ namespace ts {
                 case SyntaxKind.FunctionExpression:
                 case SyntaxKind.ArrowFunction:
                     return checkFunctionExpressionOrObjectLiteralMethod(node as FunctionExpression | ArrowFunction, checkMode);
+                case SyntaxKind.PartialApplicationPlaceholderElement:
+                    // TODO: Explain why we error out here...
+                    return errorType;
+                    // return PartialApplicationExpression;
                 case SyntaxKind.TypeOfExpression:
                     return checkTypeOfExpression(node as TypeOfExpression);
                 case SyntaxKind.TypeAssertionExpression:
@@ -39524,7 +39629,8 @@ namespace ts {
                             switch ((expr as PrefixUnaryExpression).operator) {
                                 case SyntaxKind.PlusToken: return value;
                                 case SyntaxKind.MinusToken: return -value;
-                                case SyntaxKind.TildeToken: return ~value;
+                                case SyntaxKind.TildeToken:
+                                    return ~value;
                             }
                         }
                         break;

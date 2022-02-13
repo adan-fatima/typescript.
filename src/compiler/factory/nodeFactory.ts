@@ -209,6 +209,8 @@ namespace ts {
             updateYieldExpression,
             createSpreadElement,
             updateSpreadElement,
+            createPartialApplicationPlaceholderElement,
+            updatePartialApplicationPlaceholderElement,
             createClassExpression,
             updateClassExpression,
             createOmittedExpression,
@@ -2408,6 +2410,9 @@ namespace ts {
             if (isImportKeyword(node.expression)) {
                 node.transformFlags |= TransformFlags.ContainsDynamicImport;
             }
+            if ((node.arguments).some(isPartialApplicationPlaceholderElement)) {
+                node.transformFlags |= TransformFlags.ContainsPartialApplication;
+            }
             else if (isSuperProperty(node.expression)) {
                 node.transformFlags |= TransformFlags.ContainsLexicalThis;
             }
@@ -2990,6 +2995,18 @@ namespace ts {
             return node.expression !== expression
                 ? update(createSpreadElement(expression), node)
                 : node;
+        }
+
+        // @api
+        function createPartialApplicationPlaceholderElement() {
+            const node = createBaseExpression<PartialApplicationPlaceholderElement>(SyntaxKind.PartialApplicationPlaceholderElement);
+            node.transformFlags |= TransformFlags.ContainsPartialApplication;
+            return node;
+        }
+
+        // @api
+        function updatePartialApplicationPlaceholderElement(node: PartialApplicationPlaceholderElement) {
+            return node;
         }
 
         // @api
