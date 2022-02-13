@@ -5711,6 +5711,11 @@
         "code": 6803
     },
 
+    "Check dashed jsx attributes": {
+        "category": "Message",
+        "code": 6804
+    },
+
     "one of:": {
         "category": "Message",
         "code": 6900

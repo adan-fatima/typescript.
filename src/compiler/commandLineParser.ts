@@ -697,6 +697,15 @@ namespace ts {
             defaultValueDescription: false,
         },
         {
+            name: "strictJsxAttributeChecks",
+            type: "boolean",
+            affectsSemanticDiagnostics: true,
+            strictFlag: true,
+            category: Diagnostics.Type_Checking,
+            description: Diagnostics.Check_dashed_jsx_attributes,
+            defaultValueDescription: Diagnostics.false_unless_strict_is_set
+        },
+        {
             name: "alwaysStrict",
             type: "boolean",
             affectsSourceFile: true,

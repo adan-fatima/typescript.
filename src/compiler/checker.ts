@@ -358,6 +358,7 @@ namespace ts {
         const useDefineForClassFields = getUseDefineForClassFields(compilerOptions);
         const allowSyntheticDefaultImports = getAllowSyntheticDefaultImports(compilerOptions);
         const strictNullChecks = getStrictOptionValue(compilerOptions, "strictNullChecks");
+        const strictJsxAttributeChecks = getStrictOptionValue(compilerOptions, "strictJsxAttributeChecks");
         const strictFunctionTypes = getStrictOptionValue(compilerOptions, "strictFunctionTypes");
         const strictBindCallApply = getStrictOptionValue(compilerOptions, "strictBindCallApply");
         const strictPropertyInitialization = getStrictOptionValue(compilerOptions, "strictPropertyInitialization");
@@ -17392,7 +17393,7 @@ namespace ts {
         function *generateJsxAttributes(node: JsxAttributes): ElaborationIterator {
             if (!length(node.properties)) return;
             for (const prop of node.properties) {
-                if (isJsxSpreadAttribute(prop) || isHyphenatedJsxName(idText(prop.name))) continue;
+                if (isJsxSpreadAttribute(prop) || (!strictJsxAttributeChecks && isHyphenatedJsxName(idText(prop.name)))) continue;
                 yield { errorNode: prop.name, innerExpression: prop.initializer, nameType: getStringLiteralType(idText(prop.name)) };
             }
         }
@@ -17955,7 +17956,7 @@ namespace ts {
         }
 
         function isIgnoredJsxProperty(source: Type, sourceProp: Symbol) {
-            return getObjectFlags(source) & ObjectFlags.JsxAttributes && isHyphenatedJsxName(sourceProp.escapedName);
+            return getObjectFlags(source) & ObjectFlags.JsxAttributes && (!strictJsxAttributeChecks && isHyphenatedJsxName(sourceProp.escapedName));
         }
 
         function getNormalizedType(type: Type, writing: boolean): Type {
@@ -28080,7 +28081,7 @@ namespace ts {
                 if (getPropertyOfObjectType(targetType, name) ||
                     getApplicableIndexInfoForName(targetType, name) ||
                     isLateBoundName(name) && getIndexInfoOfType(targetType, stringType) ||
-                    isComparingJsxAttributes && isHyphenatedJsxName(name)) {
+                    isComparingJsxAttributes && (!strictJsxAttributeChecks && isHyphenatedJsxName(name))) {
                     // For JSXAttributes, if the attribute has a hyphenated name, consider that the attribute to be known.
                     return true;
                 }
