@@ -26,11 +26,11 @@ function verify(a) {
     switch (a) {
         case 0 /* A */:
             return assert(a);
-        case 1 /* "B" */:
+        case 1 /* B */:
             return assert(a);
-        case 2 /* `C` */:
+        case 2 /* C */:
             return assert(a);
-        case 3 /* "\u{44}" */:
+        case 3 /* D */:
             return assert(a);
     }
 }

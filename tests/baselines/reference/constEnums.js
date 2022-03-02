@@ -208,8 +208,8 @@ function foo(x) {
         case -1 /* Q */:
         case 0 /* R */:
         case 0 /* S */:
-        case 11 /* "T" */:
-        case 11 /* `U` */:
+        case 11 /* T */:
+        case 11 /* U */:
         case 11 /* V */:
         case 11 /* W */:
         case 100 /* W1 */:

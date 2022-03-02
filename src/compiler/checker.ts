@@ -42064,22 +42064,19 @@ namespace ts {
             return getNodeLinks(node).enumMemberValue;
         }
 
-        function canHaveConstantValue(node: Node): node is EnumMember | AccessExpression {
-            switch (node.kind) {
-                case SyntaxKind.EnumMember:
-                case SyntaxKind.PropertyAccessExpression:
-                case SyntaxKind.ElementAccessExpression:
-                    return true;
-            }
-            return false;
+        function canHaveConstantValue(node: Node): node is EnumMember | EntityName | AccessExpression {
+            return isEnumMember(node) || isEntityName(node) || isAccessExpression(node);
         }
 
-        function getConstantValue(node: EnumMember | AccessExpression): string | number | undefined {
+        function getConstantValue(node: EnumMember | EntityName | AccessExpression): string | number | undefined {
             if (node.kind === SyntaxKind.EnumMember) {
                 return getEnumMemberValue(node);
             }
 
-            const symbol = getNodeLinks(node).resolvedSymbol;
+            // Cached name resolution result of import equals declaration/access expression
+            const symbol = isEntityName(node)
+                ? isDeclaration(node.parent) && resolveAlias(getSymbolOfNode(node.parent))
+                : getNodeLinks(node).resolvedSymbol;
             if (symbol && (symbol.flags & SymbolFlags.EnumMember)) {
                 // inline property\index accesses only for const enums
                 const member = symbol.valueDeclaration as EnumMember;
