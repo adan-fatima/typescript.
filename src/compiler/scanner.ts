@@ -2388,6 +2388,8 @@ namespace ts {
                 case CharacterCodes.singleQuote:
                     tokenValue = scanString(/*jsxAttributeString*/ true);
                     return token = SyntaxKind.StringLiteral;
+                case CharacterCodes.backtick:
+                    return token = scanTemplateAndSetTokenValue(/*isTaggedTemplate*/ false);
                 default:
                     // If this scans anything other than `{`, it's a parse error.
                     return scan();

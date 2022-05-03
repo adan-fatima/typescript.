@@ -5460,6 +5460,20 @@ namespace ts {
             return finishNode(factory.createJsxExpression(dotDotDotToken, expression), pos);
         }
 
+        function parseJsxAttributeValue() {
+            if (token() !== SyntaxKind.EqualsToken) {
+                return undefined;
+            }
+            const jsxAttributeValueToken = scanJsxAttributeValue();
+            if (jsxAttributeValueToken === SyntaxKind.StringLiteral || jsxAttributeValueToken === SyntaxKind.NoSubstitutionTemplateLiteral) {
+                return parseLiteralNode() as StringLiteral | NoSubstitutionTemplateLiteral;
+            }
+            if (jsxAttributeValueToken === SyntaxKind.TemplateHead) {
+                return parseTemplateExpression(/*isTaggedTemplate*/ false);
+            }
+            return parseJsxExpression(/*inExpressionContext*/ true);
+        }
+
         function parseJsxAttribute(): JsxAttribute | JsxSpreadAttribute {
             if (token() === SyntaxKind.OpenBraceToken) {
                 return parseJsxSpreadAttribute();
@@ -5470,9 +5484,7 @@ namespace ts {
             return finishNode(
                 factory.createJsxAttribute(
                     parseIdentifierName(),
-                    token() !== SyntaxKind.EqualsToken ? undefined :
-                    scanJsxAttributeValue() === SyntaxKind.StringLiteral ? parseLiteralNode() as StringLiteral :
-                    parseJsxExpression(/*inExpressionContext*/ true)
+                    parseJsxAttributeValue()
                 ),
                 pos
             );
