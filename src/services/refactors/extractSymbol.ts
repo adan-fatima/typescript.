@@ -1556,7 +1556,7 @@ namespace ts.refactor.extractSymbol {
                     prevStatement = statement;
                 }
 
-                if (!prevStatement && isCaseClause(curr)) {
+                if (!prevStatement && (isCaseClause(curr) || isDefaultClause(curr))) {
                     // We must have been in the expression of the case clause.
                     Debug.assert(isSwitchStatement(curr.parent.parent), "Grandparent isn't a switch statement");
                     return curr.parent.parent;
@@ -2034,18 +2034,6 @@ namespace ts.refactor.extractSymbol {
                     parent.kind !== SyntaxKind.ExportSpecifier;
         }
         return true;
-    }
-
-    function isBlockLike(node: Node): node is BlockLike {
-        switch (node.kind) {
-            case SyntaxKind.Block:
-            case SyntaxKind.SourceFile:
-            case SyntaxKind.ModuleBlock:
-            case SyntaxKind.CaseClause:
-                return true;
-            default:
-                return false;
-        }
     }
 
     function isInJSXContent(node: Node) {

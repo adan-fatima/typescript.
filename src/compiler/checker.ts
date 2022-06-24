@@ -39614,6 +39614,14 @@ namespace ts {
             registerForUnusedIdentifiersCheck(node);
         }
 
+        function checkGrammarClassDeclaration(node: ClassDeclaration) {
+            if (node.parent) {
+                if (!isBlockLike(node.parent) && !isLabeledStatement(node.parent)) {
+                    grammarErrorOnNode(node, Diagnostics.A_class_declaration_can_only_be_used_in_a_scope_where_other_statements_can_reference_it);
+                }
+            }
+        }
+
         function checkClassDeclaration(node: ClassDeclaration) {
             const firstDecorator = find(node.modifiers, isDecorator);
             if (firstDecorator && some(node.members, p => hasStaticModifier(p) && isPrivateIdentifierClassElementDeclaration(p))) {
@@ -39622,6 +39630,7 @@ namespace ts {
             if (!node.name && !hasSyntacticModifier(node, ModifierFlags.Default)) {
                 grammarErrorOnFirstToken(node, Diagnostics.A_class_declaration_without_the_default_modifier_must_have_a_name);
             }
+            checkGrammarClassDeclaration(node);
             checkClassLikeDeclaration(node);
             forEach(node.members, checkSourceElement);
 
