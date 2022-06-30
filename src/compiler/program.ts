@@ -325,8 +325,8 @@ namespace ts {
     const gutterSeparator = " ";
     const resetEscapeSequence = "\u001b[0m";
     const ellipsis = "...";
+    const bullet = "● ";
     const halfIndent = "  ";
-    const indent = "    ";
     function getCategoryFormat(category: DiagnosticCategory): ForegroundColorEscapeSequences {
         switch (category) {
             case DiagnosticCategory.Error: return ForegroundColorEscapeSequences.Red;
@@ -341,15 +341,25 @@ namespace ts {
         return formatStyle + text + resetEscapeSequence;
     }
 
-    function formatCodeSpan(file: SourceFile, start: number, length: number, indent: string, squiggleColor: ForegroundColorEscapeSequences, host: FormatDiagnosticsHost) {
+    function formatCodeSpan(file: SourceFile, start: number, length: number, indent: string, underlineColor: ForegroundColorEscapeSequences, host: FormatDiagnosticsHost) {
         const { line: firstLine, character: firstLineChar } = getLineAndCharacterOfPosition(file, start);
         const { line: lastLine, character: lastLineChar } = getLineAndCharacterOfPosition(file, start + length);
         const lastLineInFile = getLineAndCharacterOfPosition(file, file.text.length).line;
 
+        const gutterWidth = 1;
         const hasMoreThanFiveLines = (lastLine - firstLine) >= 4;
-        let gutterWidth = (lastLine + 1 + "").length;
-        if (hasMoreThanFiveLines) {
-            gutterWidth = Math.max(ellipsis.length, gutterWidth);
+
+        // Dedent all of the code lines consistently
+        let whitespaceToTrim = Number.MAX_VALUE;
+        for (let i = firstLine; i <= lastLine; i++) {
+            if (hasMoreThanFiveLines && firstLine + 1 < i && i < lastLine - 1) {
+                i = lastLine - 1;
+            }
+
+            const lineStart = getPositionOfLineAndCharacter(file, i, 0);
+            const lineEnd = i < lastLineInFile ? getPositionOfLineAndCharacter(file, i + 1, 0) : file.text.length;
+            const lineContent = file.text.slice(lineStart, lineEnd);
+            whitespaceToTrim = Math.min(whitespaceToTrim, startWhitespaceCount(lineContent));
         }
 
         let context = "";
@@ -366,29 +376,32 @@ namespace ts {
             const lineEnd = i < lastLineInFile ? getPositionOfLineAndCharacter(file, i + 1, 0) : file.text.length;
             let lineContent = file.text.slice(lineStart, lineEnd);
             lineContent = trimStringEnd(lineContent);  // trim from end
+            lineContent = lineContent.slice(whitespaceToTrim); // remove preceding whitespaces
             lineContent = lineContent.replace(/\t/g, " ");   // convert tabs to single spaces
 
             // Output the gutter and the actual contents of the line.
-            context += indent + formatColorAndReset(padLeft(i + 1 + "", gutterWidth), gutterStyleSequence) + gutterSeparator;
+            const gutterLine = "|";
+            context += indent + padLeft(gutterLine, gutterWidth) + gutterSeparator;
             context += lineContent + host.getNewLine();
 
-            // Output the gutter and the error span for the line using tildes.
-            context += indent + formatColorAndReset(padLeft("", gutterWidth), gutterStyleSequence) + gutterSeparator;
-            context += squiggleColor;
+            // Output the gutter and the error span for the line using underlines.
+            context += indent + padLeft("", gutterWidth) + gutterSeparator;
+            context += underlineColor;
             if (i === firstLine) {
                 // If we're on the last line, then limit it to the last character of the last line.
-                // Otherwise, we'll just squiggle the rest of the line, giving 'slice' no end position.
+                // Otherwise, we'll just underline the rest of the line, giving 'slice' no end position.
                 const lastCharForLine = i === lastLine ? lastLineChar : undefined;
 
-                context += lineContent.slice(0, firstLineChar).replace(/\S/g, " ");
-                context += lineContent.slice(firstLineChar, lastCharForLine).replace(/./g, "~");
+                context += lineContent.slice(0, firstLineChar - whitespaceToTrim).replace(/\S/g, " ");
+                const amendedLastChar = lastCharForLine ? lastCharForLine - whitespaceToTrim : undefined;
+                context += lineContent.slice(firstLineChar - whitespaceToTrim, amendedLastChar).replace(/./g, "▔");
             }
             else if (i === lastLine) {
-                context += lineContent.slice(0, lastLineChar).replace(/./g, "~");
+                context += lineContent.slice(0, lastLineChar).replace(/./g, "▔");
             }
             else {
-                // Squiggle the entire line.
-                context += lineContent.replace(/./g, "~");
+                // Underline the entire line.
+                context += lineContent.replace(/./g, "▔");
             }
             context += resetEscapeSequence;
         }
@@ -408,42 +421,59 @@ namespace ts {
         output += color(`${firstLineChar + 1}`, ForegroundColorEscapeSequences.Yellow);
         return output;
     }
-
     export function formatDiagnosticsWithColorAndContext(diagnostics: readonly Diagnostic[], host: FormatDiagnosticsHost): string {
+        const terminalWidth = sys.getWidthOfTerminal?.() ?? 0;
+        const indent = terminalWidth < 60 ? "" : halfIndent;
         let output = "";
         for (const diagnostic of diagnostics) {
+            const diagnosticCode = "TS" + diagnostic.code;
+            const diagnosticCatName = diagnosticCategoryName(diagnostic, /* lowerCase */ false);
+            const diagnosticCatNameColored = formatColorAndReset(diagnosticCatName, getCategoryFormat(diagnostic.category));
             if (diagnostic.file) {
                 const { file, start } = diagnostic;
-                output += formatLocation(file, start!, host); // TODO: GH#18217
-                output += " - ";
-            }
+                const location = formatLocation(file, start!, host); // TODO: GH#18217
+                // Get the location string display length without color & escape sequences.
+                const locationLength = location.replace(/\u001b[[0-9]+m/g, "").length;
+                const codeLength = diagnosticCode.length;
 
-            output += formatColorAndReset(diagnosticCategoryName(diagnostic), getCategoryFormat(diagnostic.category));
-            output += formatColorAndReset(` TS${diagnostic.code}: `, ForegroundColorEscapeSequences.Grey);
-            output += flattenDiagnosticMessageText(diagnostic.messageText, host.getNewLine());
+                output += formatColorAndReset(bullet, getCategoryFormat(diagnostic.category)) + location;
+                // Separate the error code from the location by a space on thinner terminals
+                // and those of unknown length, or right-align it on wider terminals.
+                const defaultPad = codeLength + 1;
+                let padWidth = terminalWidth < 60 ? defaultPad : terminalWidth - (bullet.length + locationLength + codeLength + diagnosticCatName.length + 2);
+                if (padWidth < diagnosticCode.length) padWidth = defaultPad;
+                output += padLeft(diagnosticCatNameColored, padWidth + (diagnosticCatNameColored.length - diagnosticCatName.length));
+                output += " " + diagnosticCode;
 
-            if (diagnostic.file) {
+                output += formatCodeSpan(diagnostic.file, diagnostic.start!, diagnostic.length!, indent, getCategoryFormat(diagnostic.category), host); // TODO: GH#18217
                 output += host.getNewLine();
-                output += formatCodeSpan(diagnostic.file, diagnostic.start!, diagnostic.length!, "", getCategoryFormat(diagnostic.category), host); // TODO: GH#18217
             }
+            else {
+                output += formatColorAndReset(bullet, getCategoryFormat(diagnostic.category)) + " " + diagnosticCatNameColored + " " + diagnosticCode ;
+            }
+
+            let diagnosticText = flattenDiagnosticMessageText(diagnostic.messageText, host.getNewLine(), 0, /*pretty*/ true);
+            diagnosticText = map(diagnosticText.split(host.getNewLine()), text => indent + text).join(host.getNewLine());
+            output += diagnosticText;
+            output += host.getNewLine();
+
             if (diagnostic.relatedInformation) {
                 output += host.getNewLine();
                 for (const { file, start, length, messageText } of diagnostic.relatedInformation) {
+                    output += indent + trimStringStart(flattenDiagnosticMessageText(messageText, host.getNewLine(), 0, /*pretty*/ true));
+                    // output += host.getNewLine();
                     if (file) {
+                        output += " " + formatLocation(file, start!, host); // TODO: GH#18217
                         output += host.getNewLine();
-                        output += halfIndent + formatLocation(file, start!, host); // TODO: GH#18217
-                        output += formatCodeSpan(file, start!, length!, indent, ForegroundColorEscapeSequences.Cyan, host); // TODO: GH#18217
+                        output += formatCodeSpan(file, start!, length!, indent + "  ", ForegroundColorEscapeSequences.Cyan, host); // TODO: GH#18217
                     }
-                    output += host.getNewLine();
-                    output += indent + flattenDiagnosticMessageText(messageText, host.getNewLine());
                 }
             }
-            output += host.getNewLine();
         }
         return output;
     }
 
-    export function flattenDiagnosticMessageText(diag: string | DiagnosticMessageChain | undefined, newLine: string, indent = 0): string {
+    export function flattenDiagnosticMessageText(diag: string | DiagnosticMessageChain | undefined, newLine: string, indent = 0, pretty = false): string {
         if (isString(diag)) {
             return diag;
         }
@@ -453,10 +483,15 @@ namespace ts {
         let result = "";
         if (indent) {
             result += newLine;
-
-            for (let i = 0; i < indent; i++) {
-                result += "  ";
+            // If using pretty formatting, the second line shouldn't be indented past the first,
+            // instead separating the two with an extra empty line.
+            const indentsToReplaceWithNewLines = pretty ? 1 : 0;
+            if (indent > indentsToReplaceWithNewLines) {
+                for (let i = indentsToReplaceWithNewLines; i < indent; i++) {
+                    result += "  ";
+                }
             }
+            else result += newLine;
         }
         result += diag.messageText;
         indent++;

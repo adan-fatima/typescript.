@@ -5120,7 +5120,7 @@ declare namespace ts {
     export function formatDiagnostics(diagnostics: readonly Diagnostic[], host: FormatDiagnosticsHost): string;
     export function formatDiagnostic(diagnostic: Diagnostic, host: FormatDiagnosticsHost): string;
     export function formatDiagnosticsWithColorAndContext(diagnostics: readonly Diagnostic[], host: FormatDiagnosticsHost): string;
-    export function flattenDiagnosticMessageText(diag: string | DiagnosticMessageChain | undefined, newLine: string, indent?: number): string;
+    export function flattenDiagnosticMessageText(diag: string | DiagnosticMessageChain | undefined, newLine: string, indent?: number, pretty?: boolean): string;
     /**
      * Calculates the resulting resolution mode for some reference in some file - this is generally the explicitly
      * provided resolution mode in the reference, unless one is not present, in which case it is the mode of the containing file.

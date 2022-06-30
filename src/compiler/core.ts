@@ -2510,4 +2510,11 @@ namespace ts {
         }
         return s.slice(0, end + 1);
     }
+
+    export function startWhitespaceCount(s: string) {
+        for (let i = 0; i < s.length; i++) {
+            if (!isWhiteSpaceLike(s.charCodeAt(i))) return i;
+        }
+        return s.length;
+    }
 }

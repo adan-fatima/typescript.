@@ -789,10 +789,10 @@ Output::
 >> Screen clear
 [[90m12:01:59 AM[0m] File change detected. Starting incremental compilation...
 
-[96mc/tsconfig.json[0m:[93m1[0m:[93m105[0m - [91merror[0m[90m TS6053: [0mFile '/user/username/projects/transitiveReferences/b' not found.
-
-[7m1[0m {"compilerOptions":{"baseUrl":"./","paths":{"@ref/*":["../refs/*"]}},"files":["index.ts"],"references":[{"path":"../b"}]}
-[7m [0m [91m                                                                                                        ~~~~~~~~~~~~~~~[0m
+[91m● [0m[96mc/tsconfig.json[0m:[93m1[0m:[93m105[0m  [91mError[0m TS6053
+| {"compilerOptions":{"baseUrl":"./","paths":{"@ref/*":["../refs/*"]}},"files":["index.ts"],"references":[{"path":"../b"}]}
+  [91m                                                                                                        ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/user/username/projects/transitiveReferences/b' not found.
 
 [[90m12:02:06 AM[0m] Found 1 error. Watching for file changes.
 
@@ -966,10 +966,10 @@ Output::
 >> Screen clear
 [[90m12:02:15 AM[0m] File change detected. Starting incremental compilation...
 
-[96mb/tsconfig.json[0m:[93m1[0m:[93m117[0m - [91merror[0m[90m TS6053: [0mFile '/user/username/projects/transitiveReferences/a' not found.
-
-[7m1[0m {"compilerOptions":{"composite":true,"baseUrl":"./","paths":{"@ref/*":["../*"]}},"files":["index.ts"],"references":[{"path":"../a"}]}
-[7m [0m [91m                                                                                                                    ~~~~~~~~~~~~~~~[0m
+[91m● [0m[96mb/tsconfig.json[0m:[93m1[0m:[93m117[0m  [91mError[0m TS6053
+| {"compilerOptions":{"composite":true,"baseUrl":"./","paths":{"@ref/*":["../*"]}},"files":["index.ts"],"references":[{"path":"../a"}]}
+  [91m                                                                                                                    ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/user/username/projects/transitiveReferences/a' not found.
 
 [[90m12:02:19 AM[0m] Found 1 error. Watching for file changes.
 
