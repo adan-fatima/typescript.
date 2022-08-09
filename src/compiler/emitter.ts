@@ -681,6 +681,7 @@ namespace ts {
         createLiteralConstValue: notImplemented,
         isSymbolAccessible: notImplemented,
         isEntityNameVisible: notImplemented,
+        resolveName: notImplemented,
         // Returns the constant value this property access resolves to: notImplemented, or 'undefined' for a non-constant
         getConstantValue: notImplemented,
         getReferencedValueDeclaration: notImplemented,

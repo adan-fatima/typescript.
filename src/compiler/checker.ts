@@ -6368,12 +6368,16 @@ namespace ts {
                             const lastId = isIdentifier(nonRootParts) ? nonRootParts : nonRootParts.right;
                             lastId.typeArguments = undefined;
                         }
-                        return factory.createImportTypeNode(lit, assertion, nonRootParts as EntityName, typeParameterNodes as readonly TypeNode[], isTypeOf);
+                        const node = factory.createImportTypeNode(lit, assertion, nonRootParts as EntityName, typeParameterNodes as readonly TypeNode[], isTypeOf);
+                        node.nextContainer = context.enclosingDeclaration; // `nextContainer` is used in the binder to track containers - reuse it on import types to smuggle out original context info
+                        return node;
                     }
                     else {
                         const splitNode = getTopmostIndexedAccessType(nonRootParts);
                         const qualifier = (splitNode.objectType as TypeReferenceNode).typeName;
-                        return factory.createIndexedAccessTypeNode(factory.createImportTypeNode(lit, assertion, qualifier, typeParameterNodes as readonly TypeNode[], isTypeOf), splitNode.indexType);
+                        const node = factory.createImportTypeNode(lit, assertion, qualifier, typeParameterNodes as readonly TypeNode[], isTypeOf);
+                        node.nextContainer = context.enclosingDeclaration; // `nextContainer` is used in the binder to track containers - reuse it on import types to smuggle out original context info
+                        return factory.createIndexedAccessTypeNode(node, splitNode.indexType);
                     }
                 }
 
@@ -43597,6 +43601,9 @@ namespace ts {
                 createLiteralConstValue,
                 isSymbolAccessible,
                 isEntityNameVisible,
+                resolveName(name, location, meaning, excludeGlobals) {
+                    return resolveName(getParseTreeNode(location), escapeLeadingUnderscores(name), meaning, /*nameNotFoundMessage*/ undefined, /*nameArg*/ undefined, /*isUse*/ false, excludeGlobals);
+                },
                 getConstantValue: nodeIn => {
                     const node = getParseTreeNode(nodeIn, canHaveConstantValue);
                     return node ? getConstantValue(node) : undefined;
