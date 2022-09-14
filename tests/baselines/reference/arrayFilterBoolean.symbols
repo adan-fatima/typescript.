@@ -1,0 +1,25 @@
+=== tests/cases/compiler/arrayFilterBoolean.ts ===
+const mixed = [undefined, "string", null]
+>mixed : Symbol(mixed, Decl(arrayFilterBoolean.ts, 0, 5))
+>undefined : Symbol(undefined)
+
+const mixedReadonly: Readonly<typeof mixed> = [undefined, "string", null]
+>mixedReadonly : Symbol(mixedReadonly, Decl(arrayFilterBoolean.ts, 1, 5))
+>Readonly : Symbol(Readonly, Decl(lib.es5.d.ts, --, --))
+>mixed : Symbol(mixed, Decl(arrayFilterBoolean.ts, 0, 5))
+>undefined : Symbol(undefined)
+
+const shouldBeJustStringForMutableArray = mixed.filter(Boolean)
+>shouldBeJustStringForMutableArray : Symbol(shouldBeJustStringForMutableArray, Decl(arrayFilterBoolean.ts, 3, 5))
+>mixed.filter : Symbol(Array.filter, Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --))
+>mixed : Symbol(mixed, Decl(arrayFilterBoolean.ts, 0, 5))
+>filter : Symbol(Array.filter, Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --))
+>Boolean : Symbol(Boolean, Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --))
+
+const shouldBeJustStringForReadonlyArray = mixedReadonly.filter(Boolean)
+>shouldBeJustStringForReadonlyArray : Symbol(shouldBeJustStringForReadonlyArray, Decl(arrayFilterBoolean.ts, 5, 5))
+>mixedReadonly.filter : Symbol(ReadonlyArray.filter, Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --))
+>mixedReadonly : Symbol(mixedReadonly, Decl(arrayFilterBoolean.ts, 1, 5))
+>filter : Symbol(ReadonlyArray.filter, Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --))
+>Boolean : Symbol(Boolean, Decl(lib.es5.d.ts, --, --), Decl(lib.es5.d.ts, --, --))
+
