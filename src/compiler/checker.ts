@@ -30898,14 +30898,90 @@ namespace ts {
                 for (let i = spreadIndex; i < args.length; i++) {
                     const arg = args[i];
                     // We can call checkExpressionCached because spread expressions never have a contextual type.
-                    const spreadType = arg.kind === SyntaxKind.SpreadElement && (flowLoopCount ? checkExpression((arg as SpreadElement).expression) : checkExpressionCached((arg as SpreadElement).expression));
-                    if (spreadType && isTupleType(spreadType)) {
-                        forEach(getTypeArguments(spreadType), (t, i) => {
-                            const flags = spreadType.target.elementFlags[i];
-                            const syntheticArg = createSyntheticExpression(arg, flags & ElementFlags.Rest ? createArrayType(t) : t,
-                                !!(flags & ElementFlags.Variable), spreadType.target.labeledElementDeclarations?.[i]);
-                            effectiveArgs.push(syntheticArg);
-                        });
+                    const argType = arg.kind === SyntaxKind.SpreadElement && (flowLoopCount ? checkExpression((arg as SpreadElement).expression) : checkExpressionCached((arg as SpreadElement).expression));
+                    if (argType) {
+                        if (isTupleType(argType)) {
+                            forEach(getTypeArguments(argType), (t, i) => {
+                                const flags = argType.target.elementFlags[i];
+                                const syntheticArg = createSyntheticExpression(arg, flags & ElementFlags.Rest ? createArrayType(t) : t,
+                                    !!(flags & ElementFlags.Variable), argType.target.labeledElementDeclarations?.[i]);
+                                effectiveArgs.push(syntheticArg);
+                            });
+                        }
+                        // Try to resolve an intersection of tuples and numeric indexers into effective arguments.
+                        else if (getReducedType(argType) !== neverType && argType.flags & TypeFlags.Intersection) {
+                            const tupleTypes = new Array<TupleTypeReference>();
+                            const restTypes = new Map<number, Type[]>();
+                            const restTailTypes = new Array<Type>();
+                            const numericIndexers = new Array<Type>();
+
+                            let fixedElements: number | undefined;
+
+                            for (const type of (argType as IntersectionType).types) {
+                                if (isTupleType(type)) {
+                                    tupleTypes.push(type);
+
+                                    const currentFixedElements = type.target.fixedLength;
+                                    fixedElements = Math.max(currentFixedElements, fixedElements ?? 0);
+
+                                    if (type.target.elementFlags[currentFixedElements] & ElementFlags.Variable) {
+                                        const restArg = getRestTypeOfTupleType(type)!;
+                                        restTailTypes.push(createArrayType(restArg));
+
+                                        let restArgs = restTypes.get(currentFixedElements);
+                                        if (!restArgs) restTypes.set(currentFixedElements, restArgs = []);
+
+                                        restArgs.push(restArg);
+                                    }
+                                }
+                                else {
+                                    const numericIndexer = getIndexInfoOfType(type, numberType);
+                                    if (numericIndexer) {
+                                        numericIndexers.push(numericIndexer.type);
+                                    }
+                                }
+                            }
+
+                            if (fixedElements !== undefined) {
+                                const restIntersections = new Array<Type>();
+                                const intersectedElements = new Array<Type>();
+
+                                for (let i = 0; i < fixedElements; i++) {
+                                    const restArgs = restTypes.get(i);
+                                    if (restArgs) {
+                                        restIntersections.push(...restArgs);
+                                    }
+
+                                    const constituents = new Array<Type>();
+                                    for (const tuple of tupleTypes) {
+                                        const argType = getTypeArguments(tuple)[i];
+                                        if (argType && i < tuple.target.fixedLength) {
+                                            constituents.push(argType);
+                                        }
+                                    }
+
+                                    constituents.push(...numericIndexers);
+                                    constituents.push(...restIntersections);
+                                    intersectedElements.push(getIntersectionType(constituents));
+                                }
+
+                                for (const member of intersectedElements) {
+                                    const syntheticArg = createSyntheticExpression(arg, member);
+                                    effectiveArgs.push(syntheticArg);
+                                }
+
+                                if (restTailTypes.length) {
+                                    const syntheticArg = createSyntheticExpression(arg, createIntersectionType(restTailTypes), /*isSpread*/ true);
+                                    effectiveArgs.push(syntheticArg);
+                                }
+                            }
+                            else {
+                                effectiveArgs.push(arg);
+                            }
+                        }
+                        else {
+                            effectiveArgs.push(arg);
+                        }
                     }
                     else {
                         effectiveArgs.push(arg);
