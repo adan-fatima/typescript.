@@ -49,6 +49,7 @@ Info 5    [00:00:22.000] Config: /a/jsconfig.json : {
   "allowSyntheticDefaultImports": true,
   "skipLibCheck": true,
   "noEmit": true,
+  "disableSizeLimit": false,
   "configFilePath": "/a/jsconfig.json"
  }
 }
