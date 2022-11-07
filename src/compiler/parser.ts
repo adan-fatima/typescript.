@@ -8416,7 +8416,9 @@ namespace ts {
                     let comments: string[] = [];
                     const parts: JSDocComment[] = [];
                     let linkEnd;
-                    let state = JSDocState.BeginningOfLine;
+                    let sameLineWithTag = true;
+                    let numberOfStatesChanged = 0;
+                    let state = JSDocState.BeginningOfLine as JSDocState;
                     let previousWhitespace = true;
                     let margin: number | undefined;
                     function pushComment(text: string) {
@@ -8425,6 +8427,10 @@ namespace ts {
                         }
                         comments.push(text);
                         indent += text.length;
+                    }
+                    function updateState(newState: JSDocState) {
+                        state = newState;
+                        numberOfStatesChanged++;
                     }
                     if (initialMargin !== undefined) {
                         // jump straight to saving comments if there is some initial indentation
@@ -8437,9 +8443,10 @@ namespace ts {
                     loop: while (true) {
                         switch (tok) {
                             case SyntaxKind.NewLineTrivia:
-                                state = JSDocState.BeginningOfLine;
+                                updateState(JSDocState.BeginningOfLine);
                                 // don't use pushComment here because we want to keep the margin unchanged
                                 comments.push(scanner.getTokenText());
+                                sameLineWithTag = false;
                                 indent = 0;
                                 break;
                             case SyntaxKind.AtToken:
@@ -8468,7 +8475,7 @@ namespace ts {
                                 }
                                 break;
                             case SyntaxKind.OpenBraceToken:
-                                state = JSDocState.SavingComments;
+                                updateState(JSDocState.SavingComments);
                                 const commentEnd = scanner.getStartPos();
                                 const linkStart = scanner.getTextPos() - 1;
                                 const link = parseJSDocLink(linkStart);
@@ -8483,26 +8490,42 @@ namespace ts {
                                 }
                                 break;
                             case SyntaxKind.BacktickToken:
-                                if (state === JSDocState.SavingBackticks) {
-                                    state = JSDocState.SavingComments;
-                                }
-                                else {
-                                    state = JSDocState.SavingBackticks;
-                                }
+                                updateState(state === JSDocState.SavingBackticks ? JSDocState.SavingComments : JSDocState.SavingBackticks);
                                 pushComment(scanner.getTokenText());
                                 break;
                             case SyntaxKind.AsteriskToken:
-                                if (state === JSDocState.BeginningOfLine) {
+                                // if there are two ** after a newline, considering it as a pure comment
+                                if (state === JSDocState.BeginningOfLine && lookAhead(() => nextTokenJSDoc() !== SyntaxKind.AsteriskToken)) {
+                                    /*
+                                    * @param x
+                                    * in the first line
+                                    */
+                                    // to check tag starting newline without comments like above
+                                    // it needs to actually encounter a newline
+                                    if (numberOfStatesChanged === 1 && lookAhead(() => nextTokenJSDoc() !== SyntaxKind.NewLineTrivia)) {
+                                        removeTrailingWhitespace(comments);
+                                    }
                                     // leading asterisks start recording on the *next* (non-whitespace) token
-                                    state = JSDocState.SawAsterisk;
+                                    updateState(JSDocState.SawAsterisk);
                                     indent += 1;
                                     break;
                                 }
                                 // record the * as a comment
                                 // falls through
                             default:
+                                /*
+                                 * @param x
+                                still in the first line
+                                 */
+                                // by default state starts with BeginningOfLine
+                                // to check tag starting newline without comments like above
+                                // it needs to actually encounter a newline
+                                // we cannot check `comments` since it is reset after {}
+                                if (state === JSDocState.BeginningOfLine && !sameLineWithTag && numberOfStatesChanged === 1) {
+                                    removeTrailingWhitespace(comments);
+                                }
                                 if (state !== JSDocState.SavingBackticks) {
-                                    state = JSDocState.SavingComments; // leading identifiers start recording as well
+                                    updateState(JSDocState.SavingComments); // leading identifiers start recording as well
                                 }
                                 pushComment(scanner.getTokenText());
                                 break;
@@ -8511,8 +8534,8 @@ namespace ts {
                         tok = nextTokenJSDoc();
                     }
 
-                    removeLeadingNewlines(comments);
                     removeTrailingWhitespace(comments);
+
                     if (parts.length) {
                         if (comments.length) {
                             parts.push(finishNode(factory.createJSDocText(comments.join("")), linkEnd ?? commentsPos));
@@ -8592,8 +8615,15 @@ namespace ts {
                 }
 
                 function tryParseTypeExpression(): JSDocTypeExpression | undefined {
-                    skipWhitespaceOrAsterisk();
-                    return token() === SyntaxKind.OpenBraceToken ? parseJSDocTypeExpression() : undefined;
+                    let expression;
+                    tryParse(() => {
+                        skipWhitespaceOrAsterisk();
+                        if (token() === SyntaxKind.OpenBraceToken) {
+                            expression = parseJSDocTypeExpression();
+                            return true;
+                        }
+                    });
+                    return expression;
                 }
 
                 function parseBracketNameInPropertyAndParamTag(): { name: EntityName, isBracketed: boolean } {
@@ -8638,13 +8668,11 @@ namespace ts {
                     skipWhitespaceOrAsterisk();
 
                     const { name, isBracketed } = parseBracketNameInPropertyAndParamTag();
-                    const indentText = skipWhitespaceOrAsterisk();
-
                     if (isNameFirst && !lookAhead(parseJSDocLinkPrefix)) {
                         typeExpression = tryParseTypeExpression();
                     }
 
-                    const comment = parseTrailingTagComments(start, getNodePos(), indent, indentText);
+                    const comment = parseTrailingTagComments(start, getNodePos(), indent, "");
 
                     const nestedTypeLiteral = target !== PropertyLikeParse.CallbackParameter && parseNestedTypeLiteral(typeExpression, name, target, indent);
                     if (nestedTypeLiteral) {
