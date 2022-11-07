@@ -15473,7 +15473,7 @@ namespace ts {
                 return neverType;
             }
             return isIdentifier(name) ? getStringLiteralType(unescapeLeadingUnderscores(name.escapedText)) :
-                getRegularTypeOfLiteralType(isComputedPropertyName(name) ? checkComputedPropertyName(name) : checkExpression(name));
+                isComputedPropertyName(name) ? checkComputedPropertyName(name) : checkExpression(name, /*checkMode*/ undefined, CheckExpressionIntent.NoLiteralFreshening);
         }
 
         function getLiteralTypeFromProperty(prop: Symbol, include: TypeFlags, includeNonPublic?: boolean) {
@@ -18183,7 +18183,7 @@ namespace ts {
             const oldContext = node.contextualType;
             node.contextualType = target;
             try {
-                const tupleizedType = checkArrayLiteral(node, CheckMode.Contextual, /*forceTuple*/ true);
+                const tupleizedType = checkArrayLiteral(node, CheckMode.Contextual, CheckExpressionIntent.ForceTuple);
                 node.contextualType = oldContext;
                 if (isTupleLikeType(tupleizedType)) {
                     return elaborateElementwise(generateLimitedTupleElements(node, target), tupleizedType, target, relation, containingMessageChain, errorOutputContainer);
@@ -28038,7 +28038,7 @@ namespace ts {
                 (node.kind === SyntaxKind.BinaryExpression && (node as BinaryExpression).operatorToken.kind === SyntaxKind.EqualsToken);
         }
 
-        function checkArrayLiteral(node: ArrayLiteralExpression, checkMode: CheckMode | undefined, forceTuple: boolean | undefined): Type {
+        function checkArrayLiteral(node: ArrayLiteralExpression, checkMode: CheckMode | undefined, checkExpressionIntent: CheckExpressionIntent): Type {
             const elements = node.elements;
             const elementCount = elements.length;
             const elementTypes: Type[] = [];
@@ -28053,7 +28053,7 @@ namespace ts {
                     if (languageVersion < ScriptTarget.ES2015) {
                         checkExternalEmitHelpers(e, compilerOptions.downlevelIteration ? ExternalEmitHelpers.SpreadIncludes : ExternalEmitHelpers.SpreadArray);
                     }
-                    const spreadType = checkExpression((e as SpreadElement).expression, checkMode, forceTuple);
+                    const spreadType = checkExpression((e as SpreadElement).expression, checkMode, checkExpressionIntent);
                     if (isArrayLikeType(spreadType)) {
                         elementTypes.push(spreadType);
                         elementFlags.push(ElementFlags.Variadic);
@@ -28089,7 +28089,7 @@ namespace ts {
                 }
                 else {
                     const elementContextualType = getContextualTypeForElementExpression(contextualType, elementTypes.length);
-                    const type = checkExpressionForMutableLocation(e, checkMode, elementContextualType, forceTuple);
+                    const type = checkExpressionForMutableLocation(e, checkMode, elementContextualType, checkExpressionIntent);
                     elementTypes.push(addOptionality(type, /*isProperty*/ true, hasOmittedExpression));
                     elementFlags.push(hasOmittedExpression ? ElementFlags.Optional : ElementFlags.Required);
                     if (contextualType && someType(contextualType, isTupleLikeType) && checkMode && checkMode & CheckMode.Inferential && !(checkMode & CheckMode.SkipContextSensitive) && isContextSensitive(e)) {
@@ -28102,7 +28102,7 @@ namespace ts {
             if (inDestructuringPattern) {
                 return createTupleType(elementTypes, elementFlags);
             }
-            if (forceTuple || inConstContext || contextualType && someType(contextualType, isTupleLikeType)) {
+            if ((checkExpressionIntent & CheckExpressionIntent.ForceTuple) || inConstContext || contextualType && someType(contextualType, isTupleLikeType)) {
                 return createArrayLiteralType(createTupleType(elementTypes, elementFlags, /*readonly*/ inConstContext));
             }
             return createArrayLiteralType(createArrayType(elementTypes.length ?
@@ -28150,7 +28150,7 @@ namespace ts {
                     && node.parent.kind !== SyntaxKind.GetAccessor && node.parent.kind !== SyntaxKind.SetAccessor) {
                     return links.resolvedType = errorType;
                 }
-                links.resolvedType = checkExpression(node.expression);
+                links.resolvedType = checkExpression(node.expression, /*checMode*/ undefined, CheckExpressionIntent.NoLiteralFreshening);
                 // The computed property name of a non-static class field within a loop must be stored in a block-scoped binding.
                 // (It needs to be bound at class evaluation time.)
                 if (isPropertyDeclaration(node.parent) && !hasStaticModifier(node.parent) && isClassExpression(node.parent.parent)) {
@@ -32562,7 +32562,7 @@ namespace ts {
         }
 
         function checkAssertionWorker(errNode: Node, type: TypeNode, expression: UnaryExpression | Expression, checkMode?: CheckMode) {
-            let exprType = checkExpression(expression, checkMode);
+            let exprType = checkExpression(expression, checkMode, CheckExpressionIntent.NoLiteralFreshening);
             if (isConstTypeReference(type)) {
                 if (!isValidConstAssertionArgument(expression)) {
                     error(expression, Diagnostics.A_const_assertions_can_only_be_applied_to_references_to_enum_members_or_string_number_boolean_array_or_object_literals);
@@ -33797,23 +33797,24 @@ namespace ts {
             return awaitedType;
         }
 
-        function checkPrefixUnaryExpression(node: PrefixUnaryExpression): Type {
+        function checkPrefixUnaryExpression(node: PrefixUnaryExpression, checkExpressionIntent: CheckExpressionIntent): Type {
             const operandType = checkExpression(node.operand);
             if (operandType === silentNeverType) {
                 return silentNeverType;
             }
+            const freshenIfNeeded = checkExpressionIntent & CheckExpressionIntent.NoLiteralFreshening ? identity : getFreshTypeOfLiteralType;
             switch (node.operand.kind) {
                 case SyntaxKind.NumericLiteral:
                     switch (node.operator) {
                         case SyntaxKind.MinusToken:
-                            return getFreshTypeOfLiteralType(getNumberLiteralType(-(node.operand as NumericLiteral).text));
+                            return freshenIfNeeded(getNumberLiteralType(-(node.operand as NumericLiteral).text));
                         case SyntaxKind.PlusToken:
-                            return getFreshTypeOfLiteralType(getNumberLiteralType(+(node.operand as NumericLiteral).text));
+                            return freshenIfNeeded(getNumberLiteralType(+(node.operand as NumericLiteral).text));
                     }
                     break;
                 case SyntaxKind.BigIntLiteral:
                     if (node.operator === SyntaxKind.MinusToken) {
-                        return getFreshTypeOfLiteralType(getBigIntLiteralType({
+                        return freshenIfNeeded(getBigIntLiteralType({
                             negative: true,
                             base10Value: parsePseudoBigInt((node.operand as BigIntLiteral).text)
                         }));
@@ -34406,10 +34407,10 @@ namespace ts {
                 leftType = checkTruthinessExpression(left, checkMode);
             }
             else {
-                leftType = checkExpression(left, checkMode);
+                leftType = checkExpression(left, checkMode, CheckExpressionIntent.NoLiteralFreshening);
             }
 
-            const rightType = checkExpression(right, checkMode);
+            const rightType = checkExpression(right, checkMode, CheckExpressionIntent.NoLiteralFreshening);
             return checkBinaryLikeExpressionWorker(left, operatorToken, right, leftType, rightType, errorNode);
         }
 
@@ -35093,8 +35094,8 @@ namespace ts {
                 (isPropertyAssignment(parent) || isShorthandPropertyAssignment(parent) || isTemplateSpan(parent)) && isConstContext(parent.parent);
         }
 
-        function checkExpressionForMutableLocation(node: Expression, checkMode: CheckMode | undefined, contextualType?: Type, forceTuple?: boolean): Type {
-            const type = checkExpression(node, checkMode, forceTuple);
+        function checkExpressionForMutableLocation(node: Expression, checkMode: CheckMode | undefined, contextualType?: Type, checkExpressionIntent?: CheckExpressionIntent): Type {
+            const type = checkExpression(node, checkMode, checkExpressionIntent);
             return isConstContext(node) || isCommonJsExportedExpression(node) ? getRegularTypeOfLiteralType(type) :
                 isTypeAssertion(node) ? type :
                 getWidenedLiteralLikeTypeForContextualType(type, instantiateContextualType(arguments.length === 2 ? getContextualType(node, /*contextFlags*/ undefined) : contextualType, node, /*contextFlags*/ undefined));
@@ -35358,12 +35359,12 @@ namespace ts {
             }
         }
 
-        function checkExpression(node: Expression | QualifiedName, checkMode?: CheckMode, forceTuple?: boolean): Type {
+        function checkExpression(node: Expression | QualifiedName, checkMode?: CheckMode, checkIntent?: CheckExpressionIntent): Type {
             tracing?.push(tracing.Phase.Check, "checkExpression", { kind: node.kind, pos: node.pos, end: node.end, path: (node as TracingNode).tracingPath });
             const saveCurrentNode = currentNode;
             currentNode = node;
             instantiationCount = 0;
-            const uninstantiatedType = checkExpressionWorker(node, checkMode, forceTuple);
+            const uninstantiatedType = checkExpressionWorker(node, checkMode, checkIntent);
             const type = instantiateTypeWithSingleGenericCallSignature(node, uninstantiatedType, checkMode);
             if (isConstEnumObjectType(type)) {
                 checkConstEnumAccess(node, type);
@@ -35406,7 +35407,13 @@ namespace ts {
             return checkExpression(node.expression, checkMode);
         }
 
-        function checkExpressionWorker(node: Expression | QualifiedName, checkMode: CheckMode | undefined, forceTuple?: boolean): Type {
+        const enum CheckExpressionIntent {
+            None = 0,
+            ForceTuple = 1 << 0,
+            NoLiteralFreshening = 1 << 1,
+        }
+
+        function checkExpressionWorker(node: Expression | QualifiedName, checkMode: CheckMode | undefined, intent: CheckExpressionIntent = CheckExpressionIntent.None): Type {
             const kind = node.kind;
             if (cancellationToken) {
                 // Only bother checking on a few construct kinds.  We don't want to be excessively
@@ -35431,16 +35438,25 @@ namespace ts {
                     return nullWideningType;
                 case SyntaxKind.NoSubstitutionTemplateLiteral:
                 case SyntaxKind.StringLiteral:
-                    return getFreshTypeOfLiteralType(getStringLiteralType((node as StringLiteralLike).text));
+                    const stringLiteralType: Type = getStringLiteralType((node as StringLiteralLike).text);
+                    return intent & CheckExpressionIntent.NoLiteralFreshening ?
+                        stringLiteralType :
+                        getFreshTypeOfLiteralType(stringLiteralType);
                 case SyntaxKind.NumericLiteral:
                     checkGrammarNumericLiteral(node as NumericLiteral);
-                    return getFreshTypeOfLiteralType(getNumberLiteralType(+(node as NumericLiteral).text));
+                    const numberLiteralType: Type = getNumberLiteralType(+(node as NumericLiteral).text);
+                    return intent & CheckExpressionIntent.NoLiteralFreshening ?
+                        numberLiteralType :
+                        getFreshTypeOfLiteralType(numberLiteralType);
                 case SyntaxKind.BigIntLiteral:
                     checkGrammarBigIntLiteral(node as BigIntLiteral);
-                    return getFreshTypeOfLiteralType(getBigIntLiteralType({
+                    const bigIntLiteralType: Type = getBigIntLiteralType({
                         negative: false,
                         base10Value: parsePseudoBigInt((node as BigIntLiteral).text)
-                    }));
+                    });
+                    return intent & CheckExpressionIntent.NoLiteralFreshening ?
+                        bigIntLiteralType :
+                        getFreshTypeOfLiteralType(bigIntLiteralType);
                 case SyntaxKind.TrueKeyword:
                     return trueType;
                 case SyntaxKind.FalseKeyword:
@@ -35450,7 +35466,7 @@ namespace ts {
                 case SyntaxKind.RegularExpressionLiteral:
                     return globalRegExpType;
                 case SyntaxKind.ArrayLiteralExpression:
-                    return checkArrayLiteral(node as ArrayLiteralExpression, checkMode, forceTuple);
+                    return checkArrayLiteral(node as ArrayLiteralExpression, checkMode, intent & CheckExpressionIntent.ForceTuple);
                 case SyntaxKind.ObjectLiteralExpression:
                     return checkObjectLiteral(node as ObjectLiteralExpression, checkMode);
                 case SyntaxKind.PropertyAccessExpression:
@@ -35495,7 +35511,7 @@ namespace ts {
                 case SyntaxKind.AwaitExpression:
                     return checkAwaitExpression(node as AwaitExpression);
                 case SyntaxKind.PrefixUnaryExpression:
-                    return checkPrefixUnaryExpression(node as PrefixUnaryExpression);
+                    return checkPrefixUnaryExpression(node as PrefixUnaryExpression, intent);
                 case SyntaxKind.PostfixUnaryExpression:
                     return checkPostfixUnaryExpression(node as PostfixUnaryExpression);
                 case SyntaxKind.BinaryExpression:
@@ -39847,7 +39863,7 @@ namespace ts {
             let firstDefaultClause: CaseOrDefaultClause;
             let hasDuplicateDefaultClause = false;
 
-            const expressionType = checkExpression(node.expression);
+            const expressionType = checkExpression(node.expression, /*checkMode*/ undefined, CheckExpressionIntent.NoLiteralFreshening);
             const expressionIsLiteral = isLiteralType(expressionType);
             forEach(node.caseBlock.clauses, clause => {
                 // Grammar check for duplicate default clauses, skip if we already report duplicate default clause
@@ -39874,7 +39890,7 @@ namespace ts {
                         // TypeScript 1.0 spec (April 2014): 5.9
                         // In a 'switch' statement, each 'case' expression must be of a type that is comparable
                         // to or from the type of the 'switch' expression.
-                        let caseType = checkExpression(clause.expression);
+                        let caseType = checkExpression(clause.expression, /*checkMode*/ undefined, CheckExpressionIntent.NoLiteralFreshening);
                         const caseIsLiteral = isLiteralType(caseType);
                         let comparedExpressionType = expressionType;
                         if (!caseIsLiteral || !expressionIsLiteral) {
