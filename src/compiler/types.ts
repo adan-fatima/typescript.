@@ -8777,6 +8777,8 @@ namespace ts {
         newLine?: NewLineKind;
         omitTrailingSemicolon?: boolean;
         noEmitHelpers?: boolean;
+        /** number of spaces or single tab*/
+        indentation?: number | "\t";
         /*@internal*/ module?: CompilerOptions["module"];
         /*@internal*/ target?: CompilerOptions["target"];
         /*@internal*/ sourceMap?: boolean;
@@ -8883,6 +8885,8 @@ namespace ts {
         hasTrailingWhitespace(): boolean;
         getTextPosWithWriteLine?(): number;
         nonEscapingWrite?(text: string): void;
+        getIndentString(level: number): string;
+        getIndentSize(): number;
     }
 
     export interface GetEffectiveTypeRootsHost {
