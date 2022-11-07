@@ -1187,6 +1187,7 @@ namespace FourSlashInterface {
             typeEntry("Capitalize"),
             typeEntry("Uncapitalize"),
             interfaceEntry("ThisType"),
+            interfaceEntry("YieldType"),
             varEntry("ArrayBuffer"),
             interfaceEntry("ArrayBufferTypes"),
             typeEntry("ArrayBufferLike"),

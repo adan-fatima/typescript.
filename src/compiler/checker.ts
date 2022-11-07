@@ -967,6 +967,7 @@ namespace ts {
         let globalBooleanType: ObjectType;
         let globalRegExpType: ObjectType;
         let globalThisType: GenericType;
+        let globalYieldType: GenericType;
         let anyArrayType: Type;
         let autoArrayType: Type;
         let anyReadonlyArrayType: Type;
@@ -26901,6 +26902,16 @@ namespace ts {
             });
         }
 
+        function getYieldTypeArgument(type: Type): Type | undefined {
+            return getObjectFlags(type) & ObjectFlags.Reference && (type as TypeReference).target === globalYieldType ? getTypeArguments(type as TypeReference)[0] : undefined;
+        }
+
+        function getYieldTypeFromContextualType(type: Type): Type | undefined {
+            return mapType(type, t => {
+                return t.flags & TypeFlags.Intersection ? forEach((t as IntersectionType).types, getYieldTypeArgument) : getYieldTypeArgument(t);
+            });
+        }
+
         function getContextualThisParameterType(func: SignatureDeclaration): Type | undefined {
             if (func.kind === SyntaxKind.ArrowFunction) {
                 return undefined;
@@ -34884,6 +34895,11 @@ namespace ts {
                 const use = isAsync ? IterationUse.AsyncYieldStar : IterationUse.YieldStar;
                 return getIterationTypeOfIterable(use, IterationTypeKind.Return, yieldExpressionType, node.expression)
                     || anyType;
+            }
+
+            const suggestedReturnType = yieldedType && getYieldTypeFromContextualType(yieldedType);
+            if (suggestedReturnType) {
+                return suggestedReturnType;
             }
             else if (returnType) {
                 return getIterationTypeOfGeneratorFunctionReturnType(IterationTypeKind.Next, returnType, isAsync)
@@ -44219,6 +44235,7 @@ namespace ts {
             globalReadonlyArrayType = getGlobalTypeOrUndefined("ReadonlyArray" as __String, /*arity*/ 1) as GenericType || globalArrayType;
             anyReadonlyArrayType = globalReadonlyArrayType ? createTypeFromGenericGlobalType(globalReadonlyArrayType, [anyType]) : anyArrayType;
             globalThisType = getGlobalTypeOrUndefined("ThisType" as __String, /*arity*/ 1) as GenericType;
+            globalYieldType = getGlobalTypeOrUndefined("YieldType" as __String, /*arity*/ 1) as GenericType;
 
             if (augmentations) {
                 // merge _nonglobal_ module augmentations.
