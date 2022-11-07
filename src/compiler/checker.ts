@@ -12147,6 +12147,10 @@ namespace ts {
             });
         }
 
+        /**
+         * Caution: Do you _really_ mean to use this fucntion? It creates fresh property symbols in an uncached manner - if you, the caller,
+         * do not cache the result of this function, you may have very poor performance over large unions.
+         */
         function getAllPossiblePropertiesOfTypes(types: readonly Type[]): Symbol[] {
             const unionType = getUnionType(types);
             if (!(unionType.flags & TypeFlags.Union)) {
@@ -12529,6 +12533,10 @@ namespace ts {
             return getReducedType(getApparentType(getReducedType(type)));
         }
 
+        function isDiscriminableLiteralType(type: Type): boolean {
+            return isLiteralType(type) || isPatternLiteralType(type) || type === uniqueLiteralType || (!!(type.flags & TypeFlags.Intersection) && some((type as IntersectionType).types, isDiscriminableLiteralType));
+        }
+
         function createUnionOrIntersectionProperty(containingType: UnionOrIntersectionType, name: __String, skipObjectFunctionPropertyAugment?: boolean): Symbol | undefined {
             let singleProp: Symbol | undefined;
             let propSet: ESMap<SymbolId, Symbol> | undefined;
@@ -12662,7 +12670,7 @@ namespace ts {
                 else if (type !== firstType) {
                     checkFlags |= CheckFlags.HasNonUniformType;
                 }
-                if (isLiteralType(type) || isPatternLiteralType(type) || type === uniqueLiteralType) {
+                if (isDiscriminableLiteralType(type)) {
                     checkFlags |= CheckFlags.HasLiteralType;
                 }
                 if (type.flags & TypeFlags.Never && type !== uniqueLiteralType) {
@@ -15990,11 +15998,22 @@ namespace ts {
             return !!(getGenericObjectFlags(type) & ObjectFlags.IsGenericIndexType);
         }
 
+        function isUnionWithGenericDiscriminantProperty(type: UnionType) {
+            getPropertiesOfType(type); // initialize property cache (includes partial props)
+            const props = arrayFrom((type.propertyCache || emptySymbols).values());
+            for (const prop of props) {
+                if (isDiscriminantProperty(type, prop.escapedName) === DiscriminantKind.Potential) {
+                    return true;
+                }
+            }
+        }
+
         function getGenericObjectFlags(type: Type): ObjectFlags {
             if (type.flags & TypeFlags.UnionOrIntersection) {
                 if (!((type as UnionOrIntersectionType).objectFlags & ObjectFlags.IsGenericTypeComputed)) {
                     (type as UnionOrIntersectionType).objectFlags |= ObjectFlags.IsGenericTypeComputed |
-                        reduceLeft((type as UnionOrIntersectionType).types, (flags, t) => flags | getGenericObjectFlags(t), 0);
+                        reduceLeft((type as UnionOrIntersectionType).types, (flags, t) => flags | getGenericObjectFlags(t), 0) |
+                        (type.flags & TypeFlags.Union && isUnionWithGenericDiscriminantProperty(type as UnionType) ? ObjectFlags.IsGenericObjectType : 0);
                 }
                 return (type as UnionOrIntersectionType).objectFlags & ObjectFlags.IsGenericType;
             }
@@ -23747,19 +23766,19 @@ namespace ts {
                 if (prop && getCheckFlags(prop) & CheckFlags.SyntheticProperty) {
                     if ((prop as TransientSymbol).isDiscriminantProperty === undefined) {
                         (prop as TransientSymbol).isDiscriminantProperty =
-                            ((prop as TransientSymbol).checkFlags & CheckFlags.Discriminant) === CheckFlags.Discriminant &&
-                            !isGenericType(getTypeOfSymbol(prop));
+                            ((prop as TransientSymbol).checkFlags & CheckFlags.Discriminant) === CheckFlags.Discriminant ?
+                            !isGenericType(getTypeOfSymbol(prop)) ? DiscriminantKind.Concrete : DiscriminantKind.Potential : DiscriminantKind.None;
                     }
-                    return !!(prop as TransientSymbol).isDiscriminantProperty;
+                    return (prop as TransientSymbol).isDiscriminantProperty!;
                 }
             }
-            return false;
+            return DiscriminantKind.None;
         }
 
         function findDiscriminantProperties(sourceProperties: Symbol[], target: Type): Symbol[] | undefined {
             let result: Symbol[] | undefined;
             for (const sourceProperty of sourceProperties) {
-                if (isDiscriminantProperty(target, sourceProperty.escapedName)) {
+                if (isDiscriminantProperty(target, sourceProperty.escapedName) === DiscriminantKind.Concrete) {
                     if (result) {
                         result.push(sourceProperty);
                         continue;
@@ -25219,7 +25238,7 @@ namespace ts {
                     const access = getCandidateDiscriminantPropertyAccess(expr);
                     if (access) {
                         const name = getAccessedPropertyName(access);
-                        if (name && isDiscriminantProperty(type, name)) {
+                        if (name && isDiscriminantProperty(type, name) === DiscriminantKind.Concrete) {
                             return access;
                         }
                     }
@@ -27523,11 +27542,11 @@ namespace ts {
             return getMatchingUnionConstituentForObjectLiteral(contextualType, node) || discriminateTypeByDiscriminableItems(contextualType,
                 concatenate(
                     map(
-                        filter(node.properties, p => !!p.symbol && p.kind === SyntaxKind.PropertyAssignment && isPossiblyDiscriminantValue(p.initializer) && isDiscriminantProperty(contextualType, p.symbol.escapedName)),
+                        filter(node.properties, p => !!p.symbol && p.kind === SyntaxKind.PropertyAssignment && isPossiblyDiscriminantValue(p.initializer) && isDiscriminantProperty(contextualType, p.symbol.escapedName) === DiscriminantKind.Concrete),
                         prop => ([() => getContextFreeTypeOfExpression((prop as PropertyAssignment).initializer), prop.symbol.escapedName] as [() => Type, __String])
                     ),
                     map(
-                        filter(getPropertiesOfType(contextualType), s => !!(s.flags & SymbolFlags.Optional) && !!node?.symbol?.members && !node.symbol.members.has(s.escapedName) && isDiscriminantProperty(contextualType, s.escapedName)),
+                        filter(getPropertiesOfType(contextualType), s => !!(s.flags & SymbolFlags.Optional) && !!node?.symbol?.members && !node.symbol.members.has(s.escapedName) && isDiscriminantProperty(contextualType, s.escapedName) === DiscriminantKind.Concrete),
                         s => [() => undefinedType, s.escapedName] as [() => Type, __String]
                     )
                 ),
@@ -27540,11 +27559,11 @@ namespace ts {
             return discriminateTypeByDiscriminableItems(contextualType,
                 concatenate(
                     map(
-                        filter(node.properties, p => !!p.symbol && p.kind === SyntaxKind.JsxAttribute && isDiscriminantProperty(contextualType, p.symbol.escapedName) && (!p.initializer || isPossiblyDiscriminantValue(p.initializer))),
+                        filter(node.properties, p => !!p.symbol && p.kind === SyntaxKind.JsxAttribute && isDiscriminantProperty(contextualType, p.symbol.escapedName) === DiscriminantKind.Concrete && (!p.initializer || isPossiblyDiscriminantValue(p.initializer))),
                         prop => ([!(prop as JsxAttribute).initializer ? (() => trueType) : (() => getContextFreeTypeOfExpression((prop as JsxAttribute).initializer!)), prop.symbol.escapedName] as [() => Type, __String])
                     ),
                     map(
-                        filter(getPropertiesOfType(contextualType), s => !!(s.flags & SymbolFlags.Optional) && !!node?.symbol?.members && !node.symbol.members.has(s.escapedName) && isDiscriminantProperty(contextualType, s.escapedName)),
+                        filter(getPropertiesOfType(contextualType), s => !!(s.flags & SymbolFlags.Optional) && !!node?.symbol?.members && !node.symbol.members.has(s.escapedName) && isDiscriminantProperty(contextualType, s.escapedName) === DiscriminantKind.Concrete),
                         s => [() => undefinedType, s.escapedName] as [() => Type, __String]
                     )
                 ),
