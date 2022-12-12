@@ -12,10 +12,13 @@ import {
     OptionsNameMap,
     PackageJsonInfo,
     PackageJsonInfoCache,
+    PackageJsonScope,
     Pattern,
     ProgramBuildInfo,
     Push,
+    SourceFilePackageJsonInfo,
     SymlinkCache,
+    TypeReferenceDirectiveResolutionCache,
 } from "./_namespaces/ts";
 
 // branded string type used to store absolute, normalized and canonicalized paths
@@ -4061,8 +4064,6 @@ export interface SourceFile extends Declaration {
      * CommonJS-output-format by the node module transformer and type checker, regardless of extension or context.
      */
     impliedNodeFormat?: ResolutionMode;
-    /** @internal */ packageJsonLocations?: readonly string[];
-    /** @internal */ packageJsonScope?: PackageJsonInfo;
 
     /** @internal */ scriptKind: ScriptKind;
 
@@ -4132,6 +4133,10 @@ export interface SourceFile extends Declaration {
 
     /** @internal */ exportedModulesFromDeclarationEmit?: ExportedModulesFromDeclarationEmit;
     /** @internal */ endFlowNode?: FlowNode;
+}
+
+/** @internal */
+export interface SourceFile extends SourceFilePackageJsonInfo {
 }
 
 /** @internal */
@@ -4444,6 +4449,8 @@ export interface Program extends ScriptReferenceHost {
     /** @internal */
     getModuleResolutionCache(): ModuleResolutionCache | undefined;
     /** @internal */
+    getTypeReferenceDirectiveResolutionCache(): TypeReferenceDirectiveResolutionCache | undefined;
+    /** @internal */
     getFilesByNameMap(): Map<string, SourceFile | false | undefined>;
 
     /**
@@ -4494,6 +4501,7 @@ export interface Program extends ScriptReferenceHost {
     /** @internal */ getResolvedTypeReferenceDirectives(): ModeAwareCache<ResolvedTypeReferenceDirectiveWithFailedLookupLocations>;
     /** @internal */ getAutomaticTypeDirectiveNames(): string[];
     /** @internal */ getAutomaticTypeDirectiveResolutions(): ModeAwareCache<ResolvedTypeReferenceDirectiveWithFailedLookupLocations>;
+    /** @internal */ getAutomaticTypeDirectiveContainingFile(): string;
     isSourceFileFromExternalLibrary(file: SourceFile): boolean;
     isSourceFileDefaultLibrary(file: SourceFile): boolean;
 
@@ -4538,8 +4546,9 @@ export interface Program extends ScriptReferenceHost {
     /** @internal */ getResolvedProjectReferenceToRedirect(fileName: string): ResolvedProjectReference | undefined;
     /** @internal */ forEachResolvedProjectReference<T>(cb: (resolvedProjectReference: ResolvedProjectReference) => T | undefined): T | undefined;
     /** @internal */ getResolvedProjectReferenceByPath(projectReferencePath: Path): ResolvedProjectReference | undefined;
+    /** @internal */ getRedirectReferenceForResolution(file: SourceFile): ResolvedProjectReference | undefined;
     /** @internal */ isSourceOfProjectReferenceRedirect(fileName: string): boolean;
-    /** @internal */ getBuildInfo?(bundle: BundleBuildInfo | undefined): BuildInfo;
+    /** @internal */ getBuildInfo?(bundle: BundleBuildInfo | undefined, buildInfoPath: string): BuildInfo;
     /** @internal */ emitBuildInfo(writeFile?: WriteFileCallback, cancellationToken?: CancellationToken): EmitResult;
     /**
      * This implementation handles file exists to be true if file is source of project reference redirect when program is created using useSourceOfProjectReferenceRedirect
@@ -4571,6 +4580,7 @@ export interface ResolvedProjectReference {
 /** @internal */
 export const enum StructureIsReused {
     Not,
+    SafeModuleCache,
     SafeModules,
     Completely,
 }
@@ -6775,6 +6785,7 @@ export interface CompilerOptions {
     jsxImportSource?: string;
     composite?: boolean;
     incremental?: boolean;
+    cacheResolutions?: boolean;
     tsBuildInfoFile?: string;
     removeComments?: boolean;
     rootDir?: string;
@@ -6966,6 +6977,27 @@ export interface CreateProgramOptions {
     oldProgram?: Program;
     configFileParsingDiagnostics?: readonly Diagnostic[];
 }
+
+/** @internal */
+export interface OldBuildInfoProgram {
+    getCompilerOptions(): CompilerOptions;
+    getResolvedModule(name: string, mode: ResolutionMode, dirPath: Path, redirectedReference: ResolvedProjectReference | undefined): ResolvedModuleWithFailedLookupLocations | undefined;
+    getResolvedTypeReferenceDirective(name: string, mode: ResolutionMode, dirPath: Path, redirectedReference: ResolvedProjectReference | undefined): ResolvedTypeReferenceDirectiveWithFailedLookupLocations | undefined;
+    getPackageJsonScope(dir: string): PackageJsonScope | undefined;
+}
+
+/** @internal */
+export interface OldBuildInfoProgramHost {
+    compilerHost: CompilerHost;
+    getCompilerOptions(): CompilerOptions;
+    getPackageJsonInfo(fileName: string): PackageJsonInfo | undefined;
+}
+
+/** @internal */
+export type OldBuildInfoProgramConstructor = (host: OldBuildInfoProgramHost) => OldBuildInfoProgram | undefined;
+
+/** @internal */
+export type CreateProgramOptionsWithOldBuildInfoProgramConstructor = Omit<CreateProgramOptions, "oldProgram"> & { oldProgram?: Program | OldBuildInfoProgramConstructor; };
 
 /** @internal */
 export interface CommandLineOptionBase {
@@ -7293,7 +7325,7 @@ export interface ResolvedModuleWithFailedLookupLocations {
 
 export interface ResolvedTypeReferenceDirective {
     // True if the type declaration file was found in a primary lookup location
-    primary: boolean;
+    primary: boolean | undefined;
     // The location of the .d.ts file we located, or undefined if resolution failed
     resolvedFileName: string | undefined;
     /**
@@ -7345,6 +7377,7 @@ export interface CompilerHost extends ModuleResolutionHost {
      * Returns the module resolution cache used by a provided `resolveModuleNames` implementation so that any non-name module resolution operations (eg, package.json lookup) can reuse it
      */
     getModuleResolutionCache?(): ModuleResolutionCache | undefined;
+    /** @internal */ getTypeReferenceDirectiveResolutionCache?(): TypeReferenceDirectiveResolutionCache | undefined;
     /**
      * @deprecated supply resolveTypeReferenceDirectiveReferences instead for resolution that can handle newer resolution modes like nodenext
      *
@@ -7368,7 +7401,7 @@ export interface CompilerHost extends ModuleResolutionHost {
         reusedNames: readonly T[] | undefined
     ): readonly ResolvedTypeReferenceDirectiveWithFailedLookupLocations[];
     getEnvironmentVariable?(name: string): string | undefined;
-    /** @internal */ onReleaseOldSourceFile?(oldSourceFile: SourceFile, oldOptions: CompilerOptions, hasSourceFileByPath: boolean): void;
+    /** @internal */ onReleaseOldSourceFile?(oldSourceFile: SourceFile, oldOptions: CompilerOptions): void;
     /** @internal */ onReleaseParsedCommandLine?(configFileName: string, oldResolvedRef: ResolvedProjectReference | undefined, optionOptions: CompilerOptions): void;
     /** If provided along with custom resolveModuleNames or resolveTypeReferenceDirectives, used to determine if unchanged file path needs to re-resolve modules/type reference directives */
     hasInvalidatedResolutions?(filePath: Path): boolean;
@@ -7686,7 +7719,7 @@ export interface EmitHost extends ScriptReferenceHost, ModuleSpecifierResolution
     getPrependNodes(): readonly (InputFiles | UnparsedSource)[];
 
     writeFile: WriteFileCallback;
-    getBuildInfo(bundle: BundleBuildInfo | undefined): BuildInfo | undefined;
+    getBuildInfo(bundle: BundleBuildInfo | undefined, buildInfoPath: string): BuildInfo | undefined;
     getSourceFileFromReference: Program["getSourceFileFromReference"];
     readonly redirectTargetsMap: RedirectTargetsMap;
     createHash?(data: string): string;

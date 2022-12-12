@@ -35,6 +35,7 @@ export interface TestTscCompile extends TestTscCompileLikeBase {
     baselineReadFileCalls?: boolean;
     baselinePrograms?: boolean;
     baselineDependencies?: boolean;
+    baselineModulesAndTypeRefs?: boolean;
 }
 
 export type CommandLineProgram = [ts.Program, ts.BuilderProgram?];
@@ -206,6 +207,11 @@ export function testTscCompile(input: TestTscCompile) {
             baselinePrograms(baseline, getPrograms!, ts.emptyArray, baselineDependencies);
             sys.write(baseline.join("\n"));
         }
+        if (input.baselineModulesAndTypeRefs) {
+            const baseline: string[] = [];
+            baselineModulesAndTypeRefs(baseline, getPrograms!());
+            sys.write(baseline.join("\n"));
+        }
         if (baselineReadFileCalls) {
             sys.write(`readFiles:: ${JSON.stringify(actualReadFileMap, /*replacer*/ undefined, " ")} `);
         }
@@ -245,6 +251,41 @@ function storeDtsSignatures(sys: TscCompileSystem, programs: readonly CommandLin
             const getCanonicalFileName = ts.createGetCanonicalFileName(program.useCaseSensitiveFileNames());
             const buildInfoDirectory = ts.getDirectoryPath(ts.getNormalizedAbsolutePath(buildInfoPath!, currentDirectory));
             return ts.ensurePathIsNonModuleName(ts.getRelativePathFromDirectory(buildInfoDirectory, path, getCanonicalFileName));
+        }
+    }
+}
+
+function strigifyResolution(resolution: any) {
+    return JSON.stringify({
+        ...resolution,
+        files: undefined,
+        isInvalidated: undefined,
+        watchedFailed: undefined,
+        watchedAffected: undefined,
+        setAtRoot: undefined,
+    }, /*replacer*/ undefined, 2,);
+}
+
+function baselineCache<T>(baseline: string[], cacheType: string, cache: ts.ModeAwareCache<T> | undefined) {
+    if (!cache?.size()) return;
+    baseline.push(`${cacheType}:`);
+    cache.forEach((resolved, key, mode) => baseline.push(`${key}: ${mode ? ts.getNameOfCompilerOptionValue(mode, ts.moduleOptionDeclaration.type) + ": " : ""}${strigifyResolution(resolved)}`));
+}
+
+export function baselineModulesAndTypeRefs(baseline: string[], programs: readonly CommandLineProgram[]) {
+    for (const [program] of programs) {
+        for (const f of program.getSourceFiles()) {
+            if (!f.resolvedModules && !f.resolvedTypeReferenceDirectiveNames && !f.packageJsonScope) continue;
+            baseline.push(`File: ${f.fileName}`);
+            if (f.packageJsonScope) baseline.push(`packageJsonScope:: ${strigifyResolution(f.packageJsonScope)}`);
+            baselineCache(baseline, "resolvedModules", f.resolvedModules);
+            baselineCache(baseline, "resolvedTypeReferenceDirectiveNames", f.resolvedTypeReferenceDirectiveNames);
+            baseline.push("");
+        }
+        const autoTypes = program.getAutomaticTypeDirectiveResolutions();
+        if (autoTypes.size()) {
+            baselineCache(baseline, "automaticTypeDirectiveResolutions", autoTypes);
+            baseline.push("");
         }
     }
 }
@@ -421,20 +462,21 @@ export function loadProjectFromDisk(
  */
 export function loadProjectFromFiles(
     files: vfs.FileSet,
-    libContentToAppend?: string
+    libContentToAppend?: string,
+    libPath?: string,
 ): vfs.FileSystem {
     const fs = new vfs.FileSystem(/*ignoreCase*/ true, {
         files,
         cwd: "/",
         meta: { defaultLibLocation: "/lib" },
     });
-    addLibAndMakeReadonly(fs, libContentToAppend);
+    addLibAndMakeReadonly(fs, libContentToAppend, libPath);
     return fs;
 }
 
-function addLibAndMakeReadonly(fs: vfs.FileSystem, libContentToAppend?: string) {
+function addLibAndMakeReadonly(fs: vfs.FileSystem, libContentToAppend?: string, libPath?: string) {
     fs.mkdirSync("/lib");
-    fs.writeFileSync("/lib/lib.d.ts", libContentToAppend ? `${libContent}${libContentToAppend}` : libContent);
+    fs.writeFileSync(libPath || "/lib/lib.d.ts", libContentToAppend ? `${libContent}${libContentToAppend}` : libContent);
     fs.makeReadonly();
 }
 
@@ -496,10 +538,53 @@ type ReadableProgramBuildInfoFileInfo<T> = Omit<ts.BuilderState.FileInfo, "impli
     impliedFormat: string | undefined;
     original: T | undefined;
 };
+type ReadableProgramBuildInfoResolved = string | Omit<ts.ProgramBuildInfoResolved, "resolvedFileName"> & {
+    readonly resolvedFileName: string;
+};
+type ReadableProgramBuildInfoResolution = Omit<ts.ProgramBuildInfoResolution, "resolvedModule" | "resolvedTypeReferenceDirective" | "failedLookupLocations" | "affectingLocations"> & {
+    readonly resolutionId: ts.ProgramBuildInfoResolutionId;
+    readonly resolvedModule: ReadableProgramBuildInfoResolved | undefined;
+    readonly resolvedTypeReferenceDirective: ReadableProgramBuildInfoResolved | undefined;
+    readonly affectingLocations: readonly string[] | undefined;
+};
+type ReadableWithOriginal<T, O> = T & {
+    readonly original: O;
+};
+interface ReadableProgramBuildInfoResolutionEntry {
+    resolutionEntryId: ts.ProgramBuildInfoResolutionEntryId;
+    name: string;
+    resolution: ReadableProgramBuildInfoResolution;
+    mode: string | undefined;
+}
+interface ReadableProgramBuildInfoResolutionCacheEntry {
+    dir: string;
+    resolutions: readonly ReadableProgramBuildInfoResolutionEntry[];
+}
+type ReadableProgramBuildInfoResolutionRedirectsCache = Omit<ts.ProgramBuildInfoResolutionRedirectsCache, "cache"> & {
+    cache: ReadableProgramBuildInfoResolutionCacheEntry[];
+};
+type ReadableProgramBuildInfoResolutionCacheWithRedirects = ReadableProgramBuildInfoResolutionCacheEntry[] | {
+    own: ReadableProgramBuildInfoResolutionCacheEntry[] | undefined;
+    redirects: readonly ReadableProgramBuildInfoResolutionRedirectsCache[];
+};
+type ReadableProgramBuildInfoHash = string | [file: string, hash: string];
+type ReadableProgramBuildInfoPackageJson = [dir: string, packageJson: string];
+type ReadableProgramBuildInfoCacheResolutions = Omit<ts.ProgramBuildInfoCacheResolutions,
+    "resolutions" | "hash" | "resolutionEntries" | "modules" | "typeRefs" | "packageJsons"
+> & {
+    resolutions: readonly ReadableWithOriginal<ReadableProgramBuildInfoResolution, ts.ProgramBuildInfoResolution>[];
+    hash: readonly ReadableProgramBuildInfoHash[] | undefined;
+    resolutionEntries: readonly ReadableWithOriginal<ReadableProgramBuildInfoResolutionEntry, ts.ProgramBuildInfoResolutionEntry>[];
+    modules: ReadableProgramBuildInfoResolutionCacheWithRedirects | undefined;
+    typeRefs: ReadableProgramBuildInfoResolutionCacheWithRedirects | undefined;
+    packageJsons: readonly ReadableProgramBuildInfoPackageJson[] | undefined;
+};
+
 type ReadableProgramMultiFileEmitBuildInfo = Omit<ts.ProgramMultiFileEmitBuildInfo,
     "fileIdsList" | "fileInfos" |
     "referencedMap" | "exportedModulesMap" | "semanticDiagnosticsPerFile" |
-    "affectedFilesPendingEmit" | "changeFileSet" | "emitSignatures"
+    "affectedFilesPendingEmit" | "changeFileSet" | "emitSignatures" |
+    "cacheResolutions"
 > & {
     fileNamesList: readonly (readonly string[])[] | undefined;
     fileInfos: ts.MapLike<ReadableProgramBuildInfoFileInfo<ts.ProgramMultiFileEmitBuildInfoFileInfo>>;
@@ -509,11 +594,15 @@ type ReadableProgramMultiFileEmitBuildInfo = Omit<ts.ProgramMultiFileEmitBuildIn
     affectedFilesPendingEmit: readonly ReadableProgramBuilderInfoFilePendingEmit[] | undefined;
     changeFileSet: readonly string[] | undefined;
     emitSignatures: readonly ReadableProgramBuildInfoEmitSignature[] | undefined;
+    cacheResolutions: ReadableProgramBuildInfoCacheResolutions | undefined;
 };
 type ReadableProgramBuildInfoBundlePendingEmit = [emitKind: ReadableBuilderFileEmit, original: ts.ProgramBuildInfoBundlePendingEmit];
-type ReadableProgramBundleEmitBuildInfo = Omit<ts.ProgramBundleEmitBuildInfo, "fileInfos" | "pendingEmit"> & {
+type ReadableProgramBundleEmitBuildInfo = Omit<ts.ProgramBundleEmitBuildInfo,
+    "fileInfos" | "pendingEmit" | "cacheResolutions"
+> & {
     fileInfos: ts.MapLike<string | ReadableProgramBuildInfoFileInfo<ts.BuilderState.FileInfo>>;
     pendingEmit: ReadableProgramBuildInfoBundlePendingEmit | undefined;
+    cacheResolutions: ReadableProgramBuildInfoCacheResolutions | undefined;
 };
 
 type ReadableProgramBuildInfo = ReadableProgramMultiFileEmitBuildInfo | ReadableProgramBundleEmitBuildInfo;
@@ -523,8 +612,14 @@ function isReadableProgramBundleEmitBuildInfo(info: ReadableProgramBuildInfo | u
 }
 type ReadableBuildInfo = Omit<ts.BuildInfo, "program"> & { program: ReadableProgramBuildInfo | undefined; size: number; };
 function generateBuildInfoProgramBaseline(sys: ts.System, buildInfoPath: string, buildInfo: ts.BuildInfo) {
+    interface ReadableWithOriginalArray<T, O> {
+        readables: T[];
+        withOriginals: ReadableWithOriginal<T, O>[];
+    }
     let program: ReadableProgramBuildInfo | undefined;
     let fileNamesList: string[][] | undefined;
+    let resolutions: ReadableWithOriginalArray<ReadableProgramBuildInfoResolution, ts.ProgramBuildInfoResolution>;
+    let resolutionEntries: ReadableWithOriginalArray<ReadableProgramBuildInfoResolutionEntry, ts.ProgramBuildInfoResolutionEntry>;
     if (buildInfo.program && ts.isProgramBundleEmitBuildInfo(buildInfo.program)) {
         const fileInfos: ReadableProgramBundleEmitBuildInfo["fileInfos"] = {};
         buildInfo.program?.fileInfos?.forEach((fileInfo, index) =>
@@ -542,6 +637,7 @@ function generateBuildInfoProgramBaseline(sys: ts.System, buildInfoPath: string,
                     toReadableBuilderFileEmit(ts.toProgramEmitPending(pendingEmit, buildInfo.program.options)),
                     pendingEmit
                 ],
+            cacheResolutions: toReadableProgramBuildInfoResolutions(buildInfo.program.cacheResolutions),
         };
     }
     else if (buildInfo.program) {
@@ -569,6 +665,7 @@ function generateBuildInfoProgramBaseline(sys: ts.System, buildInfoPath: string,
                     [toFileName(s[0]), s[1]]
             ),
             latestChangedDtsFile: buildInfo.program.latestChangedDtsFile,
+            cacheResolutions: toReadableProgramBuildInfoResolutions(buildInfo.program.cacheResolutions),
         };
     }
     const version = buildInfo.version === ts.version ? fakes.version : buildInfo.version;
@@ -596,7 +693,7 @@ function generateBuildInfoProgramBaseline(sys: ts.System, buildInfoPath: string,
     // For now its just JSON.stringify
     sys.writeFile(`${buildInfoPath}.readable.baseline.txt`, JSON.stringify(result, /*replacer*/ undefined, 2));
 
-    function toFileName(fileId: ts.ProgramBuildInfoFileId) {
+    function toFileName(fileId: ts.ProgramBuildInfoFileId | ts.ProgramBuildInfoAbsoluteFileId) {
         return buildInfo.program!.fileNames[fileId - 1];
     }
 
@@ -609,8 +706,12 @@ function generateBuildInfoProgramBaseline(sys: ts.System, buildInfoPath: string,
         return {
             original: ts.isString(original) ? undefined : original,
             ...info,
-            impliedFormat: info.impliedFormat && ts.getNameOfCompilerOptionValue(info.impliedFormat, ts.moduleOptionDeclaration.type),
+            impliedFormat: toReadableMode(info.impliedFormat),
         };
+    }
+
+    function toReadableMode(mode: ts.ResolutionMode) {
+        return mode && ts.getNameOfCompilerOptionValue(mode, ts.moduleOptionDeclaration.type);
     }
 
     function toMapOfReferencedSet(referenceMap: ts.ProgramBuildInfoReferencedMap | undefined): ts.MapLike<string[]> | undefined {
@@ -642,6 +743,91 @@ function generateBuildInfoProgramBaseline(sys: ts.System, buildInfoPath: string,
         function addFlags(flag: string) {
             result = result ? `${result} | ${flag}` : flag;
         }
+    }
+
+    function toReadableProgramBuildInfoResolutions(cacheResolutions: ts.ProgramBuildInfoCacheResolutions | undefined): ReadableProgramBuildInfoCacheResolutions | undefined {
+        if (!cacheResolutions) return cacheResolutions;
+        resolutions = toReadableWithOriginalArray(cacheResolutions.resolutions, toReadableProgramBuildInfoResolution);
+        resolutionEntries = toReadableWithOriginalArray(cacheResolutions.resolutionEntries, toReadableProgramBuildInfoResolutionEntry);
+        return {
+            ...cacheResolutions,
+            resolutions: resolutions.withOriginals,
+            resolutionEntries: resolutionEntries.withOriginals,
+            modules: toReadableProgramBuildInfoResolutionCacheWithRedirects(cacheResolutions.modules),
+            typeRefs: toReadableProgramBuildInfoResolutionCacheWithRedirects(cacheResolutions.typeRefs),
+            packageJsons: cacheResolutions.packageJsons?.map(toReadableProgramBuildInfoPackageJson),
+            hash: cacheResolutions.hash?.map(toReadableProgramBuildInfoHash),
+        };
+    }
+
+    function toReadableProgramBuildInfoPackageJson(entry: ts.ProgramBuildInfoPackageJson): ReadableProgramBuildInfoPackageJson {
+        return [toFileName(entry[0]), toFileName(entry[1])];
+    }
+
+    function toReadableProgramBuildInfoHash(hash: ts.ProgramBuildInfoHash): ReadableProgramBuildInfoHash {
+        return ts.isArray(hash) ? [toFileName(hash[0]), hash[1]] : toFileName(hash);
+    }
+
+    function toReadableProgramBuildInfoResolutionCacheWithRedirects(cache: ts.ProgramBuildInfoResolutionCacheWithRedirects | undefined): ReadableProgramBuildInfoResolutionCacheWithRedirects | undefined {
+        return cache ?
+            ts.isArray(cache) ?
+                toReadableProgramBuildInfoResolutionCache(cache) :
+                {
+                    own: toReadableProgramBuildInfoResolutionCache(cache.own),
+                    redirects: cache.redirects.map(r => ({ ...r, cache: toReadableProgramBuildInfoResolutionCache(r.cache)! }))
+                }
+            : undefined;
+    }
+
+    function toReadableProgramBuildInfoResolution(resolution: ts.ProgramBuildInfoResolution, index: number): ReadableProgramBuildInfoResolution {
+        return {
+            resolutionId: index + 1 as ts.ProgramBuildInfoResolutionId,
+            ...resolution,
+            resolvedModule: toReadableProgramBuildInfoResolved(resolution.resolvedModule),
+            resolvedTypeReferenceDirective: toReadableProgramBuildInfoResolved(resolution.resolvedTypeReferenceDirective),
+            affectingLocations: resolution.affectingLocations?.map(toFileName),
+        };
+    }
+
+    function toReadableProgramBuildInfoResolved(resolved: ts.ProgramBuildInfoAbsoluteFileId | ts.ProgramBuildInfoResolved | undefined): ReadableProgramBuildInfoResolved | undefined {
+        return resolved && (ts.isNumber(resolved) ? toFileName(resolved) : {
+            ...resolved,
+            resolvedFileName: toFileName(resolved.resolvedFileName),
+        });
+    }
+
+    function toName(nameId: ts.ProgramBuildInfoResolutionNameId): string {
+        return buildInfo.program!.cacheResolutions!.names[nameId - 1];
+    }
+
+    function toReadableProgramBuildInfoResolutionEntry(entry: ts.ProgramBuildInfoResolutionEntry, index: number): ReadableProgramBuildInfoResolutionEntry {
+        return {
+            resolutionEntryId: index + 1 as ts.ProgramBuildInfoResolutionEntryId,
+            name: toName(entry[0]),
+            resolution: resolutions.readables[entry[1] - 1],
+            mode: toReadableMode(entry[2])
+        };
+    }
+
+    function toReadableProgramBuildInfoResolutionCache(cache: ts.ProgramBuildInfoResolutionCache | undefined): ReadableProgramBuildInfoResolutionCacheEntry[] | undefined {
+        return cache?.map(([dirId, resolutions]) => ({
+            dir: toFileName(dirId),
+            resolutions: resolutions.map(entry => resolutionEntries.readables[entry - 1]),
+        }));
+    }
+
+    function toReadableWithOriginalArray<O, R>(originals: readonly O[], toReadable: (original: O, index: number) => R): ReadableWithOriginalArray<R, O> {
+        const readables: R[] = [];
+        const withOriginals: ReadableWithOriginal<R, O>[] = [];
+        originals.forEach((original, index) => {
+            const r = toReadable(original, index);
+            readables.push(r);
+            withOriginals.push({
+                original,
+                ...r,
+            });
+        });
+        return { readables, withOriginals };
     }
 }
 
@@ -733,10 +919,10 @@ function verifyTscEditDiscrepancies({
                     const dtsForKey = dtsSignaures?.get(key);
                     if (!incrementalFileInfo || !cleanFileInfo || incrementalFileInfo.signature !== cleanFileInfo.signature && (!dtsForKey || incrementalFileInfo.signature !== dtsForKey.signature)) {
                         return [
-                            `Incremental signature is neither dts signature nor file version for File:: ${key}`,
+                            `Incremental signature is neither dts signature nor file version from clean for File:: ${key}`,
                             `Incremental:: ${JSON.stringify(incrementalFileInfo, /*replacer*/ undefined, 2)}`,
                             `Clean:: ${JSON.stringify(cleanFileInfo, /*replacer*/ undefined, 2)}`,
-                            `Dts Signature:: $${JSON.stringify(dtsForKey?.signature)}`
+                            `Dts Signature:: ${JSON.stringify(dtsForKey?.signature)}`
                         ];
                     }
                 },
@@ -903,7 +1089,7 @@ export interface VerifyTscWithEditsInput extends TestTscCompile {
  */
 export function verifyTsc({
     subScenario, fs, scenario, commandLineArgs, environmentVariables,
-    baselineSourceMap, modifyFs, baselineReadFileCalls, baselinePrograms,
+    baselineSourceMap, modifyFs, baselineReadFileCalls, baselinePrograms, baselineDependencies, baselineModulesAndTypeRefs,
     edits
 }: VerifyTscWithEditsInput) {
     describe(`tsc ${commandLineArgs.join(" ")} ${scenario}:: ${subScenario}`, () => {
@@ -921,6 +1107,8 @@ export function verifyTsc({
                 baselineSourceMap,
                 baselineReadFileCalls,
                 baselinePrograms,
+                baselineDependencies,
+                baselineModulesAndTypeRefs,
                 environmentVariables,
             });
             edits?.forEach((
@@ -937,6 +1125,8 @@ export function verifyTsc({
                     baselineSourceMap,
                     baselineReadFileCalls,
                     baselinePrograms,
+                    baselineDependencies,
+                    baselineModulesAndTypeRefs,
                     environmentVariables,
                 }));
             });

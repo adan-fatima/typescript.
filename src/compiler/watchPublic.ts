@@ -82,6 +82,7 @@ import {
     sys,
     System,
     toPath,
+    TypeReferenceDirectiveResolutionCache,
     updateErrorForNoInputFiles,
     updateMissingFilePathsWatch,
     updateSharedExtendedConfigFileWatcher,
@@ -101,7 +102,8 @@ export interface ReadBuildProgramHost {
     /** @internal */
     getBuildInfo?(fileName: string, configFilePath: string | undefined): BuildInfo | undefined;
 }
-export function readBuilderProgram(compilerOptions: CompilerOptions, host: ReadBuildProgramHost) {
+/** @internal */
+export function readBuildInfoForProgram(compilerOptions: CompilerOptions, host: ReadBuildProgramHost) {
     const buildInfoPath = getTsBuildInfoEmitOutputFilePath(compilerOptions);
     if (!buildInfoPath) return undefined;
     let buildInfo;
@@ -115,7 +117,12 @@ export function readBuilderProgram(compilerOptions: CompilerOptions, host: ReadB
         buildInfo = getBuildInfo(buildInfoPath, content);
     }
     if (!buildInfo || buildInfo.version !== version || !buildInfo.program) return undefined;
-    return createBuilderProgramUsingProgramBuildInfo(buildInfo, buildInfoPath, host);
+    return { buildInfo, buildInfoPath };
+}
+
+export function readBuilderProgram(compilerOptions: CompilerOptions, host: ReadBuildProgramHost) {
+    const result = readBuildInfoForProgram(compilerOptions, host);
+    return result && createBuilderProgramUsingProgramBuildInfo(result.buildInfo, result.buildInfoPath, host, compilerOptions.configFilePath);
 }
 
 export function createIncrementalCompilerHost(options: CompilerOptions, system = sys): CompilerHost {
@@ -236,6 +243,7 @@ export interface ProgramHost<T extends BuilderProgram> {
      * Returns the module resolution cache used by a provided `resolveModuleNames` implementation so that any non-name module resolution operations (eg, package.json lookup) can reuse it
      */
     getModuleResolutionCache?(): ModuleResolutionCache | undefined;
+    /** @internal */ getTypeReferenceDirectiveResolutionCache?(): TypeReferenceDirectiveResolutionCache | undefined;
 }
 /**
  * Internal interface used to wire emit through same host
@@ -499,6 +507,9 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
     compilerHost.getModuleResolutionCache = host.resolveModuleNameLiterals || host.resolveModuleNames ?
         maybeBind(host, host.getModuleResolutionCache) :
         (() => resolutionCache.getModuleResolutionCache());
+    compilerHost.getTypeReferenceDirectiveResolutionCache = host.resolveTypeReferenceDirectiveReferences || host.resolveTypeReferenceDirectives ?
+        maybeBind(host, host.getTypeReferenceDirectiveResolutionCache) :
+        (() => resolutionCache.getTypeReferenceDirectiveResolutionCache());
     const userProvidedResolution = !!host.resolveModuleNameLiterals || !!host.resolveTypeReferenceDirectiveReferences ||
         !!host.resolveModuleNames || !!host.resolveTypeReferenceDirectives;
     // All resolutions are invalid if user provided resolutions and didnt supply hasInvalidatedResolutions
@@ -619,7 +630,6 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
         writeLog(`  options: ${JSON.stringify(compilerOptions)}`);
         if (projectReferences) writeLog(`  projectReferences: ${JSON.stringify(projectReferences)}`);
 
-        const needsUpdateInTypeRootWatch = hasChangedCompilerOptions || !getCurrentProgram();
         hasChangedCompilerOptions = false;
         hasChangedConfigFileParsingErrors = false;
         resolutionCache.startCachingPerDirectoryResolution();
@@ -631,9 +641,6 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
 
         // Update watches
         updateMissingFilePathsWatch(builderProgram.getProgram(), missingFilesMap || (missingFilesMap = new Map()), watchMissingFilePath);
-        if (needsUpdateInTypeRootWatch) {
-            resolutionCache.updateTypeRootsWatch();
-        }
 
         if (missingFilePathsRequestedForRelease) {
             // These are the paths that program creater told us as not in use any more but were missing on the disk.
@@ -746,7 +753,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
         return text !== undefined ? getSourceFileVersionAsHashFromText(compilerHost, text) : undefined;
     }
 
-    function onReleaseOldSourceFile(oldSourceFile: SourceFile, _oldOptions: CompilerOptions, hasSourceFileByPath: boolean) {
+    function onReleaseOldSourceFile(oldSourceFile: SourceFile) {
         const hostSourceFileInfo = sourceFilesCache.get(oldSourceFile.resolvedPath);
         // If this is the source file thats in the cache and new program doesnt need it,
         // remove the cached entry.
@@ -762,9 +769,6 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                     hostSourceFileInfo.fileWatcher.close();
                 }
                 sourceFilesCache.delete(oldSourceFile.resolvedPath);
-                if (!hasSourceFileByPath) {
-                    resolutionCache.removeResolutionsOfFile(oldSourceFile.path);
-                }
             }
         }
     }
@@ -1092,7 +1096,6 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                             // Reload config for the referenced projects and remove the resolutions from referenced projects since the config file changed
                             const config = parsedConfigs?.get(projectPath);
                             if (config) config.reloadLevel = ConfigFileProgramReloadLevel.Full;
-                            resolutionCache.removeResolutionsFromProjectReferenceRedirects(projectPath);
                         }
                         scheduleProgramUpdate();
                     });
@@ -1113,7 +1116,6 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                 updateCachedSystemWithFile(configFileName, configPath, eventKind);
                 const config = parsedConfigs?.get(configPath);
                 if (config) config.reloadLevel = ConfigFileProgramReloadLevel.Full;
-                resolutionCache.removeResolutionsFromProjectReferenceRedirects(configPath);
                 scheduleProgramUpdate();
             },
             PollingInterval.High,

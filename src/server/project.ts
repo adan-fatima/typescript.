@@ -79,7 +79,6 @@ import {
     getEmitDeclarations,
     getEntrypointsFromPackageJsonInfo,
     getNormalizedAbsolutePath,
-    getOrUpdate,
     getStringComparer,
     HasInvalidatedResolutions,
     HostCancellationToken,
@@ -119,6 +118,7 @@ import {
     removeFileExtension,
     ResolutionCache,
     resolutionExtensionIsTSOrJson,
+    ResolutionMode,
     ResolvedModuleWithFailedLookupLocations,
     ResolvedProjectReference,
     ResolvedTypeReferenceDirectiveWithFailedLookupLocations,
@@ -142,6 +142,8 @@ import {
     toPath,
     tracing,
     TypeAcquisition,
+    TypeReferenceDirectiveResolutionCache,
+    UnresolvedImports,
     updateErrorForNoInputFiles,
     updateMissingFilePathsWatch,
     WatchDirectoryFlags,
@@ -298,12 +300,10 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
 
     /**
      * This is map from files to unresolved imports in it
-     * Maop does not contain entries for files that do not have unresolved imports
-     * This helps in containing the set of files to invalidate
      *
      * @internal
      */
-    cachedUnresolvedImportsPerFile = new Map<Path, readonly string[]>();
+    cachedUnresolvedImportsPerFile = new Map<Path, UnresolvedImports>();
 
     /** @internal */
     lastCachedUnresolvedImportsList: SortedReadonlyArray<string> | undefined;
@@ -684,6 +684,11 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
         );
     }
 
+    /** @internal */
+    getTypeReferenceDirectiveResolutionCache(): TypeReferenceDirectiveResolutionCache | undefined {
+        return this.resolutionCache.getTypeReferenceDirectiveResolutionCache();
+    }
+
     directoryExists(path: string): boolean {
         return this.directoryStructureHost.directoryExists!(path); // TODO: GH#18217
     }
@@ -923,6 +928,7 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
         }
         Debug.assert(this.projectService.serverMode !== LanguageServiceMode.Syntactic);
         this.languageService.cleanupSemanticCache();
+        this.resolutionCache.clear();
         this.languageServiceEnabled = false;
         this.lastFileExceededProgramSize = lastFileExceededProgramSize;
         this.builderState = undefined;
@@ -930,7 +936,6 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
             this.autoImportProviderHost.close();
         }
         this.autoImportProviderHost = undefined;
-        this.resolutionCache.closeTypeRootsWatch();
         this.clearGeneratedFileWatch();
         this.projectService.onUpdateLanguageServiceStateForProject(this, /*languageServiceEnabled*/ false);
     }
@@ -1185,14 +1190,9 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
         if (this.isRoot(info)) {
             this.removeRoot(info);
         }
-        if (fileExists) {
-            // If file is present, just remove the resolutions for the file
-            this.resolutionCache.removeResolutionsOfFile(info.path);
-        }
-        else {
+        if (!fileExists) {
             this.resolutionCache.invalidateResolutionOfFile(info.path);
         }
-        this.cachedUnresolvedImportsPerFile.delete(info.path);
 
         if (detachFromProject) {
             info.detachFromProject(this);
@@ -1361,7 +1361,7 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
                     if (!newFile || (f.resolvedPath === f.path && newFile.resolvedPath !== f.path)) {
                         // new program does not contain this file - detach it from the project
                         // - remove resolutions only if the new program doesnt contain source file by the path (not resolvedPath since path is used for resolution)
-                        this.detachScriptInfoFromProject(f.fileName, !!this.program.getSourceFileByPath(f.path));
+                        this.detachScriptInfoFromProject(f.fileName);
                     }
                 }
 
@@ -1411,11 +1411,6 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
                         });
                     }
                 }
-            }
-
-            // Watch the type locations that would be added to program as part of automatic type resolutions
-            if (this.languageServiceEnabled && this.projectService.serverMode === LanguageServiceMode.Semantic) {
-                this.resolutionCache.updateTypeRootsWatch();
             }
         }
 
@@ -1475,14 +1470,8 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
         this.projectService.sendPerformanceEvent(kind, durationMs);
     }
 
-    private detachScriptInfoFromProject(uncheckedFileName: string, noRemoveResolution?: boolean) {
-        const scriptInfoToDetach = this.projectService.getScriptInfo(uncheckedFileName);
-        if (scriptInfoToDetach) {
-            scriptInfoToDetach.detachFromProject(this);
-            if (!noRemoveResolution) {
-                this.resolutionCache.removeResolutionsOfFile(scriptInfoToDetach.path);
-            }
-        }
+    private detachScriptInfoFromProject(uncheckedFileName: string) {
+        this.projectService.getScriptInfo(uncheckedFileName)?.detachFromProject(this);
     }
 
     private addMissingFileWatcher(missingFilePath: Path) {
@@ -2085,29 +2074,46 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
     }
 }
 
-function getUnresolvedImports(program: Program, cachedUnresolvedImportsPerFile: Map<Path, readonly string[]>): SortedReadonlyArray<string> {
+function getUnresolvedImports(program: Program, cachedUnresolvedImportsPerFile: Map<Path, UnresolvedImports>): SortedReadonlyArray<string> {
     const sourceFiles = program.getSourceFiles();
     tracing?.push(tracing.Phase.Session, "getUnresolvedImports", { count: sourceFiles.length });
     const ambientModules = program.getTypeChecker().getAmbientModules().map(mod => stripQuotes(mod.getName()));
     const result = sortAndDeduplicate(flatMap(sourceFiles, sourceFile =>
         extractUnresolvedImportsFromSourceFile(sourceFile, ambientModules, cachedUnresolvedImportsPerFile)));
+    // Remove files from the cache if they arent in program
+    if (cachedUnresolvedImportsPerFile.size !== program.getSourceFiles().length) {
+        cachedUnresolvedImportsPerFile.forEach((_value, key) => {
+            if (!program.getSourceFileByPath(key)) cachedUnresolvedImportsPerFile.delete(key);
+        });
+    }
     tracing?.pop();
     return result;
 }
-function extractUnresolvedImportsFromSourceFile(file: SourceFile, ambientModules: readonly string[], cachedUnresolvedImportsPerFile: Map<Path, readonly string[]>): readonly string[] {
-    return getOrUpdate(cachedUnresolvedImportsPerFile, file.path, () => {
-        if (!file.resolvedModules) return emptyArray;
-        let unresolvedImports: string[] | undefined;
-        file.resolvedModules.forEach(({ resolvedModule }, name) => {
-            // pick unresolved non-relative names
-            if ((!resolvedModule || !resolutionExtensionIsTSOrJson(resolvedModule.extension)) &&
-                !isExternalModuleNameRelative(name) &&
-                !ambientModules.some(m => m === name)) {
-                unresolvedImports = append(unresolvedImports, parsePackageName(name).packageName);
-            }
-        });
-        return unresolvedImports || emptyArray;
+const emptyUnresolvedImports: UnresolvedImports = {
+    packages: emptyArray,
+    imports: emptyArray,
+};
+function extractUnresolvedImportsFromSourceFile(file: SourceFile, ambientModules: readonly string[], cachedUnresolvedImportsPerFile: Map<Path, UnresolvedImports>): readonly string[] {
+    let result = cachedUnresolvedImportsPerFile.get(file.path);
+    if (result) return result.packages;
+    if (!file.resolvedModules?.size()) {
+        cachedUnresolvedImportsPerFile.set(file.path, emptyUnresolvedImports);
+        return emptyArray;
+    }
+
+    let packages: string[] | undefined;
+    let imports: { name: string; mode: ResolutionMode; }[] | undefined;
+    file.resolvedModules.forEach(({ resolvedModule }, name, mode) => {
+        // pick unresolved non-relative names
+        if ((!resolvedModule || !resolutionExtensionIsTSOrJson(resolvedModule.extension)) &&
+            !isExternalModuleNameRelative(name) &&
+            !ambientModules.some(m => m === name)) {
+            packages = append(packages, parsePackageName(name).packageName);
+            imports = append(imports, { name, mode });
+        }
     });
+    cachedUnresolvedImportsPerFile.set(file.path, result = packages ? { packages, imports: imports! } : emptyUnresolvedImports);
+    return result.packages;
 }
 
 /**
@@ -2518,6 +2524,11 @@ export class AutoImportProviderProject extends Project {
     /** @internal */
     getModuleResolutionCache() {
         return this.hostProject.getCurrentProgram()?.getModuleResolutionCache();
+    }
+
+     /** @internal */
+     getTypeReferenceDirectiveResolutionCache() {
+        return this.hostProject.getCurrentProgram()?.getTypeReferenceDirectiveResolutionCache();
     }
 }
 

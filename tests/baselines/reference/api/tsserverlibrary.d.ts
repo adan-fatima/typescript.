@@ -7083,6 +7083,7 @@ declare namespace ts {
         jsxImportSource?: string;
         composite?: boolean;
         incremental?: boolean;
+        cacheResolutions?: boolean;
         tsBuildInfoFile?: string;
         removeComments?: boolean;
         rootDir?: string;
@@ -7308,7 +7309,7 @@ declare namespace ts {
         readonly resolvedModule: ResolvedModuleFull | undefined;
     }
     interface ResolvedTypeReferenceDirective {
-        primary: boolean;
+        primary: boolean | undefined;
         resolvedFileName: string | undefined;
         packageId?: PackageId;
         /** True if `resolvedFileName` comes from `node_modules`. */

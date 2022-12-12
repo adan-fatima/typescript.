@@ -277,7 +277,7 @@ import {
     ObjectLiteralExpression,
     OperatorPrecedence,
     OptionalTypeNode,
-    PackageJsonInfo,
+    PackageJsonScope,
     ParameterDeclaration,
     ParenthesizedExpression,
     ParenthesizedTypeNode,
@@ -1301,6 +1301,11 @@ function gatherPossibleChildren(node: Node) {
     }
 }
 
+ /** @internal */
+ export interface SourceFilePackageJsonInfo {
+    packageJsonScope?: PackageJsonScope;
+}
+
 export interface CreateSourceFileOptions {
     languageVersion: ScriptTarget;
     /**
@@ -1315,8 +1320,10 @@ export interface CreateSourceFileOptions {
      * check specified by `isFileProbablyExternalModule` will be used to set the field.
      */
     setExternalModuleIndicator?: (file: SourceFile) => void;
-    /** @internal */ packageJsonLocations?: readonly string[];
-    /** @internal */ packageJsonScope?: PackageJsonInfo;
+}
+
+ /** @internal */
+ export interface CreateSourceFileOptions extends SourceFilePackageJsonInfo {
 }
 
 function setExternalModuleIndicator(sourceFile: SourceFile) {
