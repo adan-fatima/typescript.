@@ -1089,13 +1089,14 @@ export namespace Completion {
         "number",
         "object",
         "readonly",
+        "self",
         "string",
         "symbol",
         "true",
         "undefined",
         "unique",
         "unknown",
-        "void",
+        "void"
     ].map(keywordEntry);
 
     export function sorted(entries: readonly ExpectedCompletionEntry[]): readonly ExpectedCompletionEntry[] {
@@ -1196,6 +1197,8 @@ export namespace Completion {
         typeEntry("Lowercase"),
         typeEntry("Capitalize"),
         typeEntry("Uncapitalize"),
+        typeEntry("Never"),
+        typeEntry("Print"),
         interfaceEntry("ThisType"),
         varEntry("ArrayBuffer"),
         interfaceEntry("ArrayBufferTypes"),
@@ -1222,7 +1225,7 @@ export namespace Completion {
         interfaceEntry("Float32ArrayConstructor"),
         varEntry("Float64Array"),
         interfaceEntry("Float64ArrayConstructor"),
-        moduleEntry("Intl"),
+        moduleEntry("Intl")
     ];
 
     export const globalThisEntry: ExpectedCompletionEntry = {
@@ -1264,6 +1267,7 @@ export namespace Completion {
                 case "readonly":
                 case "number":
                 case "object":
+                case "self":
                 case "string":
                 case "symbol":
                 case "type":
@@ -1400,6 +1404,7 @@ export namespace Completion {
         "readonly",
         "return",
         "satisfies",
+        "self",
         "string",
         "super",
         "switch",
@@ -1615,6 +1620,7 @@ export namespace Completion {
         "readonly",
         "return",
         "satisfies",
+        "self",
         "string",
         "super",
         "switch",

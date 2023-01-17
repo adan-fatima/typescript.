@@ -1282,7 +1282,8 @@ export function getLiteralText(node: LiteralLikeNode, sourceFile: SourceFile | u
     // or a (possibly escaped) quoted form of the original text if it's string-like.
     switch (node.kind) {
         case SyntaxKind.StringLiteral: {
-            const escapeText = flags & GetLiteralTextFlags.JsxAttributeEscape ? escapeJsxAttributeString :
+            const escapeText = getEmitFlags(node) & EmitFlags.NoStringEscaping ? ((x: string) => x) :
+                flags & GetLiteralTextFlags.JsxAttributeEscape ? escapeJsxAttributeString :
                 flags & GetLiteralTextFlags.NeverAsciiEscape || (getEmitFlags(node) & EmitFlags.NoAsciiEscaping) ? escapeString :
                 escapeNonAsciiString;
             if ((node as StringLiteral).singleQuote) {
@@ -2003,6 +2004,7 @@ export function isPartOfTypeNode(node: Node): boolean {
         case SyntaxKind.ObjectKeyword:
         case SyntaxKind.UndefinedKeyword:
         case SyntaxKind.NeverKeyword:
+        case SyntaxKind.SelfKeyword:
             return true;
         case SyntaxKind.VoidKeyword:
             return node.parent.kind !== SyntaxKind.VoidExpression;
@@ -7131,6 +7133,7 @@ export function isTypeNodeKind(kind: SyntaxKind): kind is TypeNodeSyntaxKind {
         || kind === SyntaxKind.VoidKeyword
         || kind === SyntaxKind.UndefinedKeyword
         || kind === SyntaxKind.NeverKeyword
+        || kind === SyntaxKind.SelfKeyword
         || kind === SyntaxKind.ExpressionWithTypeArguments
         || kind === SyntaxKind.JSDocAllType
         || kind === SyntaxKind.JSDocUnknownType
