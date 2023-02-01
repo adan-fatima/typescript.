@@ -143,6 +143,7 @@ import {
     IndexedAccessTypeNode,
     IndexSignatureDeclaration,
     InferTypeNode,
+    InfinityExpression,
     InputFiles,
     InterfaceDeclaration,
     InternalEmitFlags,
@@ -326,6 +327,7 @@ import {
     NamespaceExport,
     NamespaceExportDeclaration,
     NamespaceImport,
+    NaNExpression,
     NewExpression,
     Node,
     NodeArray,
@@ -1300,6 +1302,8 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
     function createToken(token: SyntaxKind.NullKeyword): NullLiteral;
     function createToken(token: SyntaxKind.TrueKeyword): TrueLiteral;
     function createToken(token: SyntaxKind.FalseKeyword): FalseLiteral;
+    function createToken(token: SyntaxKind.InfinityKeyword): InfinityExpression;
+    function createToken(token: SyntaxKind.NaNKeyword): NaNExpression;
     function createToken(token: SyntaxKind.EndOfFileToken): EndOfFileToken;
     function createToken(token: SyntaxKind.Unknown): Token<SyntaxKind.Unknown>;
     function createToken<TKind extends PunctuationSyntaxKind>(token: TKind): PunctuationToken<TKind>;

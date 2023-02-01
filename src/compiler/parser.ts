@@ -127,6 +127,7 @@ import {
     IndexedAccessTypeNode,
     IndexSignatureDeclaration,
     InferTypeNode,
+    InfinityOrNaNExpression,
     InterfaceDeclaration,
     IntersectionTypeNode,
     isArray,
@@ -4381,8 +4382,8 @@ namespace Parser {
             nextToken();
         }
         let expression: BooleanLiteral | NullLiteral | LiteralExpression | PrefixUnaryExpression =
-            token() === SyntaxKind.TrueKeyword || token() === SyntaxKind.FalseKeyword || token() === SyntaxKind.NullKeyword ?
-                parseTokenNode<BooleanLiteral | NullLiteral>() :
+            token() === SyntaxKind.TrueKeyword || token() === SyntaxKind.FalseKeyword || token() === SyntaxKind.NullKeyword || token() === SyntaxKind.InfinityKeyword || token() === SyntaxKind.NaNKeyword ?
+                parseTokenNode<BooleanLiteral | NullLiteral | InfinityOrNaNExpression>() :
                 parseLiteralLikeNode(token()) as LiteralExpression;
         if (negative) {
             expression = finishNode(factory.createPrefixUnaryExpression(SyntaxKind.MinusToken, expression), pos);
@@ -4434,7 +4435,7 @@ namespace Parser {
 
     function nextTokenIsNumericOrBigIntLiteral() {
         nextToken();
-        return token() === SyntaxKind.NumericLiteral || token() === SyntaxKind.BigIntLiteral;
+        return token() === SyntaxKind.NumericLiteral || token() === SyntaxKind.BigIntLiteral || token() === SyntaxKind.InfinityKeyword || token() === SyntaxKind.NaNKeyword;
     }
 
     function parseNonArrayType(): TypeNode {
@@ -4474,6 +4475,8 @@ namespace Parser {
             case SyntaxKind.TrueKeyword:
             case SyntaxKind.FalseKeyword:
             case SyntaxKind.NullKeyword:
+            case SyntaxKind.InfinityKeyword:
+            case SyntaxKind.NaNKeyword:
                 return parseLiteralTypeNode();
             case SyntaxKind.MinusToken:
                 return lookAhead(nextTokenIsNumericOrBigIntLiteral) ? parseLiteralTypeNode(/*negative*/ true) : parseTypeReference();

@@ -114,7 +114,7 @@
 // | import
 // | in
 // | infer
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -134,7 +134,7 @@
 // | var Math: Math
 // | module
 // | namespace
-// | var NaN: number
+// | var NaN
 // | never
 // | new
 // | null
@@ -2185,7 +2185,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -2198,19 +2198,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -2743,7 +2731,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -2756,19 +2744,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []

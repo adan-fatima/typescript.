@@ -912,6 +912,7 @@ import {
     ReverseMappedSymbol,
     ReverseMappedType,
     sameMap,
+    sameValueZero,
     SatisfiesExpression,
     scanTokenAtPosition,
     ScriptKind,
@@ -1459,6 +1460,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     const requireSymbol = createSymbol(SymbolFlags.Property, "require" as __String);
     const isolatedModulesLikeFlagName = compilerOptions.verbatimModuleSyntax ? "verbatimModuleSyntax" : "isolatedModules";
 
+    const InfinitySymbol = createSymbol(SymbolFlags.Property, "Infinity" as __String);
+    InfinitySymbol.declarations = [];
+    const NaNSymbol = createSymbol(SymbolFlags.Property, "NaN" as __String);
+    NaNSymbol.declarations = [];
+
     /** This will be set during calls to `getResolvedSignature` where services determines an apparent number of arguments greater than what is actually provided. */
     let apparentArgumentCount: number | undefined;
 
@@ -1482,6 +1488,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         isUndefinedSymbol: symbol => symbol === undefinedSymbol,
         isArgumentsSymbol: symbol => symbol === argumentsSymbol,
         isUnknownSymbol: symbol => symbol === unknownSymbol,
+        isInfinitySymbol: symbol => symbol === InfinitySymbol,
+        isNaNSymbol: symbol => symbol === NaNSymbol,
         getMergedSymbol,
         getDiagnostics,
         getGlobalDiagnostics,
@@ -2084,7 +2092,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     let deferredGlobalOmitSymbol: Symbol | undefined;
     let deferredGlobalAwaitedSymbol: Symbol | undefined;
     let deferredGlobalBigIntType: ObjectType | undefined;
-    let deferredGlobalNaNSymbol: Symbol | undefined;
     let deferredGlobalRecordSymbol: Symbol | undefined;
     let deferredGlobalClassDecoratorContextType: GenericType | undefined;
     let deferredGlobalClassMethodDecoratorContextType: GenericType | undefined;
@@ -2159,6 +2166,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
     const builtinGlobals = createSymbolTable();
     builtinGlobals.set(undefinedSymbol.escapedName, undefinedSymbol);
+    builtinGlobals.set(InfinitySymbol.escapedName, InfinitySymbol);
+    builtinGlobals.set(NaNSymbol.escapedName, NaNSymbol);
 
     // Extensions suggested for path imports when module resolution is node16 or higher.
     // The first element of each tuple is the extension a file has.
@@ -6357,7 +6366,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (type.flags & TypeFlags.NumberLiteral) {
                 const value = (type as NumberLiteralType).value;
                 context.approximateLength += ("" + value).length;
-                return factory.createLiteralTypeNode(value < 0 ? factory.createPrefixUnaryExpression(SyntaxKind.MinusToken, factory.createNumericLiteral(-value)) : factory.createNumericLiteral(value));
+                const expression = isInfinityOrNaNString("" + value) ? isNaN(value) ? factory.createToken(SyntaxKind.NaNKeyword) : factory.createToken(SyntaxKind.InfinityKeyword) : factory.createNumericLiteral(Math.abs(value));
+                return factory.createLiteralTypeNode(value < 0 ? factory.createPrefixUnaryExpression(SyntaxKind.MinusToken, expression) : expression);
             }
             if (type.flags & TypeFlags.BigIntLiteral) {
                 context.approximateLength += (pseudoBigIntToString((type as BigIntLiteralType).value).length) + 1;
@@ -15631,10 +15641,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         return (deferredGlobalClassFieldDecoratorContextType ??= getGlobalType("ClassFieldDecoratorContext" as __String, /*arity*/ 2, reportErrors)) ?? emptyGenericType;
     }
 
-    function getGlobalNaNSymbol(): Symbol | undefined {
-        return (deferredGlobalNaNSymbol ||= getGlobalValueSymbol("NaN" as __String, /*reportErrors*/ false));
-    }
-
     function getGlobalRecordSymbol(): Symbol | undefined {
         deferredGlobalRecordSymbol ||= getGlobalTypeAliasSymbol("Record" as __String, /*arity*/ 2, /*reportErrors*/ true) || unknownSymbol;
         return deferredGlobalRecordSymbol === unknownSymbol ? undefined : deferredGlobalRecordSymbol;
@@ -19865,7 +19871,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         if (s & TypeFlags.NumberLike && t & TypeFlags.Number) return true;
         if (s & TypeFlags.NumberLiteral && s & TypeFlags.EnumLiteral &&
             t & TypeFlags.NumberLiteral && !(t & TypeFlags.EnumLiteral) &&
-            (source as NumberLiteralType).value === (target as NumberLiteralType).value) return true;
+            sameValueZero((source as NumberLiteralType).value, (target as NumberLiteralType).value)) return true;
         if (s & TypeFlags.BigIntLike && t & TypeFlags.BigInt) return true;
         if (s & TypeFlags.BooleanLike && t & TypeFlags.Boolean) return true;
         if (s & TypeFlags.ESSymbolLike && t & TypeFlags.ESSymbol) return true;
@@ -19873,7 +19879,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             isEnumTypeRelatedTo(source.symbol, target.symbol, errorReporter)) return true;
         if (s & TypeFlags.EnumLiteral && t & TypeFlags.EnumLiteral) {
             if (s & TypeFlags.Union && t & TypeFlags.Union && isEnumTypeRelatedTo(source.symbol, target.symbol, errorReporter)) return true;
-            if (s & TypeFlags.Literal && t & TypeFlags.Literal && (source as LiteralType).value === (target as LiteralType).value &&
+            if (s & TypeFlags.Literal && t & TypeFlags.Literal && sameValueZero((source as LiteralType).value, (target as LiteralType).value) &&
                 isEnumTypeRelatedTo(source.symbol, target.symbol, errorReporter)) return true;
         }
         // In non-strictNullChecks mode, `undefined` and `null` are assignable to anything except `never`.
@@ -19889,7 +19895,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (s & TypeFlags.Number && (t & TypeFlags.Enum || t & TypeFlags.NumberLiteral && t & TypeFlags.EnumLiteral)) return true;
             if (s & TypeFlags.NumberLiteral && !(s & TypeFlags.EnumLiteral) && (t & TypeFlags.Enum ||
                 t & TypeFlags.NumberLiteral && t & TypeFlags.EnumLiteral &&
-                (source as NumberLiteralType).value === (target as NumberLiteralType).value)) return true;
+                sameValueZero((source as NumberLiteralType).value, (target as NumberLiteralType).value))) return true;
             // Anything is assignable to a union containing undefined, null, and {}
             if (isUnknownLikeUnionType(target)) return true;
         }
@@ -34004,15 +34010,23 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             case SyntaxKind.PrefixUnaryExpression:
                 const op = (node as PrefixUnaryExpression).operator;
                 const arg = (node as PrefixUnaryExpression).operand;
-                return op === SyntaxKind.MinusToken && (arg.kind === SyntaxKind.NumericLiteral || arg.kind === SyntaxKind.BigIntLiteral) ||
-                    op === SyntaxKind.PlusToken && arg.kind === SyntaxKind.NumericLiteral;
+                return op === SyntaxKind.MinusToken && (arg.kind === SyntaxKind.NumericLiteral || arg.kind === SyntaxKind.BigIntLiteral || isInfinityOrNaNSymbol(arg)) ||
+                    op === SyntaxKind.PlusToken && (arg.kind === SyntaxKind.NumericLiteral || isInfinityOrNaNSymbol(arg));
             case SyntaxKind.PropertyAccessExpression:
             case SyntaxKind.ElementAccessExpression:
                 const expr = skipParentheses((node as PropertyAccessExpression | ElementAccessExpression).expression);
                 const symbol = isEntityNameExpression(expr) ? resolveEntityName(expr, SymbolFlags.Value, /*ignoreErrors*/ true) : undefined;
                 return !!(symbol && symbol.flags & SymbolFlags.Enum);
         }
-        return false;
+        return isInfinityOrNaNSymbol(node);
+    }
+
+    function isInfinityOrNaNSymbol(node: Node): boolean {
+        if (!isIdentifier(node)) {
+            return false;
+        }
+        const symbol = getResolvedSymbol(node);
+        return symbol === InfinitySymbol || symbol === NaNSymbol;
     }
 
     function checkAssertionWorker(errNode: Node, type: TypeNode, expression: UnaryExpression | Expression, checkMode?: CheckMode) {
@@ -35661,6 +35675,40 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         base10Value: parsePseudoBigInt((node.operand as BigIntLiteral).text)
                     }));
                 }
+                break;
+            case SyntaxKind.InfinityKeyword:
+                switch (node.operator) {
+                    case SyntaxKind.MinusToken:
+                        return getFreshTypeOfLiteralType(getNumberLiteralType(-Infinity));
+                    case SyntaxKind.PlusToken:
+                        return getFreshTypeOfLiteralType(getNumberLiteralType(Infinity));
+                }
+                break;
+            case SyntaxKind.NaNKeyword:
+                switch (node.operator) {
+                    case SyntaxKind.MinusToken:
+                    case SyntaxKind.PlusToken:
+                        return getFreshTypeOfLiteralType(getNumberLiteralType(NaN));
+                }
+                break;
+            case SyntaxKind.Identifier:
+                switch (getResolvedSymbol(node.operand as Identifier)) {
+                    case InfinitySymbol:
+                        switch (node.operator) {
+                            case SyntaxKind.MinusToken:
+                                return getFreshTypeOfLiteralType(getNumberLiteralType(-Infinity));
+                            case SyntaxKind.PlusToken:
+                                return getFreshTypeOfLiteralType(getNumberLiteralType(Infinity));
+                        }
+                        break;
+                    case NaNSymbol:
+                        switch (node.operator) {
+                            case SyntaxKind.MinusToken:
+                            case SyntaxKind.PlusToken:
+                                return getFreshTypeOfLiteralType(getNumberLiteralType(NaN));
+                        }
+                        break;
+                }
         }
         switch (node.operator) {
             case SyntaxKind.PlusToken:
@@ -36659,8 +36707,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
 
         function checkNaNEquality(errorNode: Node | undefined, operator: SyntaxKind, left: Expression, right: Expression) {
-            const isLeftNaN = isGlobalNaN(skipParentheses(left));
-            const isRightNaN = isGlobalNaN(skipParentheses(right));
+            const isLeftNaN = isNaNSymbol(skipParentheses(left));
+            const isRightNaN = isNaNSymbol(skipParentheses(right));
             if (isLeftNaN || isRightNaN) {
                 const err = error(errorNode, Diagnostics.This_condition_will_always_return_0,
                     tokenToString(operator === SyntaxKind.EqualsEqualsEqualsToken || operator === SyntaxKind.EqualsEqualsToken ? SyntaxKind.FalseKeyword : SyntaxKind.TrueKeyword));
@@ -36673,12 +36721,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             }
         }
 
-        function isGlobalNaN(expr: Expression): boolean {
-            if (isIdentifier(expr) && expr.escapedText === "NaN") {
-                const globalNaNSymbol = getGlobalNaNSymbol();
-                return !!globalNaNSymbol && globalNaNSymbol === getResolvedSymbol(expr);
-            }
-            return false;
+        function isNaNSymbol(expr: Expression): boolean {
+            return isIdentifier(expr) && getResolvedSymbol(expr) === NaNSymbol;
         }
     }
 
@@ -37296,6 +37340,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     negative: false,
                     base10Value: parsePseudoBigInt((node as BigIntLiteral).text)
                 }));
+            case SyntaxKind.InfinityKeyword:
+                return getFreshTypeOfLiteralType(getNumberLiteralType(Infinity));
+            case SyntaxKind.NaNKeyword:
+                return getFreshTypeOfLiteralType(getNumberLiteralType(NaN));
             case SyntaxKind.TrueKeyword:
                 return trueType;
             case SyntaxKind.FalseKeyword:
@@ -43089,6 +43137,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return +(expr as NumericLiteral).text;
             case SyntaxKind.ParenthesizedExpression:
                 return evaluate((expr as ParenthesizedExpression).expression, location);
+            case SyntaxKind.InfinityKeyword:
+                return Infinity;
+            case SyntaxKind.NaNKeyword:
+                return NaN;
             case SyntaxKind.Identifier:
                 if (isInfinityOrNaNString((expr as Identifier).escapedText)) {
                     return +((expr as Identifier).escapedText);
@@ -43865,7 +43917,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             // find immediate value referenced by exported name (SymbolFlags.Alias is set so we don't chase down aliases)
             const symbol = resolveName(exportedName, exportedName.escapedText, SymbolFlags.Value | SymbolFlags.Type | SymbolFlags.Namespace | SymbolFlags.Alias,
                 /*nameNotFoundMessage*/ undefined, /*nameArg*/ undefined, /*isUse*/ true);
-            if (symbol && (symbol === undefinedSymbol || symbol === globalThisSymbol || symbol.declarations && isGlobalSourceFile(getDeclarationContainer(symbol.declarations[0])))) {
+            if (symbol && (symbol === undefinedSymbol || symbol === InfinitySymbol || symbol === NaNSymbol || symbol === globalThisSymbol || symbol.declarations && isGlobalSourceFile(getDeclarationContainer(symbol.declarations[0])))) {
                 error(exportedName, Diagnostics.Cannot_export_0_Only_local_declarations_can_be_exported_from_a_module, idText(exportedName));
             }
             else {
@@ -46264,6 +46316,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         getSymbolLinks(argumentsSymbol).type = getGlobalType("IArguments" as __String, /*arity*/ 0, /*reportErrors*/ true);
         getSymbolLinks(unknownSymbol).type = errorType;
         getSymbolLinks(globalThisSymbol).type = createObjectType(ObjectFlags.Anonymous, globalThisSymbol);
+        getSymbolLinks(InfinitySymbol).type = getFreshTypeOfLiteralType(getNumberLiteralType(Infinity));
+        getSymbolLinks(NaNSymbol).type = getFreshTypeOfLiteralType(getNumberLiteralType(NaN));
 
         // Initialize special types
         globalArrayType = getGlobalType("Array" as __String, /*arity*/ 1, /*reportErrors*/ true);

@@ -98,7 +98,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -115,7 +115,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -311,7 +311,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -328,7 +328,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -477,7 +477,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -494,7 +494,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -690,7 +690,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -707,7 +707,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -844,7 +844,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -861,7 +861,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -1006,7 +1006,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -1023,7 +1023,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -1154,7 +1154,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -1171,7 +1171,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -1315,7 +1315,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -1332,7 +1332,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -1481,7 +1481,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -1498,7 +1498,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -1643,7 +1643,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -1660,7 +1660,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -1805,7 +1805,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -1822,7 +1822,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -1954,7 +1954,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -1971,7 +1971,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -2105,7 +2105,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -2122,7 +2122,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -2254,7 +2254,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -2271,7 +2271,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -2405,7 +2405,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -2422,7 +2422,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -2554,7 +2554,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -2571,7 +2571,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -2705,7 +2705,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -2722,7 +2722,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -2877,7 +2877,7 @@
 // | import
 // | in
 // | infer
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -2897,7 +2897,7 @@
 // | var Math: Math
 // | module
 // | namespace
-// | var NaN: number
+// | var NaN
 // | never
 // | new
 // | null
@@ -3066,7 +3066,7 @@
 // | import
 // | in
 // | infer
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -3086,7 +3086,7 @@
 // | var Math: Math
 // | module
 // | namespace
-// | var NaN: number
+// | var NaN
 // | never
 // | new
 // | null
@@ -3262,7 +3262,7 @@
 // | implements
 // | import
 // | in
-// | var Infinity: number
+// | var Infinity
 // | instanceof
 // | interface Int16Array
 // | var Int16Array: Int16ArrayConstructor
@@ -3279,7 +3279,7 @@
 // | let
 // | interface Math
 // | var Math: Math
-// | var NaN: number
+// | var NaN
 // | new
 // | null
 // | interface Number
@@ -6321,7 +6321,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -6334,19 +6334,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -6843,7 +6831,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -6856,19 +6844,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -13406,7 +13382,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -13419,19 +13395,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -13928,7 +13892,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -13941,19 +13905,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -18244,7 +18196,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -18257,19 +18209,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -18766,7 +18706,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -18779,19 +18719,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -25329,7 +25257,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -25342,19 +25270,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -25851,7 +25767,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -25864,19 +25780,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -29418,7 +29322,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -29431,19 +29335,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -29940,7 +29832,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -29953,19 +29845,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -34663,7 +34543,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -34676,19 +34556,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -35185,7 +35053,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -35198,19 +35066,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -38706,7 +38562,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -38719,19 +38575,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -39228,7 +39072,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -39241,19 +39085,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -43905,7 +43737,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -43918,19 +43750,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -44427,7 +44247,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -44440,19 +44260,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -49150,7 +48958,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -49163,19 +48971,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -49672,7 +49468,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -49685,19 +49481,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -54395,7 +54179,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -54408,19 +54192,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -54917,7 +54689,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -54930,19 +54702,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -59640,7 +59400,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -59653,19 +59413,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -60162,7 +59910,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -60175,19 +59923,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -63724,7 +63460,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -63737,19 +63473,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -64246,7 +63970,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -64259,19 +63983,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -67808,7 +67520,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -67821,19 +67533,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -68330,7 +68030,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -68343,19 +68043,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -71892,7 +71580,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -71905,19 +71593,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -72414,7 +72090,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -72427,19 +72103,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -75976,7 +75640,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -75989,19 +75653,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -76498,7 +76150,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -76511,19 +76163,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -80060,7 +79700,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -80073,19 +79713,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -80582,7 +80210,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -80595,19 +80223,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -84144,7 +83760,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -84157,19 +83773,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -84666,7 +84270,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -84679,19 +84283,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -88581,7 +88173,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -88594,19 +88186,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -89139,7 +88719,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -89152,19 +88732,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -93951,7 +93519,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -93964,19 +93532,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -94509,7 +94065,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -94522,19 +94078,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -98565,7 +98109,7 @@
         {
           "name": "Infinity",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -98578,19 +98122,7 @@
             },
             {
               "text": "Infinity",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
@@ -99087,7 +98619,7 @@
         {
           "name": "NaN",
           "kind": "var",
-          "kindModifiers": "declare",
+          "kindModifiers": "",
           "sortText": "15",
           "displayParts": [
             {
@@ -99100,19 +98632,7 @@
             },
             {
               "text": "NaN",
-              "kind": "localName"
-            },
-            {
-              "text": ":",
-              "kind": "punctuation"
-            },
-            {
-              "text": " ",
-              "kind": "space"
-            },
-            {
-              "text": "number",
-              "kind": "keyword"
+              "kind": "propertyName"
             }
           ],
           "documentation": []
