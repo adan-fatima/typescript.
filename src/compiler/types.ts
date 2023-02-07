@@ -205,6 +205,7 @@ export const enum SyntaxKind {
     SatisfiesKeyword,
     SetKeyword,
     StringKeyword,
+    SubtypeOfKeyword,
     SymbolKeyword,
     TypeKeyword,
     UndefinedKeyword,
@@ -641,6 +642,7 @@ export type KeywordSyntaxKind =
     | SyntaxKind.SetKeyword
     | SyntaxKind.StaticKeyword
     | SyntaxKind.StringKeyword
+    | SyntaxKind.SubtypeOfKeyword
     | SyntaxKind.SuperKeyword
     | SyntaxKind.SwitchKeyword
     | SyntaxKind.SymbolKeyword
@@ -1596,6 +1598,7 @@ export type AssertsKeyword = KeywordToken<SyntaxKind.AssertsKeyword>;
 export type AssertKeyword = KeywordToken<SyntaxKind.AssertKeyword>;
 export type AwaitKeyword = KeywordToken<SyntaxKind.AwaitKeyword>;
 export type CaseKeyword = KeywordToken<SyntaxKind.CaseKeyword>;
+export type SubtypeOfKeyword = KeywordToken<SyntaxKind.SubtypeOfKeyword>;
 
 export interface ModifierToken<TKind extends ModifierSyntaxKind> extends KeywordToken<TKind> {
 }
@@ -2216,6 +2219,7 @@ export interface TypePredicateNode extends TypeNode {
     readonly assertsModifier?: AssertsKeyword;
     readonly parameterName: Identifier | ThisTypeNode;
     readonly type?: TypeNode;
+    readonly subtypeOfModifier?: SubtypeOfKeyword;
 }
 
 export interface TypeQueryNode extends NodeWithTypeArguments {
@@ -5428,6 +5432,7 @@ export const enum TypePredicateKind {
 export interface TypePredicateBase {
     kind: TypePredicateKind;
     type: Type | undefined;
+    oneSided: boolean;
 }
 
 export interface ThisTypePredicate extends TypePredicateBase {
@@ -8283,8 +8288,8 @@ export interface NodeFactory {
     //
 
     createKeywordTypeNode<TKind extends KeywordTypeSyntaxKind>(kind: TKind): KeywordTypeNode<TKind>;
-    createTypePredicateNode(assertsModifier: AssertsKeyword | undefined, parameterName: Identifier | ThisTypeNode | string, type: TypeNode | undefined): TypePredicateNode;
-    updateTypePredicateNode(node: TypePredicateNode, assertsModifier: AssertsKeyword | undefined, parameterName: Identifier | ThisTypeNode, type: TypeNode | undefined): TypePredicateNode;
+    createTypePredicateNode(assertsModifier: AssertsKeyword | undefined, parameterName: Identifier | ThisTypeNode | string, type: TypeNode | undefined, subtypeOfModifier?: SubtypeOfKeyword): TypePredicateNode;
+    updateTypePredicateNode(node: TypePredicateNode, assertsModifier: AssertsKeyword | undefined, parameterName: Identifier | ThisTypeNode, type: TypeNode | undefined, subtypeOfModifier?: SubtypeOfKeyword): TypePredicateNode;
     createTypeReferenceNode(typeName: string | EntityName, typeArguments?: readonly TypeNode[]): TypeReferenceNode;
     updateTypeReferenceNode(node: TypeReferenceNode, typeName: EntityName, typeArguments: NodeArray<TypeNode> | undefined): TypeReferenceNode;
     createFunctionTypeNode(typeParameters: readonly TypeParameterDeclaration[] | undefined, parameters: readonly ParameterDeclaration[], type: TypeNode): FunctionTypeNode;
