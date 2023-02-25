@@ -5581,11 +5581,19 @@ export function createDiagnosticCollection(): DiagnosticCollection {
     const fileDiagnostics = new Map<string, SortedArray<DiagnosticWithLocation>>();
     let hasReadNonFileDiagnostics = false;
 
+    let isStaging = false;
+    const stagingDiagnostics = [] as Diagnostic[];
+
+
     return {
         add,
         lookup,
         getGlobalDiagnostics,
         getDiagnostics,
+        get isStaging() { return isStaging; },
+        set isStaging(v) { isStaging = v; },
+        commitStaged,
+        revertStaged,
     };
 
     function lookup(diagnostic: Diagnostic): Diagnostic | undefined {
@@ -5607,6 +5615,10 @@ export function createDiagnosticCollection(): DiagnosticCollection {
     }
 
     function add(diagnostic: Diagnostic): void {
+        if (isStaging) {
+            stagingDiagnostics.push(diagnostic);
+            return;
+        }
         let diagnostics: SortedArray<Diagnostic> | undefined;
         if (diagnostic.file) {
             diagnostics = fileDiagnostics.get(diagnostic.file.fileName);
@@ -5647,6 +5659,19 @@ export function createDiagnosticCollection(): DiagnosticCollection {
         }
         fileDiags.unshift(...nonFileDiagnostics);
         return fileDiags;
+    }
+
+    function commitStaged() {
+        const savedIsStaging = isStaging;
+        isStaging = false;
+        for (const diagnostic of stagingDiagnostics) {
+            add(diagnostic);
+        }
+        isStaging = savedIsStaging;
+    }
+
+    function revertStaged() {
+        stagingDiagnostics.length = 0;
     }
 }
 

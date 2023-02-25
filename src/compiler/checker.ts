@@ -29846,6 +29846,96 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkObjectLiteral(node: ObjectLiteralExpression, checkMode?: CheckMode): Type {
+        const contextualType = getContextualType(node, /*contextFlags*/ undefined);
+        const isContextualTypeDependent =
+            node.parent.kind === SyntaxKind.CallExpression &&
+            contextualType &&
+            (contextualType.flags & TypeFlags.TypeParameter) &&
+            contextualType.immediateBaseConstraint &&
+            !!forEachChildRecursively(
+                (contextualType.symbol.declarations![0] as TypeParameterDeclaration).constraint!,
+                node => {
+                    if (
+                        node.kind === SyntaxKind.TypeReference &&
+                        (node as TypeReferenceNode).typeName.kind === SyntaxKind.Identifier &&
+                        ((node as TypeReferenceNode).typeName as Identifier).escapedText ===
+                        (contextualType.symbol.declarations![0] as TypeParameterDeclaration).name.escapedText
+                    ) {
+                        return true;
+                    }
+                }
+            );
+
+        if (!isContextualTypeDependent) {
+            return checkObjectLiteralNonDependently(node, checkMode);
+        }
+
+        diagnostics.isStaging = true;
+        suggestionDiagnostics.isStaging = true;
+        let valueType = checkObjectLiteralNonDependently(node, checkMode);
+        let previousValueType = undefined as Type | undefined;
+        let passes = 0;
+        while(true) {
+            if (previousValueType && isTypeIdenticalTo(valueType, previousValueType)) {
+                commitDiagnostics();
+                return valueType;
+            }
+            if (passes >= 3) {
+                commitDiagnostics();
+                error(node, Diagnostics.Dependent_contextual_inference_requires_too_many_passes_and_possibly_infinite);
+                return valueType;
+            }
+
+            const newContextualType = cloneTypeParameter(contextualType as TypeParameter);
+            newContextualType.immediateBaseConstraint =
+                instantiateType(
+                    contextualType.immediateBaseConstraint,
+                    createTypeMapper([contextualType], [valueType])
+                );
+            if (newContextualType.immediateBaseConstraint!.flags & TypeFlags.StructuredType) {
+                newContextualType.immediateBaseConstraint = resolveStructuredTypeMembers(newContextualType.immediateBaseConstraint as StructuredType);
+            }
+
+            forEachChildRecursively(node, node => {
+                const nodeLinks = getNodeLinks(node);
+                nodeLinks.flags &= ~NodeCheckFlags.TypeChecked;
+                nodeLinks.flags &= ~NodeCheckFlags.ContextChecked;
+                nodeLinks.resolvedType = undefined;
+                nodeLinks.resolvedEnumType = undefined;
+                nodeLinks.resolvedSignature = undefined;
+                nodeLinks.resolvedSymbol = undefined;
+                nodeLinks.resolvedIndexInfo = undefined;
+                nodeLinks.contextFreeType = undefined;
+
+                if (node.symbol) {
+                    const symbolLinks = getSymbolLinks(node.symbol);
+                    symbolLinks.type = undefined;
+                    symbolLinks.typeParameters = undefined;
+                }
+            });
+
+
+            node.contextualType = newContextualType;
+            revertDiagnostics();
+            previousValueType = valueType;
+            valueType = checkObjectLiteralNonDependently(node);
+            passes++;
+        }
+
+        function commitDiagnostics() {
+            diagnostics.commitStaged();
+            suggestionDiagnostics.commitStaged();
+            diagnostics.isStaging = false;
+            suggestionDiagnostics.isStaging = false;
+        }
+
+        function revertDiagnostics() {
+            diagnostics.revertStaged();
+            suggestionDiagnostics.revertStaged();
+        }
+    }
+
+    function checkObjectLiteralNonDependently(node: ObjectLiteralExpression, checkMode?: CheckMode): Type {
         const inDestructuringPattern = isAssignmentTarget(node);
         // Grammar checking
         checkGrammarObjectLiteralExpression(node, inDestructuringPattern);
