@@ -73,7 +73,7 @@ Before request
 
 Info 8    [00:00:45.000] request:
     {
-      "command": "completions",
+      "command": "completionInfo",
       "arguments": {
         "file": "/user/username/projects/myproject/a.ts",
         "line": 3,
@@ -90,20 +90,36 @@ Info 13   [00:00:50.000] getCompletionData: Semantic work: *
 Info 14   [00:00:51.000] getCompletionsAtPosition: getCompletionEntriesFromSymbols: *
 Info 15   [00:00:52.000] response:
     {
-      "response": [
-        {
-          "name": "foo",
-          "kind": "method",
-          "kindModifiers": "",
-          "sortText": "11"
+      "response": {
+        "flags": 0,
+        "isGlobalCompletion": false,
+        "isMemberCompletion": true,
+        "isNewIdentifierLocation": false,
+        "optionalReplacementSpan": {
+          "start": {
+            "line": 3,
+            "offset": 47
+          },
+          "end": {
+            "line": 3,
+            "offset": 51
+          }
         },
-        {
-          "name": "prop",
-          "kind": "property",
-          "kindModifiers": "",
-          "sortText": "11"
-        }
-      ],
+        "entries": [
+          {
+            "name": "foo",
+            "kind": "method",
+            "kindModifiers": "",
+            "sortText": "11"
+          },
+          {
+            "name": "prop",
+            "kind": "property",
+            "kindModifiers": "",
+            "sortText": "11"
+          }
+        ]
+      },
       "responseRequired": true
     }
 After request
@@ -155,7 +171,7 @@ Before request
 
 Info 23   [00:01:08.000] request:
     {
-      "command": "completions",
+      "command": "completionInfo",
       "arguments": {
         "file": "/user/username/projects/myproject/a.ts",
         "line": 3,
@@ -172,20 +188,36 @@ Info 28   [00:01:13.000] getCompletionData: Semantic work: *
 Info 29   [00:01:14.000] getCompletionsAtPosition: getCompletionEntriesFromSymbols: *
 Info 30   [00:01:15.000] response:
     {
-      "response": [
-        {
-          "name": "foo",
-          "kind": "method",
-          "kindModifiers": "",
-          "sortText": "11"
+      "response": {
+        "flags": 0,
+        "isGlobalCompletion": false,
+        "isMemberCompletion": true,
+        "isNewIdentifierLocation": false,
+        "optionalReplacementSpan": {
+          "start": {
+            "line": 3,
+            "offset": 47
+          },
+          "end": {
+            "line": 3,
+            "offset": 51
+          }
         },
-        {
-          "name": "prop",
-          "kind": "property",
-          "kindModifiers": "",
-          "sortText": "11"
-        }
-      ],
+        "entries": [
+          {
+            "name": "foo",
+            "kind": "method",
+            "kindModifiers": "",
+            "sortText": "11"
+          },
+          {
+            "name": "prop",
+            "kind": "property",
+            "kindModifiers": "",
+            "sortText": "11"
+          }
+        ]
+      },
       "responseRequired": true
     }
 After request
