@@ -4,7 +4,7 @@ import {
     FileWatcherCallback,
     System,
     WatchOptions,
-} from "./_namespaces/ts";
+} from "../compiler/types";
 
 export interface CompressedData {
     length: number;

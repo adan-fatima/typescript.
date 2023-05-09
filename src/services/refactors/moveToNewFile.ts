@@ -1,33 +1,44 @@
 import {
     append,
-    ApplicableRefactorInfo,
-    Debug,
-    Diagnostics,
     emptyArray,
-    fileShouldUseJavaScriptRequire,
+    takeWhile,
+} from "../../compiler/core";
+import * as Debug from "../../compiler/debug";
+import { Diagnostics } from "../../compiler/diagnosticInformationMap.generated";
+import {
     getBaseFileName,
-    getLocaleSpecificMessage,
-    getQuotePreference,
-    hasSyntacticModifier,
-    hostGetCanonicalFileName,
+} from "../../compiler/path";
+import {
     Identifier,
-    insertImports,
-    isPrologueDirective,
-    LanguageServiceHost,
     ModifierFlags,
-    nodeSeenTracker,
     Program,
-    QuotePreference,
-    RefactorContext,
-    RefactorEditInfo,
     SourceFile,
     Symbol,
     SyntaxKind,
-    takeWhile,
-    textChanges,
     TypeChecker,
     UserPreferences,
-} from "../_namespaces/ts";
+} from "../../compiler/types";
+import {
+    getLocaleSpecificMessage,
+    hasSyntacticModifier,
+    hostGetCanonicalFileName,
+    isPrologueDirective,
+} from "../../compiler/utilities";
+import { registerRefactor } from "../refactorProvider";
+import { ChangeTracker } from "../textChanges";
+import {
+    ApplicableRefactorInfo,
+    LanguageServiceHost,
+    RefactorContext,
+    RefactorEditInfo,
+} from "../types";
+import {
+    fileShouldUseJavaScriptRequire,
+    getQuotePreference,
+    insertImports,
+    nodeSeenTracker,
+    QuotePreference,
+} from "../utilities";
 import {
     addExports,
     addExportToChanges,
@@ -45,12 +56,11 @@ import {
     makeImportOrRequire,
     moduleSpecifierFromImport,
     nameOfTopLevelDeclaration,
-    registerRefactor,
     SupportedImportStatement,
     ToMove,
     updateImportsInOtherFiles,
-    UsageInfo
-} from "../_namespaces/ts.refactor";
+    UsageInfo,
+} from "./moveToFile";
 
 const refactorName = "Move to a new file";
 const description = getLocaleSpecificMessage(Diagnostics.Move_to_a_new_file);
@@ -77,12 +87,12 @@ registerRefactor(refactorName, {
     getEditsForAction: function getRefactorEditsToMoveToNewFile(context, actionName): RefactorEditInfo {
         Debug.assert(actionName === refactorName, "Wrong refactor invoked");
         const statements = Debug.checkDefined(getStatementsToMove(context));
-        const edits = textChanges.ChangeTracker.with(context, t => doChange(context.file, context.program, statements, t, context.host, context.preferences, context));
+        const edits = ChangeTracker.with(context, t => doChange(context.file, context.program, statements, t, context.host, context.preferences, context));
         return { edits, renameFilename: undefined, renameLocation: undefined };
     }
 });
 
-function doChange(oldFile: SourceFile, program: Program, toMove: ToMove, changes: textChanges.ChangeTracker, host: LanguageServiceHost, preferences: UserPreferences, context: RefactorContext): void {
+function doChange(oldFile: SourceFile, program: Program, toMove: ToMove, changes: ChangeTracker, host: LanguageServiceHost, preferences: UserPreferences, context: RefactorContext): void {
     const checker = program.getTypeChecker();
     const usage = getUsageInfo(oldFile, toMove.all, checker);
 
@@ -95,7 +105,7 @@ function doChange(oldFile: SourceFile, program: Program, toMove: ToMove, changes
 }
 
 function getNewStatementsAndRemoveFromOldFile(
-    oldFile: SourceFile, usage: UsageInfo, changes: textChanges.ChangeTracker, toMove: ToMove, program: Program, host: LanguageServiceHost, newFilename: string, preferences: UserPreferences,
+    oldFile: SourceFile, usage: UsageInfo, changes: ChangeTracker, toMove: ToMove, program: Program, host: LanguageServiceHost, newFilename: string, preferences: UserPreferences,
 ) {
     const checker = program.getTypeChecker();
     const prologueDirectives = takeWhile(oldFile.statements, isPrologueDirective);
@@ -137,7 +147,7 @@ function getNewFileImportsAndAddExportInOldFile(
     oldFile: SourceFile,
     importsToCopy: Map<Symbol, boolean>,
     newFileImportsFromOldFile: Set<Symbol>,
-    changes: textChanges.ChangeTracker,
+    changes: ChangeTracker,
     checker: TypeChecker,
     program: Program,
     host: LanguageServiceHost,

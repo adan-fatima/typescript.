@@ -1,158 +1,187 @@
-import * as ts from "./_namespaces/ts";
+import { BuilderState } from "../compiler/builderState";
+import { updateErrorForNoInputFiles } from "../compiler/commandLineParser";
 import {
     addRange,
     append,
-    ApplyCodeActionCommandResult,
     arrayFrom,
     arrayToMap,
-    BuilderState,
-    CachedDirectoryStructureHost,
-    changesAffectModuleResolution,
-    clearMap,
-    cloneCompilerOptions,
-    closeFileWatcher,
-    closeFileWatcherOf,
-    combinePaths,
-    comparePaths,
-    CompilerHost,
-    CompilerOptions,
     concatenate,
-    ConfigFileProgramReloadLevel,
-    containsPath,
-    createCacheableExportInfoMap,
-    createLanguageService,
-    createResolutionCache,
-    createSymlinkCache,
-    Debug,
-    Diagnostic,
-    directorySeparator,
-    DirectoryStructureHost,
-    DirectoryWatcherCallback,
-    DocumentPositionMapper,
-    DocumentRegistry,
     enumerateInsertsAndDeletes,
     every,
-    explainFiles,
-    ExportInfoMap,
-    Extension,
+    filter,
+    flatMap,
+    forEach,
+    GetCanonicalFileName,
+    getOrUpdate,
+    getStringComparer,
+    map,
+    mapDefined,
+    maybeBind,
+    noop,
+    orderedRemoveItem,
+    returnFalse,
+    returnTrue,
+    some,
+    sort,
+    sortAndDeduplicate,
+    startsWith,
+} from "../compiler/core";
+import { SortedReadonlyArray } from "../compiler/corePublic";
+import * as Debug from "../compiler/debug";
+import { getDeclarationEmitOutputFilePathWorker } from "../compiler/emitterUtilities";
+import { removeFileExtension, resolutionExtensionIsTSOrJson } from "../compiler/extension";
+import {
+    getAutomaticTypeDirectiveNames,
+    getEffectiveTypeRoots,
+    getEntrypointsFromPackageJsonInfo,
+    ModuleResolutionCache,
+    PackageJsonInfo,
+    parsePackageName,
+    resolvePackageNameToPackageJson,
+} from "../compiler/moduleNameResolver";
+import { isDeclarationFileName } from "../compiler/parser";
+import {
+    combinePaths,
+    comparePaths,
+    containsPath,
+    directorySeparator,
     fileExtensionIs,
+    getBaseFileName,
+    getDirectoryPath,
+    getNormalizedAbsolutePath,
+    normalizePath,
+    normalizeSlashes,
+    toPath,
+} from "../compiler/path";
+import { perfLogger } from "../compiler/perfLogger";
+import { timestamp } from "../compiler/performanceCore";
+import { inferredTypesContainingFile } from "../compiler/program";
+import { changesAffectModuleResolution } from "../compiler/programUtilities";
+import {
+    createResolutionCache,
+    ResolutionCache,
+} from "../compiler/resolutionCache";
+import {
+    createSymlinkCache,
+    SymlinkCache,
+} from "../compiler/symlinkCache";
+import {
+    generateDjb2Hash,
+    PollingInterval,
+} from "../compiler/sys";
+import { tracing } from "../compiler/tracing";
+import {
+    CompilerHost,
+    CompilerOptions,
+    Diagnostic,
+    DirectoryWatcherCallback,
+    DocumentPositionMapper,
+    Extension,
     FileReference,
     FileWatcher,
     FileWatcherCallback,
     FileWatcherEventKind,
-    filter,
-    flatMap,
-    forEach,
-    forEachEntry,
-    forEachKey,
-    generateDjb2Hash,
-    getAllowJSCompilerOption,
-    getAutomaticTypeDirectiveNames,
-    getBaseFileName,
-    GetCanonicalFileName,
-    getDeclarationEmitOutputFilePathWorker,
-    getDefaultCompilerOptions,
-    getDefaultLibFileName,
-    getDefaultLibFilePath,
-    getDirectoryPath,
-    getEffectiveTypeRoots,
-    getEmitDeclarations,
-    getEntrypointsFromPackageJsonInfo,
-    getNormalizedAbsolutePath,
-    getOrUpdate,
-    getStringComparer,
     HasInvalidatedLibResolutions,
     HasInvalidatedResolutions,
-    HostCancellationToken,
-    inferredTypesContainingFile,
-    InstallPackageOptions,
-    IScriptSnapshot,
-    isDeclarationFileName,
-    isExternalModuleNameRelative,
-    isInsideNodeModules,
-    JsTyping,
-    LanguageService,
-    LanguageServiceHost,
-    LanguageServiceMode,
-    map,
-    mapDefined,
-    maybeBind,
-    ModuleResolutionCache,
     ModuleResolutionHost,
-    noop,
-    noopFileWatcher,
-    normalizePath,
-    normalizeSlashes,
-    orderedRemoveItem,
-    outFile,
-    PackageJsonAutoImportPreference,
-    PackageJsonInfo,
     ParsedCommandLine,
-    parsePackageName,
     Path,
-    perfLogger,
-    PerformanceEvent,
     PluginImport,
-    PollingInterval,
     Program,
-    ProjectPackageJsonInfo,
     ProjectReference,
-    removeFileExtension,
-    ResolutionCache,
-    resolutionExtensionIsTSOrJson,
     ResolvedModuleWithFailedLookupLocations,
     ResolvedProjectReference,
     ResolvedTypeReferenceDirectiveWithFailedLookupLocations,
-    resolvePackageNameToPackageJson,
-    returnFalse,
-    returnTrue,
     ScriptKind,
-    some,
-    sort,
-    sortAndDeduplicate,
-    SortedReadonlyArray,
     SourceFile,
-    SourceMapper,
-    startsWith,
     StringLiteralLike,
-    stripQuotes,
     StructureIsReused,
-    SymlinkCache,
-    ThrottledCancellationToken,
-    timestamp,
-    toPath,
-    tracing,
     TypeAcquisition,
-    updateErrorForNoInputFiles,
-    updateMissingFilePathsWatch,
     WatchDirectoryFlags,
     WatchOptions,
-    WatchType,
-} from "./_namespaces/ts";
+} from "../compiler/types";
 import {
-    ActionInvalidate,
-    asNormalizedPath,
-    createModuleSpecifierCache,
-    emptyArray,
-    Errors,
+    clearMap,
+    closeFileWatcher,
+    forEachEntry,
+    forEachKey,
+    getAllowJSCompilerOption,
+    getEmitDeclarations,
+    outFile,
+    stripQuotes,
+} from "../compiler/utilities";
+import {
+    getDefaultLibFileName,
+    isExternalModuleNameRelative,
+} from "../compiler/utilitiesPublic";
+import {
+    explainFiles,
+    noopFileWatcher,
+    WatchType,
+} from "../compiler/watch";
+import {
+    CachedDirectoryStructureHost,
+    closeFileWatcherOf,
+    ConfigFileProgramReloadLevel,
+    DirectoryStructureHost,
+    updateMissingFilePathsWatch,
+} from "../compiler/watchUtilities";
+import * as JsTyping from "../jsTyping/jsTyping";
+import { ActionInvalidate } from "../jsTyping/shared";
+import { DocumentRegistry } from "../services/documentRegistry";
+import { createCacheableExportInfoMap } from "../services/exportInfoMap";
+import {
+    createLanguageService,
+    getDefaultCompilerOptions,
+    getDefaultLibFilePath,
+    ThrottledCancellationToken,
+} from "../services/services";
+import { SourceMapper } from "../services/sourcemaps";
+import {
+    ApplyCodeActionCommandResult,
+    ExportInfoMap,
+    HostCancellationToken,
+    InstallPackageOptions,
+    IScriptSnapshot,
+    LanguageService,
+    LanguageServiceHost,
+    LanguageServiceMode,
+    PackageJsonAutoImportPreference,
+    PerformanceEvent,
+    ProjectPackageJsonInfo,
+} from "../services/types";
+import {
+    cloneCompilerOptions,
+    isInsideNodeModules,
+} from "../services/utilities";
+import * as ts from "./_namespaces/ts";
+import {
     FileStats,
     forEachResolvedProjectReferenceProject,
-    LogLevel,
-    ModuleImportResult,
-    Msg,
-    NormalizedPath,
     projectContainsInfoDirectly,
-    ProjectOptions,
     ProjectReferenceProjectLoadKind,
     ProjectService,
-    ScriptInfo,
-    ServerHost,
-    Session,
-    toNormalizedPath,
-    TypingsCache,
     updateProjectIfDirty,
-} from "./_namespaces/ts.server";
+} from "./editorServices";
+import { createModuleSpecifierCache } from "./moduleSpecifierCache";
 import * as protocol from "./protocol";
+import { ScriptInfo } from "./scriptInfo";
+import { Session } from "./session";
+import {
+    ModuleImportResult,
+    ServerHost,
+} from "./types";
+import { TypingsCache } from "./typingsCache";
+import {
+    asNormalizedPath,
+    emptyArray,
+    Errors,
+    LogLevel,
+    Msg,
+    NormalizedPath,
+    ProjectOptions,
+    toNormalizedPath,
+} from "./utilitiesPublic";
 
 export enum ProjectKind {
     Inferred,

@@ -1,15 +1,15 @@
 import {
     compareStringsCaseSensitive,
     compareValues,
-    Comparison,
-    Debug,
     emptyArray,
     every,
     isArray,
     map,
     some,
     trimString,
-} from "./_namespaces/ts";
+} from "./core";
+import { Comparison } from "./corePublic";
+import * as Debug from "./debug";
 
 // https://semver.org/#spec-item-2
 // > A normal version number MUST take the form X.Y.Z where X, Y, and Z are non-negative
@@ -204,7 +204,11 @@ export class VersionRange {
     private _alternatives: readonly (readonly Comparator[])[];
 
     constructor(spec: string) {
-        this._alternatives = spec ? Debug.checkDefined(parseRange(spec), "Invalid range spec.") : emptyArray;
+        const result = spec ? parseRange(spec) : emptyArray;
+        if (result === undefined) {
+            throw new Error("Invalid range spec.");
+        }
+        this._alternatives = result;
     }
 
     static tryParse(text: string) {

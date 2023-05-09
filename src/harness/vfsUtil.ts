@@ -1,3 +1,4 @@
+import { FileSystemEntries } from "../compiler/fileMatcher";
 import * as collections from "./_namespaces/collections";
 import * as documents from "./_namespaces/documents";
 import * as Harness from "./_namespaces/Harness";
@@ -1191,7 +1192,7 @@ export interface FileSystemResolver {
 
 export interface FileSystemResolverHost {
     useCaseSensitiveFileNames(): boolean;
-    getAccessibleFileSystemEntries(path: string): ts.FileSystemEntries;
+    getAccessibleFileSystemEntries(path: string): FileSystemEntries;
     directoryExists(path: string): boolean;
     fileExists(path: string): boolean;
     getFileSize(path: string): number;

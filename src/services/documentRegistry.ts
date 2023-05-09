@@ -1,32 +1,44 @@
 import {
+    sourceFileAffectingCompilerOptions,
+} from "../compiler/commandLineParser";
+import {
     arrayFrom,
-    CompilerOptions,
     createGetCanonicalFileName,
-    createLanguageServiceSourceFile,
-    CreateSourceFileOptions,
-    Debug,
-    ensureScriptKind,
     firstDefinedIterator,
-    forEachEntry,
-    getEmitScriptTarget,
-    getImpliedNodeFormatForFile,
-    getKeyForCompilerOptions,
     getOrUpdate,
-    getSetExternalModuleIndicator,
     identity,
-    IScriptSnapshot,
+} from "../compiler/core";
+import * as Debug from "../compiler/debug";
+import { getKeyForCompilerOptions } from "../compiler/moduleNameResolver";
+import {
+    CreateSourceFileOptions,
     isDeclarationFileName,
+} from "../compiler/parser";
+import { toPath } from "../compiler/path";
+import {
+    getImpliedNodeFormatForFile,
+    getSetExternalModuleIndicator,
+} from "../compiler/program";
+import { tracing } from "../compiler/tracing";
+import {
+    CompilerOptions,
     MinimalResolutionCacheHost,
     Path,
     ResolutionMode,
     ScriptKind,
     ScriptTarget,
     SourceFile,
-    sourceFileAffectingCompilerOptions,
-    toPath,
-    tracing,
+} from "../compiler/types";
+import {
+    ensureScriptKind,
+    forEachEntry,
+    getEmitScriptTarget,
+} from "../compiler/utilities";
+import {
+    createLanguageServiceSourceFile,
     updateLanguageServiceSourceFile,
-} from "./_namespaces/ts";
+} from "./services";
+import { IScriptSnapshot } from "./types";
 
 /**
  * The document registry represents a store of SourceFile objects that can be shared between

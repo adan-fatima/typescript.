@@ -1,10 +1,174 @@
 import {
+    addRange,
+    arrayFrom,
+    assertType,
+    binarySearch,
+    compareStringsCaseSensitive,
+    compareValues,
+    concatenate,
+    contains,
+    createGetCanonicalFileName,
+    emptyArray,
+    equalOwnProperties,
+    equateValues,
+    every,
+    filter,
+    find,
+    findBestPatternMatch,
+    findLast,
+    firstOrUndefined,
+    flatMap,
+    flatMapToMutable,
+    forEach,
+    GetCanonicalFileName,
+    getOwnKeys,
+    hasProperty,
+    identity,
+    insertSorted,
+    isArray,
+    isLineBreak,
+    isString,
+    isWhiteSpaceLike,
+    isWhiteSpaceSingleLine,
+    last,
+    lastOrUndefined,
+    length,
+    mapDefined,
+    noop,
+    Pattern,
+    singleElementArray,
+    singleOrUndefined,
+    some,
+    startsWith,
+    stringContains,
+    trimString,
+    trimStringStart,
+    tryCast,
+    tryRemovePrefix,
+} from "./core";
+import {
+    Comparison,
+    EqualityComparer,
+    MapLike,
+    ReadonlyCollection,
+    SortedArray,
+    version,
+} from "./corePublic";
+import * as Debug from "./debug";
+import { Diagnostics } from "./diagnosticInformationMap.generated";
+import {
+    isArrayLiteralExpression,
+    isArrowFunction,
+    isBigIntLiteral,
+    isBinaryExpression,
+    isBindingElement,
+    isCallExpression,
+    isClassDeclaration,
+    isClassExpression,
+    isClassStaticBlockDeclaration,
+    isCommaListExpression,
+    isComputedPropertyName,
+    isConstructorDeclaration,
+    isDecorator,
+    isElementAccessExpression,
+    isEnumDeclaration,
+    isEnumMember,
+    isExportAssignment,
+    isExportDeclaration,
+    isExpressionStatement,
+    isExpressionWithTypeArguments,
+    isExternalModuleReference,
+    isForStatement,
+    isFunctionDeclaration,
+    isFunctionExpression,
+    isGetAccessorDeclaration,
+    isHeritageClause,
+    isIdentifier,
+    isImportTypeNode,
+    isInterfaceDeclaration,
+    isJSDoc,
+    isJSDocAugmentsTag,
+    isJSDocFunctionType,
+    isJSDocMemberName,
+    isJSDocNameReference,
+    isJSDocOverloadTag,
+    isJSDocParameterTag,
+    isJSDocSatisfiesTag,
+    isJSDocSignature,
+    isJSDocTemplateTag,
+    isJSDocTypeExpression,
+    isJSDocTypeLiteral,
+    isJSDocTypeTag,
+    isJsxText,
+    isLiteralTypeNode,
+    isMetaProperty,
+    isMethodDeclaration,
+    isModuleDeclaration,
+    isNamespaceExport,
+    isNamespaceExportDeclaration,
+    isNamespaceImport,
+    isNonNullExpression,
+    isNoSubstitutionTemplateLiteral,
+    isNumericLiteral,
+    isObjectLiteralExpression,
+    isOmittedExpression,
+    isParameter,
+    isParenthesizedExpression,
+    isParenthesizedTypeNode,
+    isPrefixUnaryExpression,
+    isPrivateIdentifier,
+    isPropertyAccessExpression,
+    isPropertyAssignment,
+    isPropertyDeclaration,
+    isPropertySignature,
+    isQualifiedName,
+    isSetAccessorDeclaration,
+    isShorthandPropertyAssignment,
+    isSourceFile,
+    isStringLiteral,
+    isTypeAliasDeclaration,
+    isTypeLiteralNode,
+    isTypeParameterDeclaration,
+    isTypeReferenceNode,
+    isVariableDeclaration,
+    isVariableStatement,
+    isVoidExpression,
+} from "./factory/nodeTests";
+import {
+    canHaveDecorators,
+    canHaveModifiers,
+} from "./factory/utilitiesPublic";
+import {
+    forEachAncestorDirectory,
+    getBaseFileName,
+    getDirectoryPath,
+    getRootLength,
+    isAnyDirectorySeparator,
+    normalizePath,
+} from "./path";
+import {
+    computeLineAndCharacterOfPosition,
+    computeLineOfPosition,
+    computeLineStarts,
+    createScanner,
+    getLeadingCommentRanges,
+    getLineAndCharacterOfPosition,
+    getLinesBetweenPositions,
+    getLineStarts,
+    getTrailingCommentRanges,
+    isIdentifierStart,
+    skipTrivia,
+    stringToToken,
+    tokenToString,
+} from "./scanner";
+import {
+    parsePseudoBigInt,
+    positionIsSynthesized,
+} from "./scannerUtilities";
+import {
     __String,
     AccessExpression,
     AccessorDeclaration,
-    addRange,
-    affectsDeclarationPathOptionDeclarations,
-    affectsEmitOptionDeclarations,
     AliasDeclarationNode,
     AllAccessorDeclarations,
     AmbientModuleDeclaration,
@@ -13,20 +177,16 @@ import {
     AnyImportOrReExport,
     AnyImportSyntax,
     AnyValidImportOrReExport,
-    append,
-    arrayFrom,
     ArrayLiteralExpression,
     ArrayTypeNode,
     ArrowFunction,
     AsExpression,
     AssertionExpression,
-    assertType,
     AssignmentDeclarationKind,
     AssignmentExpression,
     AssignmentOperatorToken,
     BarBarEqualsToken,
     BinaryExpression,
-    binarySearch,
     BindableObjectDefinePropertyCall,
     BindableStaticAccessExpression,
     BindableStaticElementAccessExpression,
@@ -40,13 +200,10 @@ import {
     CallExpression,
     CallLikeExpression,
     CallSignatureDeclaration,
-    canHaveDecorators,
-    canHaveModifiers,
     CaseBlock,
     CaseClause,
     CaseOrDefaultClause,
     CatchClause,
-    changeAnyExtension,
     CharacterCodes,
     CheckFlags,
     ClassDeclaration,
@@ -54,34 +211,17 @@ import {
     ClassExpression,
     ClassLikeDeclaration,
     ClassStaticBlockDeclaration,
-    combinePaths,
     CommaListExpression,
     CommandLineOption,
     CommentDirective,
     CommentDirectivesMap,
     CommentDirectiveType,
     CommentRange,
-    compareStringsCaseSensitive,
-    compareValues,
-    Comparison,
     CompilerOptions,
     ComputedPropertyName,
-    computeLineAndCharacterOfPosition,
-    computeLineOfPosition,
-    computeLineStarts,
-    concatenate,
     ConditionalExpression,
     ConstructorDeclaration,
     ConstructSignatureDeclaration,
-    contains,
-    containsPath,
-    createGetCanonicalFileName,
-    createModeAwareCache,
-    createMultiMap,
-    createScanner,
-    createTextSpan,
-    createTextSpanFromBounds,
-    Debug,
     Declaration,
     DeclarationName,
     DeclarationWithTypeParameterChildren,
@@ -95,32 +235,19 @@ import {
     DiagnosticMessage,
     DiagnosticMessageChain,
     DiagnosticRelatedInformation,
-    Diagnostics,
     DiagnosticWithDetachedLocation,
     DiagnosticWithLocation,
-    directorySeparator,
     DoStatement,
     DynamicNamedBinaryExpression,
     DynamicNamedDeclaration,
     ElementAccessExpression,
     EmitFlags,
-    EmitHost,
-    EmitResolver,
     EmitTextWriter,
-    emptyArray,
-    endsWith,
-    ensurePathIsNonModuleName,
-    ensureTrailingDirectorySeparator,
     EntityName,
     EntityNameExpression,
     EntityNameOrEntityNameExpression,
     EnumDeclaration,
-    EqualityComparer,
-    equalOwnProperties,
     EqualsToken,
-    equateValues,
-    escapeLeadingUnderscores,
-    every,
     ExportAssignment,
     ExportDeclaration,
     ExportSpecifier,
@@ -129,26 +256,7 @@ import {
     ExpressionWithTypeArguments,
     Extension,
     ExternalModuleReference,
-    factory,
-    FileExtensionInfo,
-    fileExtensionIs,
-    fileExtensionIsOneOf,
     FileWatcher,
-    filter,
-    find,
-    findAncestor,
-    findBestPatternMatch,
-    findIndex,
-    findLast,
-    firstDefined,
-    firstOrUndefined,
-    flatMap,
-    flatMapToMutable,
-    flatten,
-    forEach,
-    forEachAncestorDirectory,
-    forEachChild,
-    forEachChildRecursively,
     ForInOrOfStatement,
     ForInStatement,
     ForOfStatement,
@@ -158,64 +266,19 @@ import {
     FunctionExpression,
     FunctionLikeDeclaration,
     GetAccessorDeclaration,
-    getBaseFileName,
-    GetCanonicalFileName,
-    getCombinedModifierFlags,
-    getCombinedNodeFlags,
-    getDirectoryPath,
-    getJSDocAugmentsTag,
-    getJSDocDeprecatedTagNoCache,
-    getJSDocImplementsTags,
-    getJSDocOverrideTagNoCache,
-    getJSDocParameterTags,
-    getJSDocParameterTagsNoCache,
-    getJSDocPrivateTagNoCache,
-    getJSDocProtectedTagNoCache,
-    getJSDocPublicTagNoCache,
-    getJSDocReadonlyTagNoCache,
-    getJSDocReturnType,
-    getJSDocSatisfiesTag,
-    getJSDocTags,
-    getJSDocType,
-    getJSDocTypeParameterTags,
-    getJSDocTypeParameterTagsNoCache,
-    getJSDocTypeTag,
-    getLeadingCommentRanges,
-    getLineAndCharacterOfPosition,
-    getLinesBetweenPositions,
-    getLineStarts,
-    getNameOfDeclaration,
-    getNormalizedAbsolutePath,
-    getNormalizedPathComponents,
-    getOwnKeys,
-    getParseTreeNode,
-    getPathComponents,
-    getPathFromPathComponents,
-    getRelativePathToDirectoryOrUrl,
-    getRootLength,
-    getSnippetElement,
-    getStringComparer,
-    getSymbolId,
-    getTrailingCommentRanges,
     HasExpressionInitializer,
-    hasExtension,
     HasFlowNode,
+    HasIllegalDecorators,
+    HasIllegalTypeParameters,
     HasInitializer,
-    hasInitializer,
     HasJSDoc,
-    hasJSDocNodes,
     HasModifiers,
-    hasProperty,
     HasType,
     HasTypeArguments,
     HeritageClause,
     Identifier,
-    identifierToKeywordKind,
     IdentifierTypePredicate,
-    identity,
-    idText,
     IfStatement,
-    ignoredPaths,
     ImportCall,
     ImportClause,
     ImportDeclaration,
@@ -224,125 +287,10 @@ import {
     ImportSpecifier,
     ImportTypeNode,
     IndexInfo,
-    indexOfAnyCharCode,
     IndexSignatureDeclaration,
     InitializedVariableDeclaration,
-    insertSorted,
     InterfaceDeclaration,
     InternalEmitFlags,
-    isAccessor,
-    isAnyDirectorySeparator,
-    isArray,
-    isArrayLiteralExpression,
-    isArrowFunction,
-    isAutoAccessorPropertyDeclaration,
-    isBigIntLiteral,
-    isBinaryExpression,
-    isBindingElement,
-    isBindingPattern,
-    isCallExpression,
-    isClassDeclaration,
-    isClassElement,
-    isClassExpression,
-    isClassLike,
-    isClassStaticBlockDeclaration,
-    isCommaListExpression,
-    isComputedPropertyName,
-    isConstructorDeclaration,
-    isDeclaration,
-    isDecorator,
-    isElementAccessExpression,
-    isEnumDeclaration,
-    isEnumMember,
-    isExportAssignment,
-    isExportDeclaration,
-    isExpressionStatement,
-    isExpressionWithTypeArguments,
-    isExternalModule,
-    isExternalModuleReference,
-    isFileProbablyExternalModule,
-    isForStatement,
-    isFunctionDeclaration,
-    isFunctionExpression,
-    isFunctionLike,
-    isFunctionLikeDeclaration,
-    isFunctionLikeOrClassStaticBlockDeclaration,
-    isGetAccessorDeclaration,
-    isHeritageClause,
-    isIdentifier,
-    isIdentifierStart,
-    isIdentifierText,
-    isImportTypeNode,
-    isInterfaceDeclaration,
-    isJSDoc,
-    isJSDocAugmentsTag,
-    isJSDocFunctionType,
-    isJSDocLinkLike,
-    isJSDocMemberName,
-    isJSDocNameReference,
-    isJSDocNode,
-    isJSDocOverloadTag,
-    isJSDocParameterTag,
-    isJSDocPropertyLikeTag,
-    isJSDocSatisfiesTag,
-    isJSDocSignature,
-    isJSDocTag,
-    isJSDocTemplateTag,
-    isJSDocTypeExpression,
-    isJSDocTypeLiteral,
-    isJSDocTypeTag,
-    isJsxChild,
-    isJsxFragment,
-    isJsxOpeningLikeElement,
-    isJsxText,
-    isLeftHandSideExpression,
-    isLineBreak,
-    isLiteralTypeNode,
-    isMemberName,
-    isMetaProperty,
-    isMethodDeclaration,
-    isMethodOrAccessor,
-    isModifierLike,
-    isModuleDeclaration,
-    isNamedDeclaration,
-    isNamespaceExport,
-    isNamespaceExportDeclaration,
-    isNamespaceImport,
-    isNonNullExpression,
-    isNoSubstitutionTemplateLiteral,
-    isNumericLiteral,
-    isObjectLiteralExpression,
-    isOmittedExpression,
-    isParameter,
-    isParameterPropertyDeclaration,
-    isParenthesizedExpression,
-    isParenthesizedTypeNode,
-    isPrefixUnaryExpression,
-    isPrivateIdentifier,
-    isPropertyAccessExpression,
-    isPropertyAssignment,
-    isPropertyDeclaration,
-    isPropertyName,
-    isPropertySignature,
-    isQualifiedName,
-    isRootedDiskPath,
-    isSetAccessorDeclaration,
-    isShorthandPropertyAssignment,
-    isSourceFile,
-    isString,
-    isStringLiteral,
-    isStringLiteralLike,
-    isTypeAliasDeclaration,
-    isTypeElement,
-    isTypeLiteralNode,
-    isTypeNode,
-    isTypeParameterDeclaration,
-    isTypeReferenceNode,
-    isVariableDeclaration,
-    isVariableStatement,
-    isVoidExpression,
-    isWhiteSpaceLike,
-    isWhiteSpaceSingleLine,
     JSDoc,
     JSDocCallbackTag,
     JSDocEnumTag,
@@ -354,6 +302,7 @@ import {
     JSDocSignature,
     JSDocTag,
     JSDocTemplateTag,
+    JSDocTypeAssertion,
     JSDocTypedefTag,
     JsonSourceFile,
     JsxAttributeName,
@@ -369,22 +318,15 @@ import {
     KeywordSyntaxKind,
     LabeledStatement,
     LanguageVariant,
-    last,
-    lastOrUndefined,
     LateVisibilityPaintedStatement,
-    length,
     LiteralImportTypeNode,
     LiteralLikeElementAccessExpression,
     LiteralLikeNode,
     LogicalOperator,
     LogicalOrCoalescingAssignmentOperator,
-    map,
-    mapDefined,
-    MapLike,
     MemberName,
     MethodDeclaration,
     MethodSignature,
-    ModeAwareCache,
     ModifierFlags,
     ModifierLike,
     ModuleBlock,
@@ -392,8 +334,7 @@ import {
     ModuleDetectionKind,
     ModuleKind,
     ModuleResolutionKind,
-    moduleResolutionOptionDeclarations,
-    MultiMap,
+    Mutable,
     NamedDeclaration,
     NamedExports,
     NamedImports,
@@ -405,10 +346,7 @@ import {
     Node,
     NodeArray,
     NodeFlags,
-    nodeModulesPathPart,
     NonNullExpression,
-    noop,
-    normalizePath,
     NoSubstitutionTemplateLiteral,
     NumericLiteral,
     ObjectFlags,
@@ -417,18 +355,13 @@ import {
     ObjectLiteralExpression,
     ObjectLiteralExpressionBase,
     ObjectTypeDeclaration,
-    optionsAffectingProgramStructure,
-    or,
+    OuterExpression,
     OuterExpressionKinds,
     PackageId,
     ParameterDeclaration,
     ParenthesizedExpression,
     ParenthesizedTypeNode,
-    parseConfigFileTextToJson,
     PartiallyEmittedExpression,
-    Path,
-    pathIsRelative,
-    Pattern,
     PostfixUnaryExpression,
     PrefixUnaryExpression,
     PrinterOptions,
@@ -448,13 +381,10 @@ import {
     PunctuationSyntaxKind,
     QualifiedName,
     QuestionQuestionEqualsToken,
-    ReadonlyCollection,
     ReadonlyTextRange,
-    removeTrailingDirectorySeparator,
     RequireOrImportCall,
     RequireVariableStatement,
     ResolutionMode,
-    ResolutionNameAndModeGetter,
     ResolvedModuleFull,
     ResolvedModuleWithFailedLookupLocations,
     ResolvedTypeReferenceDirective,
@@ -463,38 +393,24 @@ import {
     SatisfiesExpression,
     ScriptKind,
     ScriptTarget,
-    semanticDiagnosticsOptionDeclarations,
     SetAccessorDeclaration,
     ShorthandPropertyAssignment,
-    shouldAllowImportingTsExtension,
     Signature,
     SignatureDeclaration,
     SignatureFlags,
-    singleElementArray,
-    singleOrUndefined,
-    skipOuterExpressions,
-    skipTrivia,
-    SnippetKind,
-    some,
-    sort,
-    SortedArray,
     SourceFile,
     SourceFileLike,
     SourceFileMayBeEmittedHost,
-    SourceMapSource,
-    startsWith,
-    startsWithUseStrict,
     Statement,
-    stringContains,
     StringLiteral,
     StringLiteralLike,
-    stringToToken,
     SuperCall,
     SuperExpression,
     SuperProperty,
     SwitchStatement,
     Symbol,
     SymbolFlags,
+    SymbolId,
     SymbolTable,
     SyntaxKind,
     SyntaxList,
@@ -508,16 +424,8 @@ import {
     ThisTypePredicate,
     Token,
     TokenFlags,
-    tokenToString,
-    toPath,
-    tracing,
-    TransformFlags,
     TransientSymbol,
-    trimString,
-    trimStringStart,
     TriviaSyntaxKind,
-    tryCast,
-    tryRemovePrefix,
     TryStatement,
     TsConfigSourceFile,
     TupleTypeNode,
@@ -535,23 +443,102 @@ import {
     TypePredicate,
     TypePredicateKind,
     TypeReferenceNode,
-    unescapeLeadingUnderscores,
     UnionOrIntersectionTypeNode,
-    UserPreferences,
     ValidImportTypeNode,
     VariableDeclaration,
     VariableDeclarationInitializedTo,
     VariableDeclarationList,
     VariableLikeDeclaration,
     VariableStatement,
-    version,
     WhileStatement,
     WithStatement,
     WrappedExpression,
     WriteFileCallback,
     WriteFileCallbackData,
     YieldExpression,
-} from "./_namespaces/ts";
+} from "./types";
+import {
+    createTextSpan,
+    createTextSpanFromBounds,
+    escapeLeadingUnderscores,
+    findAncestor,
+    getCombinedModifierFlags,
+    getCombinedNodeFlags,
+    getJSDocAugmentsTag,
+    getJSDocDeprecatedTagNoCache,
+    getJSDocImplementsTags,
+    getJSDocOverrideTagNoCache,
+    getJSDocParameterTags,
+    getJSDocParameterTagsNoCache,
+    getJSDocPrivateTagNoCache,
+    getJSDocProtectedTagNoCache,
+    getJSDocPublicTagNoCache,
+    getJSDocReadonlyTagNoCache,
+    getJSDocReturnType,
+    getJSDocSatisfiesTag,
+    getJSDocTags,
+    getJSDocType,
+    getJSDocTypeParameterTags,
+    getJSDocTypeParameterTagsNoCache,
+    getJSDocTypeTag,
+    getNameOfDeclaration,
+    getParseTreeNode,
+    hasInitializer,
+    hasJSDocNodes,
+    identifierToKeywordKind,
+    idText,
+    isAccessor,
+    isAutoAccessorPropertyDeclaration,
+    isBindingPattern,
+    isClassElement,
+    isClassLike,
+    isDeclaration,
+    isFunctionLike,
+    isFunctionLikeDeclaration,
+    isFunctionLikeOrClassStaticBlockDeclaration,
+    isJSDocLinkLike,
+    isJSDocNode,
+    isJSDocPropertyLikeTag,
+    isJSDocTag,
+    isJsxChild,
+    isLeftHandSideExpression,
+    isMemberName,
+    isMethodOrAccessor,
+    isModifierLike,
+    isNamedDeclaration,
+    isParameterPropertyDeclaration,
+    isPropertyName,
+    isStringLiteralLike,
+    isTypeElement,
+    isTypeNode,
+    unescapeLeadingUnderscores,
+} from "./utilitiesPublic";
+
+function isCommonJSContainingModuleKind(kind: ModuleKind) {
+    return kind === ModuleKind.CommonJS || kind === ModuleKind.Node16 || kind === ModuleKind.NodeNext;
+}
+
+let nextSymbolId = 1;
+let nextNodeId = 1;
+
+/** @internal */
+export function getNodeId(node: Node): number {
+    if (!node.id) {
+        node.id = nextNodeId;
+        nextNodeId++;
+    }
+    return node.id;
+}
+
+/** @internal */
+export function getSymbolId(symbol: Symbol): SymbolId {
+    if (!symbol.id) {
+        symbol.id = nextSymbolId;
+        nextSymbolId++;
+    }
+
+    return symbol.id;
+}
 
 /** @internal */
 export const resolvingEmptyArray: never[] = [];
@@ -576,6 +563,11 @@ export function getDeclarationOfKind<T extends Declaration>(symbol: Symbol, kind
     }
 
     return undefined;
+}
+
+// See also `isExternalOrCommonJsModule`
+export function isExternalModule(file: SourceFile): boolean {
+    return file.externalModuleIndicator !== undefined;
 }
 
 /** @internal */
@@ -638,22 +630,6 @@ function createSingleLineStringWriter(): EmitTextWriter {
         decreaseIndent: noop,
         clear: () => str = "",
     };
-}
-
-/** @internal */
-export function changesAffectModuleResolution(oldOptions: CompilerOptions, newOptions: CompilerOptions): boolean {
-    return oldOptions.configFilePath !== newOptions.configFilePath ||
-        optionsHaveModuleResolutionChanges(oldOptions, newOptions);
-}
-
-/** @internal */
-export function optionsHaveModuleResolutionChanges(oldOptions: CompilerOptions, newOptions: CompilerOptions) {
-    return optionsHaveChanges(oldOptions, newOptions, moduleResolutionOptionDeclarations);
-}
-
-/** @internal */
-export function changesAffectingProgramStructure(oldOptions: CompilerOptions, newOptions: CompilerOptions) {
-    return optionsHaveChanges(oldOptions, newOptions, optionsAffectingProgramStructure);
 }
 
 /** @internal */
@@ -741,24 +717,6 @@ export function getResolvedModule(sourceFile: SourceFile | undefined, moduleName
 }
 
 /** @internal */
-export function setResolvedModule(sourceFile: SourceFile, moduleNameText: string, resolvedModule: ResolvedModuleWithFailedLookupLocations, mode: ResolutionMode): void {
-    if (!sourceFile.resolvedModules) {
-        sourceFile.resolvedModules = createModeAwareCache();
-    }
-
-    sourceFile.resolvedModules.set(moduleNameText, mode, resolvedModule);
-}
-
-/** @internal */
-export function setResolvedTypeReferenceDirective(sourceFile: SourceFile, typeReferenceDirectiveName: string, resolvedTypeReferenceDirective: ResolvedTypeReferenceDirectiveWithFailedLookupLocations, mode: ResolutionMode): void {
-    if (!sourceFile.resolvedTypeReferenceDirectiveNames) {
-        sourceFile.resolvedTypeReferenceDirectiveNames = createModeAwareCache();
-    }
-
-    sourceFile.resolvedTypeReferenceDirectiveNames.set(typeReferenceDirectiveName, mode, resolvedTypeReferenceDirective);
-}
-
-/** @internal */
 export function getResolvedTypeReferenceDirective(sourceFile: SourceFile | undefined, typeReferenceDirectiveName: string, mode: ResolutionMode): ResolvedTypeReferenceDirective | undefined {
     return sourceFile?.resolvedTypeReferenceDirectiveNames?.get(typeReferenceDirectiveName, mode)?.resolvedTypeReferenceDirective;
 }
@@ -809,61 +767,6 @@ export function typeDirectiveIsEqualTo(oldResolution: ResolvedTypeReferenceDirec
 }
 
 /** @internal */
-export function hasChangesInResolutions<K, V>(
-    names: readonly K[],
-    newSourceFile: SourceFile,
-    newResolutions: readonly V[],
-    oldResolutions: ModeAwareCache<V> | undefined,
-    comparer: (oldResolution: V, newResolution: V) => boolean,
-    nameAndModeGetter: ResolutionNameAndModeGetter<K, SourceFile>,
-): boolean {
-    Debug.assert(names.length === newResolutions.length);
-
-    for (let i = 0; i < names.length; i++) {
-        const newResolution = newResolutions[i];
-        const entry = names[i];
-        const name = nameAndModeGetter.getName(entry);
-        const mode = nameAndModeGetter.getMode(entry, newSourceFile);
-        const oldResolution = oldResolutions && oldResolutions.get(name, mode);
-        const changed =
-            oldResolution
-                ? !newResolution || !comparer(oldResolution, newResolution)
-                : newResolution;
-        if (changed) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// Returns true if this node contains a parse error anywhere underneath it.
-/** @internal */
-export function containsParseError(node: Node): boolean {
-    aggregateChildData(node);
-    return (node.flags & NodeFlags.ThisNodeOrAnySubNodesHasError) !== 0;
-}
-
-function aggregateChildData(node: Node): void {
-    if (!(node.flags & NodeFlags.HasAggregatedChildData)) {
-        // A node is considered to contain a parse error if:
-        //  a) the parser explicitly marked that it had an error
-        //  b) any of it's children reported that it had an error.
-        const thisNodeOrAnySubNodesHasError = ((node.flags & NodeFlags.ThisNodeHasError) !== 0) ||
-            forEachChild(node, containsParseError);
-
-        // If so, mark ourselves accordingly.
-        if (thisNodeOrAnySubNodesHasError) {
-            (node as Mutable<Node>).flags |= NodeFlags.ThisNodeOrAnySubNodesHasError;
-        }
-
-        // Also mark that we've propagated the child information to this node.  This way we can
-        // always consult the bit directly on this node without needing to check its children
-        // again.
-        (node as Mutable<Node>).flags |= NodeFlags.HasAggregatedChildData;
-    }
-}
-
-/** @internal */
 export function getSourceFileOfNode(node: Node): SourceFile;
 /** @internal */
 export function getSourceFileOfNode(node: Node | undefined): SourceFile | undefined;
@@ -873,11 +776,6 @@ export function getSourceFileOfNode(node: Node | undefined): SourceFile | undefi
         node = node.parent;
     }
     return node as SourceFile;
-}
-
-/** @internal */
-export function getSourceFileOfModule(module: Symbol) {
-    return getSourceFileOfNode(module.valueDeclaration || getNonAugmentationDeclaration(module));
 }
 
 /** @internal */
@@ -1742,11 +1640,6 @@ export function isCatchClauseVariableDeclarationOrBindingElement(declaration: De
 }
 
 /** @internal */
-export function isAmbientModule(node: Node): node is AmbientModuleDeclaration {
-    return isModuleDeclaration(node) && (node.name.kind === SyntaxKind.StringLiteral || isGlobalScopeAugmentation(node));
-}
-
-/** @internal */
 export function isModuleWithStringLiteralName(node: Node): node is ModuleDeclaration {
     return isModuleDeclaration(node) && node.name.kind === SyntaxKind.StringLiteral;
 }
@@ -1790,83 +1683,6 @@ export function isBlockScopedContainerTopLevel(node: Node): boolean {
 }
 
 /** @internal */
-export function isGlobalScopeAugmentation(module: ModuleDeclaration): boolean {
-    return !!(module.flags & NodeFlags.GlobalAugmentation);
-}
-
-/** @internal */
-export function isExternalModuleAugmentation(node: Node): node is AmbientModuleDeclaration {
-    return isAmbientModule(node) && isModuleAugmentationExternal(node);
-}
-
-/** @internal */
-export function isModuleAugmentationExternal(node: AmbientModuleDeclaration) {
-    // external module augmentation is a ambient module declaration that is either:
-    // - defined in the top level scope and source file is an external module
-    // - defined inside ambient module declaration located in the top level scope and source file not an external module
-    switch (node.parent.kind) {
-        case SyntaxKind.SourceFile:
-            return isExternalModule(node.parent);
-        case SyntaxKind.ModuleBlock:
-            return isAmbientModule(node.parent.parent) && isSourceFile(node.parent.parent.parent) && !isExternalModule(node.parent.parent.parent);
-    }
-    return false;
-}
-
-/** @internal */
-export function getNonAugmentationDeclaration(symbol: Symbol) {
-    return symbol.declarations?.find(d => !isExternalModuleAugmentation(d) && !(isModuleDeclaration(d) && isGlobalScopeAugmentation(d)));
-}
-
-function isCommonJSContainingModuleKind(kind: ModuleKind) {
-    return kind === ModuleKind.CommonJS || kind === ModuleKind.Node16 || kind === ModuleKind.NodeNext;
-}
-
-/** @internal */
-export function isEffectiveExternalModule(node: SourceFile, compilerOptions: CompilerOptions) {
-    return isExternalModule(node) || getIsolatedModules(compilerOptions) || (isCommonJSContainingModuleKind(getEmitModuleKind(compilerOptions)) && !!node.commonJsModuleIndicator);
-}
-
-/**
- * Returns whether the source file will be treated as if it were in strict mode at runtime.
- *
- * @internal
- */
-export function isEffectiveStrictModeSourceFile(node: SourceFile, compilerOptions: CompilerOptions) {
-    // We can only verify strict mode for JS/TS files
-    switch (node.scriptKind) {
-        case ScriptKind.JS:
-        case ScriptKind.TS:
-        case ScriptKind.JSX:
-        case ScriptKind.TSX:
-            break;
-        default:
-            return false;
-    }
-    // Strict mode does not matter for declaration files.
-    if (node.isDeclarationFile) {
-        return false;
-    }
-    // If `alwaysStrict` is set, then treat the file as strict.
-    if (getStrictOptionValue(compilerOptions, "alwaysStrict")) {
-        return true;
-    }
-    // Starting with a "use strict" directive indicates the file is strict.
-    if (startsWithUseStrict(node.statements)) {
-        return true;
-    }
-    if (isExternalModule(node) || getIsolatedModules(compilerOptions)) {
-        // ECMAScript Modules are always strict.
-        if (getEmitModuleKind(compilerOptions) >= ModuleKind.ES2015) {
-            return true;
-        }
-        // Other modules are strict unless otherwise specified.
-        return !compilerOptions.noImplicitUseStrict;
-    }
-    return false;
-}
-
-/** @internal */
 export function isAmbientPropertyDeclaration(node: PropertyDeclaration) {
     return !!(node.flags & NodeFlags.Ambient) || hasSyntacticModifier(node, ModifierFlags.Ambient);
 }
@@ -1903,7 +1719,7 @@ export function isBlockScope(node: Node, parentNode: Node | undefined): boolean 
 
 /** @internal */
 export function isDeclarationWithTypeParameters(node: Node): node is DeclarationWithTypeParameters {
-    Debug.type<DeclarationWithTypeParameters>(node);
+    Debug.assertType<DeclarationWithTypeParameters>(node);
     switch (node.kind) {
         case SyntaxKind.JSDocCallbackTag:
         case SyntaxKind.JSDocTypedefTag:
@@ -1917,7 +1733,7 @@ export function isDeclarationWithTypeParameters(node: Node): node is Declaration
 
 /** @internal */
 export function isDeclarationWithTypeParameterChildren(node: Node): node is DeclarationWithTypeParameterChildren {
-    Debug.type<DeclarationWithTypeParameterChildren>(node);
+    Debug.assertType<DeclarationWithTypeParameterChildren>(node);
     switch (node.kind) {
         case SyntaxKind.CallSignature:
         case SyntaxKind.ConstructSignature:
@@ -2495,75 +2311,6 @@ export function isChildOfNodeWithKind(node: Node, kind: SyntaxKind): boolean {
     return false;
 }
 
-// Warning: This has the same semantics as the forEach family of functions,
-//          in that traversal terminates in the event that 'visitor' supplies a truthy value.
-/** @internal */
-export function forEachReturnStatement<T>(body: Block | Statement, visitor: (stmt: ReturnStatement) => T): T | undefined {
-
-    return traverse(body);
-
-    function traverse(node: Node): T | undefined {
-        switch (node.kind) {
-            case SyntaxKind.ReturnStatement:
-                return visitor(node as ReturnStatement);
-            case SyntaxKind.CaseBlock:
-            case SyntaxKind.Block:
-            case SyntaxKind.IfStatement:
-            case SyntaxKind.DoStatement:
-            case SyntaxKind.WhileStatement:
-            case SyntaxKind.ForStatement:
-            case SyntaxKind.ForInStatement:
-            case SyntaxKind.ForOfStatement:
-            case SyntaxKind.WithStatement:
-            case SyntaxKind.SwitchStatement:
-            case SyntaxKind.CaseClause:
-            case SyntaxKind.DefaultClause:
-            case SyntaxKind.LabeledStatement:
-            case SyntaxKind.TryStatement:
-            case SyntaxKind.CatchClause:
-                return forEachChild(node, traverse);
-        }
-    }
-}
-
-/** @internal */
-export function forEachYieldExpression(body: Block, visitor: (expr: YieldExpression) => void): void {
-
-    return traverse(body);
-
-    function traverse(node: Node): void {
-        switch (node.kind) {
-            case SyntaxKind.YieldExpression:
-                visitor(node as YieldExpression);
-                const operand = (node as YieldExpression).expression;
-                if (operand) {
-                    traverse(operand);
-                }
-                return;
-            case SyntaxKind.EnumDeclaration:
-            case SyntaxKind.InterfaceDeclaration:
-            case SyntaxKind.ModuleDeclaration:
-            case SyntaxKind.TypeAliasDeclaration:
-                // These are not allowed inside a generator now, but eventually they may be allowed
-                // as local types. Regardless, skip them to avoid the work.
-                return;
-            default:
-                if (isFunctionLike(node)) {
-                    if (node.name && node.name.kind === SyntaxKind.ComputedPropertyName) {
-                        // Note that we will not include methods/accessors of a class because they would require
-                        // first descending into the class. This is by design.
-                        traverse(node.name.expression);
-                        return;
-                    }
-                }
-                else if (!isPartOfTypeNode(node)) {
-                    // This is the general case, which should include mostly expressions and statements.
-                    // Also includes NodeArrays.
-                    forEachChild(node, traverse);
-                }
-        }
-    }
-}
 
 /**
  * Gets the most likely element type for a TypeNode. This is not an exhaustive test
@@ -6073,101 +5820,6 @@ export function hostGetCanonicalFileName(host: { useCaseSensitiveFileNames?(): b
 }
 
 /** @internal */
-export interface ResolveModuleNameResolutionHost {
-    getCanonicalFileName(p: string): string;
-    getCommonSourceDirectory(): string;
-    getCurrentDirectory(): string;
-}
-
-/** @internal */
-export function getResolvedExternalModuleName(host: ResolveModuleNameResolutionHost, file: SourceFile, referenceFile?: SourceFile): string {
-    return file.moduleName || getExternalModuleNameFromPath(host, file.fileName, referenceFile && referenceFile.fileName);
-}
-
-function getCanonicalAbsolutePath(host: ResolveModuleNameResolutionHost, path: string) {
-    return host.getCanonicalFileName(getNormalizedAbsolutePath(path, host.getCurrentDirectory()));
-}
-
-/** @internal */
-export function getExternalModuleNameFromDeclaration(host: ResolveModuleNameResolutionHost, resolver: EmitResolver, declaration: ImportEqualsDeclaration | ImportDeclaration | ExportDeclaration | ModuleDeclaration | ImportTypeNode): string | undefined {
-    const file = resolver.getExternalModuleFileFromDeclaration(declaration);
-    if (!file || file.isDeclarationFile) {
-        return undefined;
-    }
-    // If the declaration already uses a non-relative name, and is outside the common source directory, continue to use it
-    const specifier = getExternalModuleName(declaration);
-    if (specifier && isStringLiteralLike(specifier) && !pathIsRelative(specifier.text) &&
-        getCanonicalAbsolutePath(host, file.path).indexOf(getCanonicalAbsolutePath(host, ensureTrailingDirectorySeparator(host.getCommonSourceDirectory()))) === -1) {
-        return undefined;
-    }
-    return getResolvedExternalModuleName(host, file);
-}
-
-/**
- * Resolves a local path to a path which is absolute to the base of the emit
- *
- * @internal
- */
-export function getExternalModuleNameFromPath(host: ResolveModuleNameResolutionHost, fileName: string, referencePath?: string): string {
-    const getCanonicalFileName = (f: string) => host.getCanonicalFileName(f);
-    const dir = toPath(referencePath ? getDirectoryPath(referencePath) : host.getCommonSourceDirectory(), host.getCurrentDirectory(), getCanonicalFileName);
-    const filePath = getNormalizedAbsolutePath(fileName, host.getCurrentDirectory());
-    const relativePath = getRelativePathToDirectoryOrUrl(dir, filePath, dir, getCanonicalFileName, /*isAbsolutePathAnUrl*/ false);
-    const extensionless = removeFileExtension(relativePath);
-    return referencePath ? ensurePathIsNonModuleName(extensionless) : extensionless;
-}
-
-/** @internal */
-export function getOwnEmitOutputFilePath(fileName: string, host: EmitHost, extension: string) {
-    const compilerOptions = host.getCompilerOptions();
-    let emitOutputFilePathWithoutExtension: string;
-    if (compilerOptions.outDir) {
-        emitOutputFilePathWithoutExtension = removeFileExtension(getSourceFilePathInNewDir(fileName, host, compilerOptions.outDir));
-    }
-    else {
-        emitOutputFilePathWithoutExtension = removeFileExtension(fileName);
-    }
-
-    return emitOutputFilePathWithoutExtension + extension;
-}
-
-/** @internal */
-export function getDeclarationEmitOutputFilePath(fileName: string, host: EmitHost) {
-    return getDeclarationEmitOutputFilePathWorker(fileName, host.getCompilerOptions(), host.getCurrentDirectory(), host.getCommonSourceDirectory(), f => host.getCanonicalFileName(f));
-}
-
-/** @internal */
-export function getDeclarationEmitOutputFilePathWorker(fileName: string, options: CompilerOptions, currentDirectory: string, commonSourceDirectory: string, getCanonicalFileName: GetCanonicalFileName): string {
-    const outputDir = options.declarationDir || options.outDir; // Prefer declaration folder if specified
-
-    const path = outputDir
-        ? getSourceFilePathInNewDirWorker(fileName, outputDir, currentDirectory, commonSourceDirectory, getCanonicalFileName)
-        : fileName;
-    const declarationExtension = getDeclarationEmitExtensionForPath(path);
-    return removeFileExtension(path) + declarationExtension;
-}
-
-/** @internal */
-export function getDeclarationEmitExtensionForPath(path: string) {
-    return fileExtensionIsOneOf(path, [Extension.Mjs, Extension.Mts]) ? Extension.Dmts :
-        fileExtensionIsOneOf(path, [Extension.Cjs, Extension.Cts]) ? Extension.Dcts :
-        fileExtensionIsOneOf(path, [Extension.Json]) ? `.d.json.ts` : // Drive-by redefinition of json declaration file output name so if it's ever enabled, it behaves well
-        Extension.Dts;
-}
-
-/**
- * This function is an inverse of `getDeclarationEmitExtensionForPath`.
- *
- * @internal
- */
-export function getPossibleOriginalInputExtensionForExtension(path: string) {
-    return fileExtensionIsOneOf(path, [Extension.Dmts, Extension.Mjs, Extension.Mts]) ? [Extension.Mts, Extension.Mjs] :
-        fileExtensionIsOneOf(path, [Extension.Dcts, Extension.Cjs, Extension.Cts]) ? [Extension.Cts, Extension.Cjs]:
-        fileExtensionIsOneOf(path, [`.d.json.ts`]) ? [Extension.Json] :
-        [Extension.Tsx, Extension.Ts, Extension.Jsx, Extension.Js];
-}
-
-/** @internal */
 export function outFile(options: CompilerOptions) {
     return options.outFile || options.out;
 }
@@ -6192,39 +5844,6 @@ export interface EmitFileNames {
 }
 
 /**
- * Gets the source files that are expected to have an emit output.
- *
- * Originally part of `forEachExpectedEmitFile`, this functionality was extracted to support
- * transformations.
- *
- * @param host An EmitHost.
- * @param targetSourceFile An optional target source file to emit.
- *
- * @internal
- */
-export function getSourceFilesToEmit(host: EmitHost, targetSourceFile?: SourceFile, forceDtsEmit?: boolean): readonly SourceFile[] {
-    const options = host.getCompilerOptions();
-    if (outFile(options)) {
-        const moduleKind = getEmitModuleKind(options);
-        const moduleEmitEnabled = options.emitDeclarationOnly || moduleKind === ModuleKind.AMD || moduleKind === ModuleKind.System;
-        // Can emit only sources that are not declaration file and are either non module code or module with --module or --target es6 specified
-        return filter(
-            host.getSourceFiles(),
-            sourceFile =>
-                (moduleEmitEnabled || !isExternalModule(sourceFile)) &&
-                sourceFileMayBeEmitted(sourceFile, host, forceDtsEmit)
-        );
-    }
-    else {
-        const sourceFiles = targetSourceFile === undefined ? host.getSourceFiles() : [targetSourceFile];
-        return filter(
-            sourceFiles,
-            sourceFile => sourceFileMayBeEmitted(sourceFile, host, forceDtsEmit)
-        );
-    }
-}
-
-/**
  * Don't call this for `--outFile`, just for `--outDir` or plain emit. `--outFile` needs additional checks.
  *
  * @internal
@@ -6238,19 +5857,6 @@ export function sourceFileMayBeEmitted(sourceFile: SourceFile, host: SourceFileM
             !(isJsonSourceFile(sourceFile) && host.getResolvedProjectReferenceToRedirect(sourceFile.fileName)) &&
             !host.isSourceOfProjectReferenceRedirect(sourceFile.fileName)
         ));
-}
-
-/** @internal */
-export function getSourceFilePathInNewDir(fileName: string, host: EmitHost, newDirPath: string): string {
-    return getSourceFilePathInNewDirWorker(fileName, newDirPath, host.getCurrentDirectory(), host.getCommonSourceDirectory(), f => host.getCanonicalFileName(f));
-}
-
-/** @internal */
-export function getSourceFilePathInNewDirWorker(fileName: string, newDirPath: string, currentDirectory: string, commonSourceDirectory: string, getCanonicalFileName: GetCanonicalFileName): string {
-    let sourceFilePath = getNormalizedAbsolutePath(fileName, currentDirectory);
-    const isSourceFileInCommonSourceDirectory = getCanonicalFileName(sourceFilePath).indexOf(getCanonicalFileName(commonSourceDirectory)) === 0;
-    sourceFilePath = isSourceFileInCommonSourceDirectory ? sourceFilePath.substring(commonSourceDirectory.length) : sourceFilePath;
-    return combinePaths(newDirPath, sourceFilePath);
 }
 
 /** @internal */
@@ -7094,14 +6700,6 @@ function isExportDefaultSymbol(symbol: Symbol): boolean {
 }
 
 /**
- * Return ".ts", ".d.ts", or ".tsx", if that is the extension.
- *
- * @internal
- */
-export function tryExtractTSExtension(fileName: string): string | undefined {
-    return find(supportedTSExtensionsForExtractExtension, extension => fileExtensionIs(fileName, extension));
-}
-/**
  * Replace each instance of non-ascii characters by one, two, three, or four escape sequences
  * representing the UTF-8 encoding of the character, and return the expanded char code list.
  */
@@ -7258,20 +6856,6 @@ export function base64decode(host: { base64decode?(input: string): string } | un
 }
 
 /** @internal */
-export function readJsonOrUndefined(path: string, hostOrText: { readFile(fileName: string): string | undefined } | string): object | undefined {
-    const jsonText = isString(hostOrText) ? hostOrText : hostOrText.readFile(path);
-    if (!jsonText) return undefined;
-    // gracefully handle if readFile fails or returns not JSON
-    const result = parseConfigFileTextToJson(path, jsonText);
-    return !result.error ? result.config : undefined;
-}
-
-/** @internal */
-export function readJson(path: string, host: { readFile(fileName: string): string | undefined }): object {
-    return readJsonOrUndefined(path, host) || {};
-}
-
-/** @internal */
 export function directoryProbablyExists(directoryName: string, host: { directoryExists?: (directoryName: string) => boolean }): boolean {
     // if host does not support 'directoryExists' assume that directory will exist
     return !host.directoryExists || host.directoryExists(directoryName);
@@ -7279,6 +6863,7 @@ export function directoryProbablyExists(directoryName: string, host: { directory
 
 const carriageReturnLineFeed = "\r\n";
 const lineFeed = "\n";
+
 /** @internal */
 export function getNewLineCharacter(options: CompilerOptions | PrinterOptions): string {
     switch (options.newLine) {
@@ -7725,25 +7310,6 @@ export function showModuleSpecifier({ moduleSpecifier }: ImportDeclaration): str
     return isStringLiteral(moduleSpecifier) ? moduleSpecifier.text : getTextOfNode(moduleSpecifier);
 }
 
-/** @internal */
-export function getLastChild(node: Node): Node | undefined {
-    let lastChild: Node | undefined;
-    forEachChild(node,
-        child => {
-            if (nodeIsPresent(child)) lastChild = child;
-        },
-        children => {
-            // As an optimization, jump straight to the end of the list.
-            for (let i = children.length - 1; i >= 0; i--) {
-                if (nodeIsPresent(children[i])) {
-                    lastChild = children[i];
-                    break;
-                }
-            }
-        });
-    return lastChild;
-}
-
 /**
  * Add a value to a set, and return true if it wasn't already present.
  *
@@ -7906,122 +7472,6 @@ export function getLeftmostExpression(node: Expression, stopAtCallExpressions: b
 
         return node;
     }
-}
-
-/** @internal */
-export interface ObjectAllocator {
-    getNodeConstructor(): new (kind: SyntaxKind, pos: number, end: number) => Node;
-    getTokenConstructor(): new <TKind extends SyntaxKind>(kind: TKind, pos: number, end: number) => Token<TKind>;
-    getIdentifierConstructor(): new (kind: SyntaxKind.Identifier, pos: number, end: number) => Identifier;
-    getPrivateIdentifierConstructor(): new (kind: SyntaxKind.PrivateIdentifier, pos: number, end: number) => PrivateIdentifier;
-    getSourceFileConstructor(): new (kind: SyntaxKind.SourceFile, pos: number, end: number) => SourceFile;
-    getSymbolConstructor(): new (flags: SymbolFlags, name: __String) => Symbol;
-    getTypeConstructor(): new (checker: TypeChecker, flags: TypeFlags) => Type;
-    getSignatureConstructor(): new (checker: TypeChecker, flags: SignatureFlags) => Signature;
-    getSourceMapSourceConstructor(): new (fileName: string, text: string, skipTrivia?: (pos: number) => number) => SourceMapSource;
-}
-
-function Symbol(this: Symbol, flags: SymbolFlags, name: __String) {
-    this.flags = flags;
-    this.escapedName = name;
-    this.declarations = undefined;
-    this.valueDeclaration = undefined;
-    this.id = 0;
-    this.mergeId = 0;
-    this.parent = undefined;
-    this.members = undefined;
-    this.exports = undefined;
-    this.exportSymbol = undefined;
-    this.constEnumOnlyModule = undefined;
-    this.isReferenced = undefined;
-    this.isAssigned = undefined;
-    (this as any).links = undefined; // used by TransientSymbol
-}
-
-function Type(this: Type, checker: TypeChecker, flags: TypeFlags) {
-    this.flags = flags;
-    if (Debug.isDebugging || tracing) {
-        this.checker = checker;
-    }
-}
-
-function Signature(this: Signature, checker: TypeChecker, flags: SignatureFlags) {
-    this.flags = flags;
-    if (Debug.isDebugging) {
-        this.checker = checker;
-    }
-}
-
-function Node(this: Mutable<Node>, kind: SyntaxKind, pos: number, end: number) {
-    this.pos = pos;
-    this.end = end;
-    this.kind = kind;
-    this.id = 0;
-    this.flags = NodeFlags.None;
-    this.modifierFlagsCache = ModifierFlags.None;
-    this.transformFlags = TransformFlags.None;
-    this.parent = undefined!;
-    this.original = undefined;
-    this.emitNode = undefined;
-}
-
-function Token(this: Mutable<Node>, kind: SyntaxKind, pos: number, end: number) {
-    this.pos = pos;
-    this.end = end;
-    this.kind = kind;
-    this.id = 0;
-    this.flags = NodeFlags.None;
-    this.transformFlags = TransformFlags.None;
-    this.parent = undefined!;
-    this.emitNode = undefined;
-}
-
-function Identifier(this: Mutable<Node>, kind: SyntaxKind, pos: number, end: number) {
-    this.pos = pos;
-    this.end = end;
-    this.kind = kind;
-    this.id = 0;
-    this.flags = NodeFlags.None;
-    this.transformFlags = TransformFlags.None;
-    this.parent = undefined!;
-    this.original = undefined;
-    this.emitNode = undefined;
-}
-
-function SourceMapSource(this: SourceMapSource, fileName: string, text: string, skipTrivia?: (pos: number) => number) {
-    this.fileName = fileName;
-    this.text = text;
-    this.skipTrivia = skipTrivia || (pos => pos);
-}
-
-/** @internal */
-export const objectAllocator: ObjectAllocator = {
-    getNodeConstructor: () => Node as any,
-    getTokenConstructor: () => Token as any,
-    getIdentifierConstructor: () => Identifier as any,
-    getPrivateIdentifierConstructor: () => Node as any,
-    getSourceFileConstructor: () => Node as any,
-    getSymbolConstructor: () => Symbol as any,
-    getTypeConstructor: () => Type as any,
-    getSignatureConstructor: () => Signature as any,
-    getSourceMapSourceConstructor: () => SourceMapSource as any,
-};
-
-const objectAllocatorPatchers: ((objectAllocator: ObjectAllocator) => void)[] = [];
-
-/**
- * Used by `deprecatedCompat` to patch the object allocator to apply deprecations.
- * @internal
- */
-export function addObjectAllocatorPatcher(fn: (objectAllocator: ObjectAllocator) => void) {
-    objectAllocatorPatchers.push(fn);
-    fn(objectAllocator);
-}
-
-/** @internal */
-export function setObjectAllocator(alloc: ObjectAllocator) {
-    Object.assign(objectAllocator, alloc);
-    forEach(objectAllocatorPatchers, fn => fn(objectAllocator));
 }
 
 /** @internal */
@@ -8303,62 +7753,6 @@ export function getLanguageVariant(scriptKind: ScriptKind) {
     return scriptKind === ScriptKind.TSX || scriptKind === ScriptKind.JSX || scriptKind === ScriptKind.JS || scriptKind === ScriptKind.JSON ? LanguageVariant.JSX : LanguageVariant.Standard;
 }
 
-/**
- * This is a somewhat unavoidable full tree walk to locate a JSX tag - `import.meta` requires the same,
- * but we avoid that walk (or parts of it) if at all possible using the `PossiblyContainsImportMeta` node flag.
- * Unfortunately, there's no `NodeFlag` space to do the same for JSX.
- */
-function walkTreeForJSXTags(node: Node): Node | undefined {
-    if (!(node.transformFlags & TransformFlags.ContainsJsx)) return undefined;
-    return isJsxOpeningLikeElement(node) || isJsxFragment(node) ? node : forEachChild(node, walkTreeForJSXTags);
-}
-
-function isFileModuleFromUsingJSXTag(file: SourceFile): Node | undefined {
-    // Excludes declaration files - they still require an explicit `export {}` or the like
-    // for back compat purposes. (not that declaration files should contain JSX tags!)
-    return !file.isDeclarationFile ? walkTreeForJSXTags(file) : undefined;
-}
-
-/**
- * Note that this requires file.impliedNodeFormat be set already; meaning it must be set very early on
- * in SourceFile construction.
- */
-function isFileForcedToBeModuleByFormat(file: SourceFile): true | undefined {
-    // Excludes declaration files - they still require an explicit `export {}` or the like
-    // for back compat purposes. The only non-declaration files _not_ forced to be a module are `.js` files
-    // that aren't esm-mode (meaning not in a `type: module` scope).
-    return (file.impliedNodeFormat === ModuleKind.ESNext || (fileExtensionIsOneOf(file.fileName, [Extension.Cjs, Extension.Cts, Extension.Mjs, Extension.Mts]))) && !file.isDeclarationFile ? true : undefined;
-}
-
-/** @internal */
-export function getSetExternalModuleIndicator(options: CompilerOptions): (file: SourceFile) => void {
-    // TODO: Should this callback be cached?
-    switch (getEmitModuleDetectionKind(options)) {
-        case ModuleDetectionKind.Force:
-            // All non-declaration files are modules, declaration files still do the usual isFileProbablyExternalModule
-            return (file: SourceFile) => {
-                file.externalModuleIndicator = isFileProbablyExternalModule(file) || !file.isDeclarationFile || undefined;
-            };
-        case ModuleDetectionKind.Legacy:
-            // Files are modules if they have imports, exports, or import.meta
-            return (file: SourceFile) => {
-                file.externalModuleIndicator = isFileProbablyExternalModule(file);
-            };
-        case ModuleDetectionKind.Auto:
-            // If module is nodenext or node16, all esm format files are modules
-            // If jsx is react-jsx or react-jsxdev then jsx tags force module-ness
-            // otherwise, the presence of import or export statments (or import.meta) implies module-ness
-            const checks: ((file: SourceFile) => Node | true | undefined)[] = [isFileProbablyExternalModule];
-            if (options.jsx === JsxEmit.ReactJSX || options.jsx === JsxEmit.ReactJSXDev) {
-                checks.push(isFileModuleFromUsingJSXTag);
-            }
-            checks.push(isFileForcedToBeModuleByFormat);
-            const combined = or(...checks);
-            const callback = (file: SourceFile) => void (file.externalModuleIndicator = combined(file));
-            return callback;
-    }
-}
-
 /** @internal */
 export function getEmitScriptTarget(compilerOptions: {module?: CompilerOptions["module"], target?: CompilerOptions["target"]}): ScriptTarget {
     return compilerOptions.target ??
@@ -8571,21 +7965,6 @@ export function getUseDefineForClassFields(compilerOptions: CompilerOptions): bo
 }
 
 /** @internal */
-export function compilerOptionsAffectSemanticDiagnostics(newOptions: CompilerOptions, oldOptions: CompilerOptions): boolean {
-    return optionsHaveChanges(oldOptions, newOptions, semanticDiagnosticsOptionDeclarations);
-}
-
-/** @internal */
-export function compilerOptionsAffectEmit(newOptions: CompilerOptions, oldOptions: CompilerOptions): boolean {
-    return optionsHaveChanges(oldOptions, newOptions, affectsEmitOptionDeclarations);
-}
-
-/** @internal */
-export function compilerOptionsAffectDeclarationPath(newOptions: CompilerOptions, oldOptions: CompilerOptions): boolean {
-    return optionsHaveChanges(oldOptions, newOptions, affectsDeclarationPathOptionDeclarations);
-}
-
-/** @internal */
 export function getCompilerOptionValue(options: CompilerOptions, option: CommandLineOption): unknown {
     return option.strictFlag ? getStrictOptionValue(options, option.name as StrictOptionName) : options[option.name];
 }
@@ -8630,110 +8009,6 @@ export function hasZeroOrOneAsteriskCharacter(str: string): boolean {
     return true;
 }
 
-/** @internal */
-export interface SymlinkedDirectory {
-    /** Matches the casing returned by `realpath`.  Used to compute the `realpath` of children. */
-    real: string;
-    /** toPath(real).  Stored to avoid repeated recomputation. */
-    realPath: Path;
-}
-
-/** @internal */
-export interface SymlinkCache {
-    /** Gets a map from symlink to realpath. Keys have trailing directory separators. */
-    getSymlinkedDirectories(): ReadonlyMap<Path, SymlinkedDirectory | false> | undefined;
-    /** Gets a map from realpath to symlinks. Keys have trailing directory separators. */
-    getSymlinkedDirectoriesByRealpath(): MultiMap<Path, string> | undefined;
-    /** Gets a map from symlink to realpath */
-    getSymlinkedFiles(): ReadonlyMap<Path, string> | undefined;
-    setSymlinkedDirectory(symlink: string, real: SymlinkedDirectory | false): void;
-    setSymlinkedFile(symlinkPath: Path, real: string): void;
-    /**
-     * @internal
-     * Uses resolvedTypeReferenceDirectives from program instead of from files, since files
-     * don't include automatic type reference directives. Must be called only when
-     * `hasProcessedResolutions` returns false (once per cache instance).
-     */
-    setSymlinksFromResolutions(files: readonly SourceFile[], typeReferenceDirectives: ModeAwareCache<ResolvedTypeReferenceDirectiveWithFailedLookupLocations>): void;
-    /**
-     * @internal
-     * Whether `setSymlinksFromResolutions` has already been called.
-     */
-    hasProcessedResolutions(): boolean;
-}
-
-/** @internal */
-export function createSymlinkCache(cwd: string, getCanonicalFileName: GetCanonicalFileName): SymlinkCache {
-    let symlinkedDirectories: Map<Path, SymlinkedDirectory | false> | undefined;
-    let symlinkedDirectoriesByRealpath: MultiMap<Path, string> | undefined;
-    let symlinkedFiles: Map<Path, string> | undefined;
-    let hasProcessedResolutions = false;
-    return {
-        getSymlinkedFiles: () => symlinkedFiles,
-        getSymlinkedDirectories: () => symlinkedDirectories,
-        getSymlinkedDirectoriesByRealpath: () => symlinkedDirectoriesByRealpath,
-        setSymlinkedFile: (path, real) => (symlinkedFiles || (symlinkedFiles = new Map())).set(path, real),
-        setSymlinkedDirectory: (symlink, real) => {
-            // Large, interconnected dependency graphs in pnpm will have a huge number of symlinks
-            // where both the realpath and the symlink path are inside node_modules/.pnpm. Since
-            // this path is never a candidate for a module specifier, we can ignore it entirely.
-            let symlinkPath = toPath(symlink, cwd, getCanonicalFileName);
-            if (!containsIgnoredPath(symlinkPath)) {
-                symlinkPath = ensureTrailingDirectorySeparator(symlinkPath);
-                if (real !== false && !symlinkedDirectories?.has(symlinkPath)) {
-                    (symlinkedDirectoriesByRealpath ||= createMultiMap()).add(ensureTrailingDirectorySeparator(real.realPath), symlink);
-                }
-                (symlinkedDirectories || (symlinkedDirectories = new Map())).set(symlinkPath, real);
-            }
-        },
-        setSymlinksFromResolutions(files, typeReferenceDirectives) {
-            Debug.assert(!hasProcessedResolutions);
-            hasProcessedResolutions = true;
-            for (const file of files) {
-                file.resolvedModules?.forEach(resolution => processResolution(this, resolution.resolvedModule));
-                file.resolvedTypeReferenceDirectiveNames?.forEach(resolution => processResolution(this, resolution.resolvedTypeReferenceDirective));
-            }
-            typeReferenceDirectives.forEach(resolution => processResolution(this, resolution.resolvedTypeReferenceDirective));
-        },
-        hasProcessedResolutions: () => hasProcessedResolutions,
-    };
-
-    function processResolution(cache: SymlinkCache, resolution: ResolvedModuleFull | ResolvedTypeReferenceDirective | undefined) {
-        if (!resolution || !resolution.originalPath || !resolution.resolvedFileName) return;
-        const { resolvedFileName, originalPath } = resolution;
-        cache.setSymlinkedFile(toPath(originalPath, cwd, getCanonicalFileName), resolvedFileName);
-        const [commonResolved, commonOriginal] = guessDirectorySymlink(resolvedFileName, originalPath, cwd, getCanonicalFileName) || emptyArray;
-        if (commonResolved && commonOriginal) {
-            cache.setSymlinkedDirectory(
-                commonOriginal,
-                { real: commonResolved, realPath: toPath(commonResolved, cwd, getCanonicalFileName) });
-        }
-    }
-}
-
-function guessDirectorySymlink(a: string, b: string, cwd: string, getCanonicalFileName: GetCanonicalFileName): [string, string] | undefined {
-    const aParts = getPathComponents(getNormalizedAbsolutePath(a, cwd));
-    const bParts = getPathComponents(getNormalizedAbsolutePath(b, cwd));
-    let isDirectory = false;
-    while (
-        aParts.length >= 2 && bParts.length >= 2 &&
-        !isNodeModulesOrScopedPackageDirectory(aParts[aParts.length - 2], getCanonicalFileName) &&
-        !isNodeModulesOrScopedPackageDirectory(bParts[bParts.length - 2], getCanonicalFileName) &&
-        getCanonicalFileName(aParts[aParts.length - 1]) === getCanonicalFileName(bParts[bParts.length - 1])
-    ) {
-        aParts.pop();
-        bParts.pop();
-        isDirectory = true;
-    }
-    return isDirectory ? [getPathFromPathComponents(aParts), getPathFromPathComponents(bParts)] : undefined;
-}
-
-// KLUDGE: Don't assume one 'node_modules' links to another. More likely a single directory inside the node_modules is the symlink.
-// ALso, don't assume that an `@foo` directory is linked. More likely the contents of that are linked.
-function isNodeModulesOrScopedPackageDirectory(s: string | undefined, getCanonicalFileName: GetCanonicalFileName): boolean {
-    return s !== undefined && (getCanonicalFileName(s) === "node_modules" || startsWith(s, "@"));
-}
-
 function stripLeadingDirectorySeparator(s: string): string | undefined {
     return isAnyDirectorySeparator(s.charCodeAt(0)) ? s.slice(1) : undefined;
 }
@@ -8742,341 +8017,6 @@ function stripLeadingDirectorySeparator(s: string): string | undefined {
 export function tryRemoveDirectoryPrefix(path: string, dirPath: string, getCanonicalFileName: GetCanonicalFileName): string | undefined {
     const withoutPrefix = tryRemovePrefix(path, dirPath, getCanonicalFileName);
     return withoutPrefix === undefined ? undefined : stripLeadingDirectorySeparator(withoutPrefix);
-}
-
-// Reserved characters, forces escaping of any non-word (or digit), non-whitespace character.
-// It may be inefficient (we could just match (/[-[\]{}()*+?.,\\^$|#\s]/g), but this is future
-// proof.
-const reservedCharacterPattern = /[^\w\s\/]/g;
-
-/** @internal */
-export function regExpEscape(text: string) {
-    return text.replace(reservedCharacterPattern, escapeRegExpCharacter);
-}
-
-function escapeRegExpCharacter(match: string) {
-    return "\\" + match;
-}
-
-const wildcardCharCodes = [CharacterCodes.asterisk, CharacterCodes.question];
-
-/** @internal */
-export const commonPackageFolders: readonly string[] = ["node_modules", "bower_components", "jspm_packages"];
-
-const implicitExcludePathRegexPattern = `(?!(${commonPackageFolders.join("|")})(/|$))`;
-
-interface WildcardMatcher {
-    singleAsteriskRegexFragment: string;
-    doubleAsteriskRegexFragment: string;
-    replaceWildcardCharacter: (match: string) => string;
-}
-
-const filesMatcher: WildcardMatcher = {
-    /**
-     * Matches any single directory segment unless it is the last segment and a .min.js file
-     * Breakdown:
-     *  [^./]                   # matches everything up to the first . character (excluding directory separators)
-     *  (\\.(?!min\\.js$))?     # matches . characters but not if they are part of the .min.js file extension
-     */
-    singleAsteriskRegexFragment: "([^./]|(\\.(?!min\\.js$))?)*",
-    /**
-     * Regex for the ** wildcard. Matches any number of subdirectories. When used for including
-     * files or directories, does not match subdirectories that start with a . character
-     */
-    doubleAsteriskRegexFragment: `(/${implicitExcludePathRegexPattern}[^/.][^/]*)*?`,
-    replaceWildcardCharacter: match => replaceWildcardCharacter(match, filesMatcher.singleAsteriskRegexFragment)
-};
-
-const directoriesMatcher: WildcardMatcher = {
-    singleAsteriskRegexFragment: "[^/]*",
-    /**
-     * Regex for the ** wildcard. Matches any number of subdirectories. When used for including
-     * files or directories, does not match subdirectories that start with a . character
-     */
-    doubleAsteriskRegexFragment: `(/${implicitExcludePathRegexPattern}[^/.][^/]*)*?`,
-    replaceWildcardCharacter: match => replaceWildcardCharacter(match, directoriesMatcher.singleAsteriskRegexFragment)
-};
-
-const excludeMatcher: WildcardMatcher = {
-    singleAsteriskRegexFragment: "[^/]*",
-    doubleAsteriskRegexFragment: "(/.+?)?",
-    replaceWildcardCharacter: match => replaceWildcardCharacter(match, excludeMatcher.singleAsteriskRegexFragment)
-};
-
-const wildcardMatchers = {
-    files: filesMatcher,
-    directories: directoriesMatcher,
-    exclude: excludeMatcher
-};
-
-/** @internal */
-export function getRegularExpressionForWildcard(specs: readonly string[] | undefined, basePath: string, usage: "files" | "directories" | "exclude"): string | undefined {
-    const patterns = getRegularExpressionsForWildcards(specs, basePath, usage);
-    if (!patterns || !patterns.length) {
-        return undefined;
-    }
-
-    const pattern = patterns.map(pattern => `(${pattern})`).join("|");
-    // If excluding, match "foo/bar/baz...", but if including, only allow "foo".
-    const terminator = usage === "exclude" ? "($|/)" : "$";
-    return `^(${pattern})${terminator}`;
-}
-
-/** @internal */
-export function getRegularExpressionsForWildcards(specs: readonly string[] | undefined, basePath: string, usage: "files" | "directories" | "exclude"): readonly string[] | undefined {
-    if (specs === undefined || specs.length === 0) {
-        return undefined;
-    }
-
-    return flatMap(specs, spec =>
-        spec && getSubPatternFromSpec(spec, basePath, usage, wildcardMatchers[usage]));
-}
-
-/**
- * An "includes" path "foo" is implicitly a glob "foo/** /*" (without the space) if its last component has no extension,
- * and does not contain any glob characters itself.
- *
- * @internal
- */
-export function isImplicitGlob(lastPathComponent: string): boolean {
-    return !/[.*?]/.test(lastPathComponent);
-}
-
-/** @internal */
-export function getPatternFromSpec(spec: string, basePath: string, usage: "files" | "directories" | "exclude") {
-    const pattern = spec && getSubPatternFromSpec(spec, basePath, usage, wildcardMatchers[usage]);
-    return pattern && `^(${pattern})${usage === "exclude" ? "($|/)" : "$"}`;
-}
-
-function getSubPatternFromSpec(spec: string, basePath: string, usage: "files" | "directories" | "exclude", { singleAsteriskRegexFragment, doubleAsteriskRegexFragment, replaceWildcardCharacter }: WildcardMatcher): string | undefined {
-    let subpattern = "";
-    let hasWrittenComponent = false;
-    const components = getNormalizedPathComponents(spec, basePath);
-    const lastComponent = last(components);
-    if (usage !== "exclude" && lastComponent === "**") {
-        return undefined;
-    }
-
-    // getNormalizedPathComponents includes the separator for the root component.
-    // We need to remove to create our regex correctly.
-    components[0] = removeTrailingDirectorySeparator(components[0]);
-
-    if (isImplicitGlob(lastComponent)) {
-        components.push("**", "*");
-    }
-
-    let optionalCount = 0;
-    for (let component of components) {
-        if (component === "**") {
-            subpattern += doubleAsteriskRegexFragment;
-        }
-        else {
-            if (usage === "directories") {
-                subpattern += "(";
-                optionalCount++;
-            }
-
-            if (hasWrittenComponent) {
-                subpattern += directorySeparator;
-            }
-
-            if (usage !== "exclude") {
-                let componentPattern = "";
-                // The * and ? wildcards should not match directories or files that start with . if they
-                // appear first in a component. Dotted directories and files can be included explicitly
-                // like so: **/.*/.*
-                if (component.charCodeAt(0) === CharacterCodes.asterisk) {
-                    componentPattern += "([^./]" + singleAsteriskRegexFragment + ")?";
-                    component = component.substr(1);
-                }
-                else if (component.charCodeAt(0) === CharacterCodes.question) {
-                    componentPattern += "[^./]";
-                    component = component.substr(1);
-                }
-
-                componentPattern += component.replace(reservedCharacterPattern, replaceWildcardCharacter);
-
-                // Patterns should not include subfolders like node_modules unless they are
-                // explicitly included as part of the path.
-                //
-                // As an optimization, if the component pattern is the same as the component,
-                // then there definitely were no wildcard characters and we do not need to
-                // add the exclusion pattern.
-                if (componentPattern !== component) {
-                    subpattern += implicitExcludePathRegexPattern;
-                }
-
-                subpattern += componentPattern;
-            }
-            else {
-                subpattern += component.replace(reservedCharacterPattern, replaceWildcardCharacter);
-            }
-        }
-
-        hasWrittenComponent = true;
-    }
-
-    while (optionalCount > 0) {
-        subpattern += ")?";
-        optionalCount--;
-    }
-
-    return subpattern;
-}
-
-function replaceWildcardCharacter(match: string, singleAsteriskRegexFragment: string) {
-    return match === "*" ? singleAsteriskRegexFragment : match === "?" ? "[^/]" : "\\" + match;
-}
-
-/** @internal */
-export interface FileSystemEntries {
-    readonly files: readonly string[];
-    readonly directories: readonly string[];
-}
-
-/** @internal */
-export interface FileMatcherPatterns {
-    /** One pattern for each "include" spec. */
-    includeFilePatterns: readonly string[] | undefined;
-    /** One pattern matching one of any of the "include" specs. */
-    includeFilePattern: string | undefined;
-    includeDirectoryPattern: string | undefined;
-    excludePattern: string | undefined;
-    basePaths: readonly string[];
-}
-
-/**
- * @param path directory of the tsconfig.json
- *
- * @internal
- */
-export function getFileMatcherPatterns(path: string, excludes: readonly string[] | undefined, includes: readonly string[] | undefined, useCaseSensitiveFileNames: boolean, currentDirectory: string): FileMatcherPatterns {
-    path = normalizePath(path);
-    currentDirectory = normalizePath(currentDirectory);
-    const absolutePath = combinePaths(currentDirectory, path);
-
-    return {
-        includeFilePatterns: map(getRegularExpressionsForWildcards(includes, absolutePath, "files"), pattern => `^${pattern}$`),
-        includeFilePattern: getRegularExpressionForWildcard(includes, absolutePath, "files"),
-        includeDirectoryPattern: getRegularExpressionForWildcard(includes, absolutePath, "directories"),
-        excludePattern: getRegularExpressionForWildcard(excludes, absolutePath, "exclude"),
-        basePaths: getBasePaths(path, includes, useCaseSensitiveFileNames)
-    };
-}
-
-/** @internal */
-export function getRegexFromPattern(pattern: string, useCaseSensitiveFileNames: boolean): RegExp {
-    return new RegExp(pattern, useCaseSensitiveFileNames ? "" : "i");
-}
-
-/**
- * @param path directory of the tsconfig.json
- *
- * @internal
- */
-export function matchFiles(path: string, extensions: readonly string[] | undefined, excludes: readonly string[] | undefined, includes: readonly string[] | undefined, useCaseSensitiveFileNames: boolean, currentDirectory: string, depth: number | undefined, getFileSystemEntries: (path: string) => FileSystemEntries, realpath: (path: string) => string): string[] {
-    path = normalizePath(path);
-    currentDirectory = normalizePath(currentDirectory);
-
-    const patterns = getFileMatcherPatterns(path, excludes, includes, useCaseSensitiveFileNames, currentDirectory);
-
-    const includeFileRegexes = patterns.includeFilePatterns && patterns.includeFilePatterns.map(pattern => getRegexFromPattern(pattern, useCaseSensitiveFileNames));
-    const includeDirectoryRegex = patterns.includeDirectoryPattern && getRegexFromPattern(patterns.includeDirectoryPattern, useCaseSensitiveFileNames);
-    const excludeRegex = patterns.excludePattern && getRegexFromPattern(patterns.excludePattern, useCaseSensitiveFileNames);
-
-    // Associate an array of results with each include regex. This keeps results in order of the "include" order.
-    // If there are no "includes", then just put everything in results[0].
-    const results: string[][] = includeFileRegexes ? includeFileRegexes.map(() => []) : [[]];
-    const visited = new Map<string, true>();
-    const toCanonical = createGetCanonicalFileName(useCaseSensitiveFileNames);
-    for (const basePath of patterns.basePaths) {
-        visitDirectory(basePath, combinePaths(currentDirectory, basePath), depth);
-    }
-
-    return flatten(results);
-
-    function visitDirectory(path: string, absolutePath: string, depth: number | undefined) {
-        const canonicalPath = toCanonical(realpath(absolutePath));
-        if (visited.has(canonicalPath)) return;
-        visited.set(canonicalPath, true);
-        const { files, directories } = getFileSystemEntries(path);
-
-        for (const current of sort<string>(files, compareStringsCaseSensitive)) {
-            const name = combinePaths(path, current);
-            const absoluteName = combinePaths(absolutePath, current);
-            if (extensions && !fileExtensionIsOneOf(name, extensions)) continue;
-            if (excludeRegex && excludeRegex.test(absoluteName)) continue;
-            if (!includeFileRegexes) {
-                results[0].push(name);
-            }
-            else {
-                const includeIndex = findIndex(includeFileRegexes, re => re.test(absoluteName));
-                if (includeIndex !== -1) {
-                    results[includeIndex].push(name);
-                }
-            }
-        }
-
-        if (depth !== undefined) {
-            depth--;
-            if (depth === 0) {
-                return;
-            }
-        }
-
-        for (const current of sort<string>(directories, compareStringsCaseSensitive)) {
-            const name = combinePaths(path, current);
-            const absoluteName = combinePaths(absolutePath, current);
-            if ((!includeDirectoryRegex || includeDirectoryRegex.test(absoluteName)) &&
-                (!excludeRegex || !excludeRegex.test(absoluteName))) {
-                visitDirectory(name, absoluteName, depth);
-            }
-        }
-    }
-}
-
-/**
- * Computes the unique non-wildcard base paths amongst the provided include patterns.
- */
-function getBasePaths(path: string, includes: readonly string[] | undefined, useCaseSensitiveFileNames: boolean): string[] {
-    // Storage for our results in the form of literal paths (e.g. the paths as written by the user).
-    const basePaths: string[] = [path];
-
-    if (includes) {
-        // Storage for literal base paths amongst the include patterns.
-        const includeBasePaths: string[] = [];
-        for (const include of includes) {
-            // We also need to check the relative paths by converting them to absolute and normalizing
-            // in case they escape the base path (e.g "..\somedirectory")
-            const absolute: string = isRootedDiskPath(include) ? include : normalizePath(combinePaths(path, include));
-            // Append the literal and canonical candidate base paths.
-            includeBasePaths.push(getIncludeBasePath(absolute));
-        }
-
-        // Sort the offsets array using either the literal or canonical path representations.
-        includeBasePaths.sort(getStringComparer(!useCaseSensitiveFileNames));
-
-        // Iterate over each include base path and include unique base paths that are not a
-        // subpath of an existing base path
-        for (const includeBasePath of includeBasePaths) {
-            if (every(basePaths, basePath => !containsPath(basePath, includeBasePath, path, !useCaseSensitiveFileNames))) {
-                basePaths.push(includeBasePath);
-            }
-        }
-    }
-
-    return basePaths;
-}
-
-function getIncludeBasePath(absolute: string): string {
-    const wildcardOffset = indexOfAnyCharCode(absolute, wildcardCharCodes);
-    if (wildcardOffset < 0) {
-        // No "*" or "?" in the path
-        return !hasExtension(absolute)
-            ? absolute
-            : removeTrailingDirectorySeparator(getDirectoryPath(absolute));
-    }
-    return absolute.substring(0, absolute.lastIndexOf(directorySeparator, wildcardOffset));
 }
 
 /** @internal */
@@ -9113,76 +8053,9 @@ export function getScriptKindFromFileName(fileName: string): ScriptKind {
     }
 }
 
-/**
- *  Groups of supported extensions in order of file resolution precedence. (eg, TS > TSX > DTS and seperately, CTS > DCTS)
- *
- * @internal
- */
-export const supportedTSExtensions: readonly Extension[][] = [[Extension.Ts, Extension.Tsx, Extension.Dts], [Extension.Cts, Extension.Dcts], [Extension.Mts, Extension.Dmts]];
 /** @internal */
-export const supportedTSExtensionsFlat: readonly Extension[] = flatten(supportedTSExtensions);
-const supportedTSExtensionsWithJson: readonly Extension[][] = [...supportedTSExtensions, [Extension.Json]];
-/** Must have ".d.ts" first because if ".ts" goes first, that will be detected as the extension instead of ".d.ts". */
-const supportedTSExtensionsForExtractExtension: readonly Extension[] = [Extension.Dts, Extension.Dcts, Extension.Dmts, Extension.Cts, Extension.Mts, Extension.Ts, Extension.Tsx];
-/** @internal */
-export const supportedJSExtensions: readonly Extension[][] = [[Extension.Js, Extension.Jsx], [Extension.Mjs], [Extension.Cjs]];
-/** @internal */
-export const supportedJSExtensionsFlat: readonly Extension[] = flatten(supportedJSExtensions);
-const allSupportedExtensions: readonly Extension[][] = [[Extension.Ts, Extension.Tsx, Extension.Dts, Extension.Js, Extension.Jsx], [Extension.Cts, Extension.Dcts, Extension.Cjs], [Extension.Mts, Extension.Dmts, Extension.Mjs]];
-const allSupportedExtensionsWithJson: readonly Extension[][] = [...allSupportedExtensions, [Extension.Json]];
-/** @internal */
-export const supportedDeclarationExtensions: readonly Extension[] = [Extension.Dts, Extension.Dcts, Extension.Dmts];
-/** @internal */
-export const supportedTSImplementationExtensions: readonly Extension[] = [Extension.Ts, Extension.Cts, Extension.Mts, Extension.Tsx];
-/** @internal */
-export const extensionsNotSupportingExtensionlessResolution: readonly Extension[] = [Extension.Mts, Extension.Dmts, Extension.Mjs, Extension.Cts, Extension.Dcts, Extension.Cjs];
-
-/** @internal */
-export function getSupportedExtensions(options?: CompilerOptions): readonly Extension[][];
-/** @internal */
-export function getSupportedExtensions(options?: CompilerOptions, extraFileExtensions?: readonly FileExtensionInfo[]): readonly string[][];
-/** @internal */
-export function getSupportedExtensions(options?: CompilerOptions, extraFileExtensions?: readonly FileExtensionInfo[]): readonly string[][] {
-    const needJsExtensions = options && getAllowJSCompilerOption(options);
-
-    if (!extraFileExtensions || extraFileExtensions.length === 0) {
-        return needJsExtensions ? allSupportedExtensions : supportedTSExtensions;
-    }
-
-    const builtins = needJsExtensions ? allSupportedExtensions : supportedTSExtensions;
-    const flatBuiltins = flatten(builtins);
-    const extensions = [
-        ...builtins,
-        ...mapDefined(extraFileExtensions, x => x.scriptKind === ScriptKind.Deferred || needJsExtensions && isJSLike(x.scriptKind) && flatBuiltins.indexOf(x.extension as Extension) === -1 ? [x.extension] : undefined)
-    ];
-
-    return extensions;
-}
-
-/** @internal */
-export function getSupportedExtensionsWithJsonIfResolveJsonModule(options: CompilerOptions | undefined, supportedExtensions: readonly Extension[][]): readonly Extension[][];
-/** @internal */
-export function getSupportedExtensionsWithJsonIfResolveJsonModule(options: CompilerOptions | undefined, supportedExtensions: readonly string[][]): readonly string[][];
-/** @internal */
-export function getSupportedExtensionsWithJsonIfResolveJsonModule(options: CompilerOptions | undefined, supportedExtensions: readonly string[][]): readonly string[][] {
-    if (!options || !getResolveJsonModule(options)) return supportedExtensions;
-    if (supportedExtensions === allSupportedExtensions) return allSupportedExtensionsWithJson;
-    if (supportedExtensions === supportedTSExtensions) return supportedTSExtensionsWithJson;
-    return [...supportedExtensions, [Extension.Json]];
-}
-
-function isJSLike(scriptKind: ScriptKind | undefined): boolean {
+export function isJSLike(scriptKind: ScriptKind | undefined): boolean {
     return scriptKind === ScriptKind.JS || scriptKind === ScriptKind.JSX;
-}
-
-/** @internal */
-export function hasJSFileExtension(fileName: string): boolean {
-    return some(supportedJSExtensionsFlat, extension => fileExtensionIs(fileName, extension));
-}
-
-/** @internal */
-export function hasTSFileExtension(fileName: string): boolean {
-    return some(supportedTSExtensionsFlat, extension => fileExtensionIs(fileName, extension));
 }
 
 /**
@@ -9196,100 +8069,6 @@ export const enum ModuleSpecifierEnding {
     TsExtension,
 }
 
-/** @internal */
-export function usesExtensionsOnImports({ imports }: SourceFile, hasExtension: (text: string) => boolean = or(hasJSFileExtension, hasTSFileExtension)): boolean {
-    return firstDefined(imports, ({ text }) => pathIsRelative(text) && !fileExtensionIsOneOf(text, extensionsNotSupportingExtensionlessResolution)
-        ? hasExtension(text)
-        : undefined) || false;
-}
-
-/** @internal */
-export function getModuleSpecifierEndingPreference(preference: UserPreferences["importModuleSpecifierEnding"], resolutionMode: ResolutionMode, compilerOptions: CompilerOptions, sourceFile: SourceFile): ModuleSpecifierEnding {
-    if (preference === "js" || resolutionMode === ModuleKind.ESNext) {
-        // Extensions are explicitly requested or required. Now choose between .js and .ts.
-        if (!shouldAllowImportingTsExtension(compilerOptions)) {
-            return ModuleSpecifierEnding.JsExtension;
-        }
-        // `allowImportingTsExtensions` is a strong signal, so use .ts unless the file
-        // already uses .js extensions and no .ts extensions.
-        return inferPreference() !== ModuleSpecifierEnding.JsExtension
-            ? ModuleSpecifierEnding.TsExtension
-            : ModuleSpecifierEnding.JsExtension;
-    }
-    if (preference === "minimal") {
-        return ModuleSpecifierEnding.Minimal;
-    }
-    if (preference === "index") {
-        return ModuleSpecifierEnding.Index;
-    }
-
-    // No preference was specified.
-    // Look at imports and/or requires to guess whether .js, .ts, or extensionless imports are preferred.
-    // N.B. that `Index` detection is not supported since it would require file system probing to do
-    // accurately, and more importantly, literally nobody wants `Index` and its existence is a mystery.
-    if (!shouldAllowImportingTsExtension(compilerOptions)) {
-        // If .ts imports are not valid, we only need to see one .js import to go with that.
-        return usesExtensionsOnImports(sourceFile) ? ModuleSpecifierEnding.JsExtension : ModuleSpecifierEnding.Minimal;
-    }
-
-    return inferPreference();
-
-    function inferPreference() {
-        let usesJsExtensions = false;
-        const specifiers = sourceFile.imports.length ? sourceFile.imports.map(i => i.text) :
-            isSourceFileJS(sourceFile) ? getRequiresAtTopOfFile(sourceFile).map(r => r.arguments[0].text) :
-            emptyArray;
-        for (const specifier of specifiers) {
-            if (pathIsRelative(specifier)) {
-                if (fileExtensionIsOneOf(specifier, extensionsNotSupportingExtensionlessResolution)) {
-                    // These extensions are not optional, so do not indicate a preference.
-                    continue;
-                }
-                if (hasTSFileExtension(specifier)) {
-                    return ModuleSpecifierEnding.TsExtension;
-                }
-                if (hasJSFileExtension(specifier)) {
-                    usesJsExtensions = true;
-                }
-            }
-        }
-        return usesJsExtensions ? ModuleSpecifierEnding.JsExtension : ModuleSpecifierEnding.Minimal;
-    }
-}
-
-function getRequiresAtTopOfFile(sourceFile: SourceFile): readonly RequireOrImportCall[] {
-    let nonRequireStatementCount = 0;
-    let requires: RequireOrImportCall[] | undefined;
-    for (const statement of sourceFile.statements) {
-        if (nonRequireStatementCount > 3) {
-            break;
-        }
-        if (isRequireVariableStatement(statement)) {
-            requires = concatenate(requires, statement.declarationList.declarations.map(d => d.initializer));
-        }
-        else if (isExpressionStatement(statement) && isRequireCall(statement.expression, /*requireStringLiteralLikeArgument*/ true)) {
-            requires = append(requires, statement.expression);
-        }
-        else {
-            nonRequireStatementCount++;
-        }
-    }
-    return requires || emptyArray;
-}
-
-/** @internal */
-export function isSupportedSourceFileName(fileName: string, compilerOptions?: CompilerOptions, extraFileExtensions?: readonly FileExtensionInfo[]) {
-    if (!fileName) return false;
-
-    const supportedExtensions = getSupportedExtensions(compilerOptions, extraFileExtensions);
-    for (const extension of flatten(getSupportedExtensionsWithJsonIfResolveJsonModule(compilerOptions, supportedExtensions))) {
-        if (fileExtensionIs(fileName, extension)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 function numberOfDirectorySeparators(str: string) {
     const match = str.match(/\//g);
     return match ? match.length : 0;
@@ -9301,33 +8080,6 @@ export function compareNumberOfDirectorySeparators(path1: string, path2: string)
         numberOfDirectorySeparators(path1),
         numberOfDirectorySeparators(path2)
     );
-}
-
-const extensionsToRemove = [Extension.Dts, Extension.Dmts, Extension.Dcts, Extension.Mjs, Extension.Mts, Extension.Cjs, Extension.Cts, Extension.Ts, Extension.Js, Extension.Tsx, Extension.Jsx, Extension.Json];
-/** @internal */
-export function removeFileExtension(path: string): string {
-    for (const ext of extensionsToRemove) {
-        const extensionless = tryRemoveExtension(path, ext);
-        if (extensionless !== undefined) {
-            return extensionless;
-        }
-    }
-    return path;
-}
-
-/** @internal */
-export function tryRemoveExtension(path: string, extension: string): string | undefined {
-    return fileExtensionIs(path, extension) ? removeExtension(path, extension) : undefined;
-}
-
-/** @internal */
-export function removeExtension(path: string, extension: string): string {
-    return path.substring(0, path.length - extension.length);
-}
-
-/** @internal */
-export function changeExtension<T extends string | Path>(path: T, newExtension: string): T {
-    return changeAnyExtension(path, newExtension, extensionsToRemove, /*ignoreCase*/ false) as T;
 }
 
 /**
@@ -9355,58 +8107,9 @@ export function tryParsePatterns(paths: MapLike<string[]>): (string | Pattern)[]
 }
 
 /** @internal */
-export function positionIsSynthesized(pos: number): boolean {
-    // This is a fast way of testing the following conditions:
-    //  pos === undefined || pos === null || isNaN(pos) || pos < 0;
-    return !(pos >= 0);
-}
-
-/**
- * True if an extension is one of the supported TypeScript extensions.
- *
- * @internal
- */
-export function extensionIsTS(ext: string): boolean {
-    return ext === Extension.Ts || ext === Extension.Tsx || ext === Extension.Dts || ext === Extension.Cts || ext === Extension.Mts || ext === Extension.Dmts || ext === Extension.Dcts || (startsWith(ext, ".d.") && endsWith(ext, ".ts"));
-}
-
-/** @internal */
-export function resolutionExtensionIsTSOrJson(ext: string) {
-    return extensionIsTS(ext) || ext === Extension.Json;
-}
-
-/**
- * Gets the extension from a path.
- * Path must have a valid extension.
- *
- * @internal
- */
-export function extensionFromPath(path: string): Extension {
-    const ext = tryGetExtensionFromPath(path);
-    return ext !== undefined ? ext : Debug.fail(`File ${path} has unknown extension.`);
-}
-
-/** @internal */
-export function isAnySupportedFileExtension(path: string): boolean {
-    return tryGetExtensionFromPath(path) !== undefined;
-}
-
-/** @internal */
-export function tryGetExtensionFromPath(path: string): Extension | undefined {
-    return find(extensionsToRemove, e => fileExtensionIs(path, e));
-}
-
-/** @internal */
 export function isCheckJsEnabledForFile(sourceFile: SourceFile, compilerOptions: CompilerOptions) {
     return sourceFile.checkJsDirective ? sourceFile.checkJsDirective.enabled : compilerOptions.checkJs;
 }
-
-/** @internal */
-export const emptyFileSystemEntries: FileSystemEntries = {
-    files: emptyArray,
-    directories: emptyArray
-};
-
 
 /**
  * patternOrStrings contains both patterns (containing "*") and regular strings.
@@ -9429,9 +8132,6 @@ export function matchPatternOrExact(patternOrStrings: readonly (string | Pattern
 
     return findBestPatternMatch(patterns, _ => _, candidate);
 }
-
-/** @internal */
-export type Mutable<T extends object> = { -readonly [K in keyof T]: T[K] };
 
 /** @internal */
 export function sliceAfter<T>(arr: readonly T[], value: T): readonly T[] {
@@ -9501,79 +8201,6 @@ export function skipTypeChecking(sourceFile: SourceFile, options: CompilerOption
 export function isJsonEqual(a: unknown, b: unknown): boolean {
     // eslint-disable-next-line no-null/no-null
     return a === b || typeof a === "object" && a !== null && typeof b === "object" && b !== null && equalOwnProperties(a as MapLike<unknown>, b as MapLike<unknown>, isJsonEqual);
-}
-
-/**
- * Converts a bigint literal string, e.g. `0x1234n`,
- * to its decimal string representation, e.g. `4660`.
- *
- * @internal
- */
-export function parsePseudoBigInt(stringValue: string): string {
-    let log2Base: number;
-    switch (stringValue.charCodeAt(1)) { // "x" in "0x123"
-        case CharacterCodes.b:
-        case CharacterCodes.B: // 0b or 0B
-            log2Base = 1;
-            break;
-        case CharacterCodes.o:
-        case CharacterCodes.O: // 0o or 0O
-            log2Base = 3;
-            break;
-        case CharacterCodes.x:
-        case CharacterCodes.X: // 0x or 0X
-            log2Base = 4;
-            break;
-        default: // already in decimal; omit trailing "n"
-            const nIndex = stringValue.length - 1;
-            // Skip leading 0s
-            let nonZeroStart = 0;
-            while (stringValue.charCodeAt(nonZeroStart) === CharacterCodes._0) {
-                nonZeroStart++;
-            }
-            return stringValue.slice(nonZeroStart, nIndex) || "0";
-    }
-
-    // Omit leading "0b", "0o", or "0x", and trailing "n"
-    const startIndex = 2, endIndex = stringValue.length - 1;
-    const bitsNeeded = (endIndex - startIndex) * log2Base;
-    // Stores the value specified by the string as a LE array of 16-bit integers
-    // using Uint16 instead of Uint32 so combining steps can use bitwise operators
-    const segments = new Uint16Array((bitsNeeded >>> 4) + (bitsNeeded & 15 ? 1 : 0));
-    // Add the digits, one at a time
-    for (let i = endIndex - 1, bitOffset = 0; i >= startIndex; i--, bitOffset += log2Base) {
-        const segment = bitOffset >>> 4;
-        const digitChar = stringValue.charCodeAt(i);
-        // Find character range: 0-9 < A-F < a-f
-        const digit = digitChar <= CharacterCodes._9
-            ? digitChar - CharacterCodes._0
-            : 10 + digitChar -
-                (digitChar <= CharacterCodes.F ? CharacterCodes.A : CharacterCodes.a);
-        const shiftedDigit = digit << (bitOffset & 15);
-        segments[segment] |= shiftedDigit;
-        const residual = shiftedDigit >>> 16;
-        if (residual) segments[segment + 1] |= residual; // overflows segment
-    }
-    // Repeatedly divide segments by 10 and add remainder to base10Value
-    let base10Value = "";
-    let firstNonzeroSegment = segments.length - 1;
-    let segmentsRemaining = true;
-    while (segmentsRemaining) {
-        let mod10 = 0;
-        segmentsRemaining = false;
-        for (let segment = firstNonzeroSegment; segment >= 0; segment--) {
-            const newSegment = mod10 << 16 | segments[segment];
-            const segmentValue = (newSegment / 10) | 0;
-            segments[segment] = segmentValue;
-            mod10 = newSegment - segmentValue * 10;
-            if (segmentValue && !segmentsRemaining) {
-                firstNonzeroSegment = segment;
-                segmentsRemaining = true;
-            }
-        }
-        base10Value = mod10 + base10Value;
-    }
-    return base10Value;
 }
 
 /** @internal */
@@ -9741,78 +8368,6 @@ export function setNodeFlags<T extends Node>(node: T | undefined, newFlags: Node
     return node;
 }
 
-/**
- * Bypasses immutability and directly sets the `parent` property of a `Node`.
- *
- * @internal
- */
-export function setParent<T extends Node>(child: T, parent: T["parent"] | undefined): T;
-/** @internal */
-export function setParent<T extends Node>(child: T | undefined, parent: T["parent"] | undefined): T | undefined;
-/** @internal */
-export function setParent<T extends Node>(child: T | undefined, parent: T["parent"] | undefined): T | undefined {
-    if (child && parent) {
-        (child as Mutable<T>).parent = parent;
-    }
-    return child;
-}
-
-/**
- * Bypasses immutability and directly sets the `parent` property of each `Node` in an array of nodes, if is not already set.
- *
- * @internal
- */
-export function setEachParent<T extends readonly Node[]>(children: T, parent: T[number]["parent"]): T;
-/** @internal */
-export function setEachParent<T extends readonly Node[]>(children: T | undefined, parent: T[number]["parent"]): T | undefined;
-/** @internal */
-export function setEachParent<T extends readonly Node[]>(children: T | undefined, parent: T[number]["parent"]): T | undefined {
-    if (children) {
-        for (const child of children) {
-            setParent(child, parent);
-        }
-    }
-    return children;
-}
-
-/**
- * Bypasses immutability and directly sets the `parent` property of each `Node` recursively.
- * @param rootNode The root node from which to start the recursion.
- * @param incremental When `true`, only recursively descends through nodes whose `parent` pointers are incorrect.
- * This allows us to quickly bail out of setting `parent` for subtrees during incremental parsing.
- *
- * @internal
- */
-export function setParentRecursive<T extends Node>(rootNode: T, incremental: boolean): T;
-/** @internal */
-export function setParentRecursive<T extends Node>(rootNode: T | undefined, incremental: boolean): T | undefined;
-/** @internal */
-export function setParentRecursive<T extends Node>(rootNode: T | undefined, incremental: boolean): T | undefined {
-    if (!rootNode) return rootNode;
-    forEachChildRecursively(rootNode, isJSDocNode(rootNode) ? bindParentToChildIgnoringJSDoc : bindParentToChild);
-    return rootNode;
-
-    function bindParentToChildIgnoringJSDoc(child: Node, parent: Node): void | "skip" {
-        if (incremental && child.parent === parent) {
-            return "skip";
-        }
-        setParent(child, parent);
-    }
-
-    function bindJSDoc(child: Node) {
-        if (hasJSDocNodes(child)) {
-            for (const doc of child.jsDoc!) {
-                bindParentToChildIgnoringJSDoc(doc, child);
-                forEachChildRecursively(doc, bindParentToChildIgnoringJSDoc);
-            }
-        }
-    }
-
-    function bindParentToChild(child: Node, parent: Node) {
-        return bindParentToChildIgnoringJSDoc(child, parent) || bindJSDoc(child);
-    }
-}
-
 function isPackedElement(node: Expression) {
     return !isOmittedExpression(node);
 }
@@ -9864,11 +8419,6 @@ export function expressionResultIsUnused(node: Expression): boolean {
         }
         return false;
     }
-}
-
-/** @internal */
-export function containsIgnoredPath(path: string) {
-    return some(ignoredPaths, p => stringContains(path, p));
 }
 
 /** @internal */
@@ -10015,81 +8565,8 @@ export function isNumericLiteralName(name: string | __String) {
 }
 
 /** @internal */
-export function createPropertyNameNodeForIdentifierOrLiteral(name: string, target: ScriptTarget, singleQuote?: boolean, stringNamed?: boolean) {
-    return isIdentifierText(name, target) ? factory.createIdentifier(name) :
-        !stringNamed && isNumericLiteralName(name) && +name >= 0 ? factory.createNumericLiteral(+name) :
-        factory.createStringLiteral(name, !!singleQuote);
-}
-
-/** @internal */
 export function isThisTypeParameter(type: Type): boolean {
     return !!(type.flags & TypeFlags.TypeParameter && (type as TypeParameter).isThisType);
-}
-
-/** @internal */
-export interface NodeModulePathParts {
-    readonly topLevelNodeModulesIndex: number;
-    readonly topLevelPackageNameIndex: number;
-    readonly packageRootIndex: number;
-    readonly fileNameIndex: number;
-}
-/** @internal */
-export function getNodeModulePathParts(fullPath: string): NodeModulePathParts | undefined {
-    // If fullPath can't be valid module file within node_modules, returns undefined.
-    // Example of expected pattern: /base/path/node_modules/[@scope/otherpackage/@otherscope/node_modules/]package/[subdirectory/]file.js
-    // Returns indices:                       ^            ^                                                      ^             ^
-
-    let topLevelNodeModulesIndex = 0;
-    let topLevelPackageNameIndex = 0;
-    let packageRootIndex = 0;
-    let fileNameIndex = 0;
-
-    const enum States {
-        BeforeNodeModules,
-        NodeModules,
-        Scope,
-        PackageContent
-    }
-
-    let partStart = 0;
-    let partEnd = 0;
-    let state = States.BeforeNodeModules;
-
-    while (partEnd >= 0) {
-        partStart = partEnd;
-        partEnd = fullPath.indexOf("/", partStart + 1);
-        switch (state) {
-            case States.BeforeNodeModules:
-                if (fullPath.indexOf(nodeModulesPathPart, partStart) === partStart) {
-                    topLevelNodeModulesIndex = partStart;
-                    topLevelPackageNameIndex = partEnd;
-                    state = States.NodeModules;
-                }
-                break;
-            case States.NodeModules:
-            case States.Scope:
-                if (state === States.NodeModules && fullPath.charAt(partStart + 1) === "@") {
-                    state = States.Scope;
-                }
-                else {
-                    packageRootIndex = partEnd;
-                    state = States.PackageContent;
-                }
-                break;
-            case States.PackageContent:
-                if (fullPath.indexOf(nodeModulesPathPart, partStart) === partStart) {
-                    state = States.NodeModules;
-                }
-                else {
-                    state = States.PackageContent;
-                }
-                break;
-        }
-    }
-
-    fileNameIndex = partStart;
-
-    return state > States.NodeModules ? { topLevelNodeModulesIndex, topLevelPackageNameIndex, packageRootIndex, fileNameIndex } : undefined;
 }
 
 /** @internal */
@@ -10120,12 +8597,6 @@ export function isTypeDeclaration(node: Node): node is TypeParameterDeclaration 
 }
 
 /** @internal */
-export function canHaveExportModifier(node: Node): node is Extract<HasModifiers, Statement> {
-    return isEnumDeclaration(node) || isVariableStatement(node) || isFunctionDeclaration(node) || isClassDeclaration(node)
-        || isInterfaceDeclaration(node) || isTypeDeclaration(node) || (isModuleDeclaration(node) && !isExternalModuleAugmentation(node) && !isGlobalScopeAugmentation(node));
-}
-
-/** @internal */
 export function isOptionalJSDocPropertyLikeTag(node: Node): node is JSDocPropertyLikeTag {
     if (!isJSDocPropertyLikeTag(node)) {
         return false;
@@ -10144,11 +8615,6 @@ export function canUsePropertyAccess(name: string, languageVersion: ScriptTarget
     return firstChar === CharacterCodes.hash ?
         name.length > 1 && isIdentifierStart(name.charCodeAt(1), languageVersion) :
         isIdentifierStart(firstChar, languageVersion);
-}
-
-/** @internal */
-export function hasTabstop(node: Node): boolean {
-    return getSnippetElement(node)?.kind === SnippetKind.TabStop;
 }
 
 /** @internal */
@@ -10174,6 +8640,178 @@ export function isOptionalDeclaration(declaration: Declaration): boolean {
         default:
             return false;
     }
+}
+
+/** @internal */
+export function signatureHasRestParameter(s: Signature) {
+    return !!(s.flags & SignatureFlags.HasRestParameter);
+}
+
+/** @internal */
+export function signatureHasLiteralTypes(s: Signature) {
+    return !!(s.flags & SignatureFlags.HasLiteralTypes);
+}
+
+/** @internal */
+export function skipOuterExpressions(node: Expression, kinds?: OuterExpressionKinds): Expression;
+/** @internal */
+export function skipOuterExpressions(node: Node, kinds?: OuterExpressionKinds): Node;
+/** @internal */
+export function skipOuterExpressions(node: Node, kinds = OuterExpressionKinds.All) {
+    while (isOuterExpression(node, kinds)) {
+        node = node.expression;
+    }
+    return node;
+}
+
+/** @internal */
+export function skipAssertions(node: Expression): Expression;
+/** @internal */
+export function skipAssertions(node: Node): Node;
+/** @internal */
+export function skipAssertions(node: Node): Node {
+    return skipOuterExpressions(node, OuterExpressionKinds.Assertions);
+}
+
+/** @internal */
+export function isOuterExpression(node: Node, kinds = OuterExpressionKinds.All): node is OuterExpression {
+    switch (node.kind) {
+        case SyntaxKind.ParenthesizedExpression:
+            if (kinds & OuterExpressionKinds.ExcludeJSDocTypeAssertion && isJSDocTypeAssertion(node)) {
+                return false;
+            }
+            return (kinds & OuterExpressionKinds.Parentheses) !== 0;
+        case SyntaxKind.TypeAssertionExpression:
+        case SyntaxKind.AsExpression:
+        case SyntaxKind.ExpressionWithTypeArguments:
+        case SyntaxKind.SatisfiesExpression:
+            return (kinds & OuterExpressionKinds.TypeAssertions) !== 0;
+        case SyntaxKind.NonNullExpression:
+            return (kinds & OuterExpressionKinds.NonNullAssertions) !== 0;
+        case SyntaxKind.PartiallyEmittedExpression:
+            return (kinds & OuterExpressionKinds.PartiallyEmittedExpressions) !== 0;
+    }
+    return false;
+}
+
+/** @internal */
+export function walkUpOuterExpressions(node: Expression, kinds = OuterExpressionKinds.All): Node {
+    let parent = node.parent;
+    while (isOuterExpression(parent, kinds)) {
+        parent = parent.parent;
+        Debug.assert(parent);
+    }
+    return parent;
+}
+
+/** @internal */
+export function isJSDocTypeAssertion(node: Node): node is JSDocTypeAssertion {
+    return isParenthesizedExpression(node) && isInJSFile(node) && !!getJSDocTypeTag(node);
+}
+
+/** @internal */
+export function startsWithUseStrict(statements: readonly Statement[]) {
+    const firstStatement = firstOrUndefined(statements);
+    return firstStatement !== undefined && isPrologueDirective(firstStatement) && isUseStrictPrologue(firstStatement);
+}
+
+function isUseStrictPrologue(node: ExpressionStatement): boolean {
+    return isStringLiteral(node.expression) && node.expression.text === "use strict";
+}
+
+/** @internal */
+export function findUseStrictPrologue(statements: readonly Statement[]): Statement | undefined {
+    for (const statement of statements) {
+        if (isPrologueDirective(statement)) {
+            if (isUseStrictPrologue(statement)) {
+                return statement;
+            }
+        }
+        else {
+            break;
+        }
+    }
+    return undefined;
+}
+
+/** @internal */
+export function canHaveIllegalDecorators(node: Node): node is HasIllegalDecorators {
+    const kind = node.kind;
+    return kind === SyntaxKind.PropertyAssignment
+        || kind === SyntaxKind.ShorthandPropertyAssignment
+        || kind === SyntaxKind.FunctionDeclaration
+        || kind === SyntaxKind.Constructor
+        || kind === SyntaxKind.IndexSignature
+        || kind === SyntaxKind.ClassStaticBlockDeclaration
+        || kind === SyntaxKind.MissingDeclaration
+        || kind === SyntaxKind.VariableStatement
+        || kind === SyntaxKind.InterfaceDeclaration
+        || kind === SyntaxKind.TypeAliasDeclaration
+        || kind === SyntaxKind.EnumDeclaration
+        || kind === SyntaxKind.ModuleDeclaration
+        || kind === SyntaxKind.ImportEqualsDeclaration
+        || kind === SyntaxKind.ImportDeclaration
+        || kind === SyntaxKind.NamespaceExportDeclaration
+        || kind === SyntaxKind.ExportDeclaration
+        || kind === SyntaxKind.ExportAssignment;
+}
+
+/** @internal */
+export function canHaveIllegalTypeParameters(node: Node): node is HasIllegalTypeParameters {
+    const kind = node.kind;
+    return kind === SyntaxKind.Constructor
+        || kind === SyntaxKind.GetAccessor
+        || kind === SyntaxKind.SetAccessor;
+}
+
+/** @internal */
+export function isModuleAugmentationExternal(node: AmbientModuleDeclaration) {
+    // external module augmentation is a ambient module declaration that is either:
+    // - defined in the top level scope and source file is an external module
+    // - defined inside ambient module declaration located in the top level scope and source file not an external module
+    switch (node.parent.kind) {
+        case SyntaxKind.SourceFile:
+            return isExternalModule(node.parent);
+        case SyntaxKind.ModuleBlock:
+            return isAmbientModule(node.parent.parent) && isSourceFile(node.parent.parent.parent) && !isExternalModule(node.parent.parent.parent);
+    }
+    return false;
+}
+
+/** @internal */
+export function isExternalModuleAugmentation(node: Node): node is AmbientModuleDeclaration {
+    return isAmbientModule(node) && isModuleAugmentationExternal(node);
+}
+
+/** @internal */
+export function isAmbientModule(node: Node): node is AmbientModuleDeclaration {
+    return isModuleDeclaration(node) && (node.name.kind === SyntaxKind.StringLiteral || isGlobalScopeAugmentation(node));
+}
+
+/** @internal */
+export function isGlobalScopeAugmentation(module: ModuleDeclaration): boolean {
+    return !!(module.flags & NodeFlags.GlobalAugmentation);
+}
+
+/** @internal */
+export function getNonAugmentationDeclaration(symbol: Symbol) {
+    return symbol.declarations?.find(d => !isExternalModuleAugmentation(d) && !(isModuleDeclaration(d) && isGlobalScopeAugmentation(d)));
+}
+
+/** @internal */
+export function getSourceFileOfModule(module: Symbol) {
+    return getSourceFileOfNode(module.valueDeclaration || getNonAugmentationDeclaration(module));
+}
+
+/** @internal */
+export function isEffectiveExternalModule(node: SourceFile, compilerOptions: CompilerOptions) {
+    return isExternalModule(node) || getIsolatedModules(compilerOptions) || (isCommonJSContainingModuleKind(getEmitModuleKind(compilerOptions)) && !!node.commonJsModuleIndicator);
+}
+
+/** @internal */
+export function canHaveExportModifier(node: Node): node is Extract<HasModifiers, Statement> {
+    return isEnumDeclaration(node) || isVariableStatement(node) || isFunctionDeclaration(node) || isClassDeclaration(node)
+        || isInterfaceDeclaration(node) || isTypeDeclaration(node) || (isModuleDeclaration(node) && !isExternalModuleAugmentation(node) && !isGlobalScopeAugmentation(node));
 }
 
 /** @internal */

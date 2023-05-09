@@ -1,24 +1,23 @@
 import {
-    AccessExpression,
     append,
     appendIfUnique,
+    orderedRemoveItem,
+    some,
+} from "../core";
+import * as Debug from "../debug";
+import {
+    AccessExpression,
     AutoGenerateInfo,
-    Debug,
     EmitFlags,
     EmitHelper,
     EmitNode,
-    getParseTreeNode,
-    getSourceFileOfNode,
     Identifier,
     ImportSpecifier,
     InternalEmitFlags,
-    isParseTreeNode,
     Node,
     NodeArray,
-    orderedRemoveItem,
     PrivateIdentifier,
     SnippetElement,
-    some,
     SourceFile,
     SourceMapRange,
     SyntaxKind,
@@ -26,7 +25,12 @@ import {
     TextRange,
     TypeNode,
     TypeParameterDeclaration,
-} from "../_namespaces/ts";
+} from "../types";
+import { getSourceFileOfNode } from "../utilities";
+import {
+    getParseTreeNode,
+    isParseTreeNode,
+} from "../utilitiesPublic";
 
 /**
  * Associates a node with the current transformation, initializing

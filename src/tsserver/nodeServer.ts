@@ -1,80 +1,107 @@
-import * as protocol from "../server/protocol";
-import * as ts from "./_namespaces/ts";
 import {
-    ApplyCodeActionCommandResult,
     assertType,
-    CharacterCodes,
-    combinePaths,
     createQueue,
-    Debug,
+    noop,
+    toFileNameLowerCase,
+} from "../compiler/core";
+import {
+    MapLike,
+    SortedReadonlyArray,
+    versionMajorMinor,
+} from "../compiler/corePublic";
+import * as Debug from "../compiler/debug";
+import {
+    combinePaths,
     directorySeparator,
-    DirectoryWatcherCallback,
-    FileWatcher,
     getDirectoryPath,
     getRootLength,
-    JsTyping,
-    LanguageServiceMode,
-    MapLike,
-    noop,
-    noopFileWatcher,
     normalizePath,
     normalizeSlashes,
-    perfLogger,
-    SortedReadonlyArray,
+} from "../compiler/path";
+import { perfLogger } from "../compiler/perfLogger";
+import { sys as system } from "../compiler/sys";
+import {
     startTracing,
-    stripQuotes,
-    sys,
-    toFileNameLowerCase,
     tracing,
+} from "../compiler/tracing";
+import {
+    CharacterCodes,
+    DirectoryWatcherCallback,
+    FileWatcher,
     TypeAcquisition,
-    validateLocaleAndSetLanguage,
-    versionMajorMinor,
     WatchOptions,
-} from "./_namespaces/ts";
-import * as server from "./_namespaces/ts.server";
+} from "../compiler/types";
+import { stripQuotes } from "../compiler/utilities";
+import { validateLocaleAndSetLanguage } from "../compiler/utilitiesPublic";
+import { noopFileWatcher } from "../compiler/watch";
+import {
+    NameValidationResult,
+    validatePackageName,
+} from "../jsTyping/jsTyping";
 import {
     ActionInvalidate,
     ActionPackageInstalled,
     ActionSet,
     ActionWatchTypingLocations,
     Arguments,
-    BeginInstallTypes,
-    createInstallTypingsRequest,
-    EndInstallTypes,
     EventBeginInstallTypes,
     EventEndInstallTypes,
     EventInitializationFailed,
     EventTypesRegistry,
     findArgument,
-    formatMessage,
-    getLogLevel,
     hasArgument,
-    indent,
+    nowString,
+} from "../jsTyping/shared";
+import {
+    BeginInstallTypes,
+    EndInstallTypes,
     InitializationFailedResponse,
-    InstallPackageOptionsWithProject,
     InstallPackageRequest,
     InvalidateCachedTypings,
+    PackageInstalledResponse,
+    SetTypings,
+    TypesRegistryResponse,
+    TypingInstallerRequestUnion,
+    WatchTypingLocations,
+} from "../jsTyping/types";
+import { ProjectService } from "../server/editorServices";
+import { Project } from "../server/project";
+import * as protocol from "../server/protocol";
+import {
+    Event,
+    formatMessage,
+    nullCancellationToken,
+    ServerCancellationToken,
+    Session,
+    toEvent,
+} from "../server/session";
+import {
+    ServerHost,
+} from "../server/types";
+import {
+    InstallPackageOptionsWithProject,
     ITypingsInstaller,
+    nullTypingsInstaller,
+} from "../server/typingsCache";
+import {
+    indent,
+    stringifyIndented,
+} from "../server/utilities";
+import {
+    createInstallTypingsRequest,
     Logger,
     LogLevel,
     Msg,
-    nowString,
-    nullCancellationToken,
-    nullTypingsInstaller,
-    PackageInstalledResponse,
-    Project,
-    ProjectService,
-    ServerCancellationToken,
-    ServerHost,
-    Session,
-    SetTypings,
+} from "../server/utilitiesPublic";
+import {
+    ApplyCodeActionCommandResult,
+    LanguageServiceMode,
+} from "../services/types";
+import {
+    getLogLevel,
     StartInput,
     StartSessionOptions,
-    stringifyIndented,
-    toEvent,
-    TypesRegistryResponse,
-    TypingInstallerRequestUnion,
-} from "./_namespaces/ts.server";
+} from "./common";
 
 interface LogOptions {
     file?: string;
@@ -166,7 +193,7 @@ function parseServerMode(): LanguageServiceMode | string | undefined {
 
 /** @internal */
 export function initializeNodeSystem(): StartInput {
-    const sys = Debug.checkDefined(ts.sys) as ServerHost;
+    const sys = Debug.checkDefined(system) as ServerHost;
     const childProcess: {
         execFileSync(file: string, args: string[], options: { stdio: "ignore", env: MapLike<string> }): string | Buffer;
     } = require("child_process");
@@ -302,18 +329,18 @@ export function initializeNodeSystem(): StartInput {
     const logger = createLogger();
 
     // enable deprecation logging
-    Debug.loggingHost = {
+    Debug.setLoggingHost({
         log(level, s) {
             switch (level) {
-                case ts.LogLevel.Error:
-                case ts.LogLevel.Warning:
+                case Debug.LogLevel.Error:
+                case Debug.LogLevel.Warning:
                     return logger.msg(s, Msg.Err);
-                case ts.LogLevel.Info:
-                case ts.LogLevel.Verbose:
+                case Debug.LogLevel.Info:
+                case Debug.LogLevel.Verbose:
                     return logger.msg(s, Msg.Info);
             }
         }
-    };
+    });
 
     const pending = createQueue<Buffer>();
     let canWrite = true;
@@ -551,13 +578,13 @@ function startNodeSession(options: StartSessionOptions, logger: Logger, cancella
             readonly typesMapLocation: string,
             private readonly npmLocation: string | undefined,
             private readonly validateDefaultNpmLocation: boolean,
-            private event: server.Event) {
+            private event: Event) {
         }
 
         isKnownTypesPackageName(name: string): boolean {
             // We want to avoid looking this up in the registry as that is expensive. So first check that it's actually an NPM package.
-            const validationResult = JsTyping.validatePackageName(name);
-            if (validationResult !== JsTyping.NameValidationResult.Ok) {
+            const validationResult = validatePackageName(name);
+            if (validationResult !== NameValidationResult.Ok) {
                 return false;
             }
 
@@ -618,7 +645,7 @@ function startNodeSession(options: StartSessionOptions, logger: Logger, cancella
                 }
             }
 
-            const typingsInstaller = combinePaths(getDirectoryPath(sys.getExecutingFilePath()), "typingsInstaller.js");
+            const typingsInstaller = combinePaths(getDirectoryPath(system.getExecutingFilePath()), "typingsInstaller.js");
             this.installer = childProcess.fork(typingsInstaller, args, { execArgv });
             this.installer.on("message", m => this.handleMessage(m));
 
@@ -670,7 +697,7 @@ function startNodeSession(options: StartSessionOptions, logger: Logger, cancella
             }
         }
 
-        private handleMessage(response: TypesRegistryResponse | PackageInstalledResponse | SetTypings | InvalidateCachedTypings | BeginInstallTypes | EndInstallTypes | InitializationFailedResponse | server.WatchTypingLocations) {
+        private handleMessage(response: TypesRegistryResponse | PackageInstalledResponse | SetTypings | InvalidateCachedTypings | BeginInstallTypes | EndInstallTypes | InitializationFailedResponse | WatchTypingLocations) {
             if (this.logger.hasLevel(LogLevel.verbose)) {
                 this.logger.info(`Received response:${stringifyIndented(response)}`);
             }
@@ -795,7 +822,7 @@ function startNodeSession(options: StartSessionOptions, logger: Logger, cancella
                 this.event(body, eventName);
             };
 
-            const host = sys as ServerHost;
+            const host = system as ServerHost;
 
             const typingsInstaller = disableAutomaticTypingAcquisition
                 ? undefined
@@ -907,7 +934,7 @@ function startNodeSession(options: StartSessionOptions, logger: Logger, cancella
 
     const eventPort: number | undefined = parseEventPort(findArgument("--eventPort"));
     const typingSafeListLocation = findArgument(Arguments.TypingSafeListLocation)!; // TODO: GH#18217
-    const typesMapLocation = findArgument(Arguments.TypesMapLocation) || combinePaths(getDirectoryPath(sys.getExecutingFilePath()), "typesMap.json");
+    const typesMapLocation = findArgument(Arguments.TypesMapLocation) || combinePaths(getDirectoryPath(system.getExecutingFilePath()), "typesMap.json");
     const npmLocation = findArgument(Arguments.NpmLocation);
     const validateDefaultNpmLocation = hasArgument(Arguments.ValidateDefaultNpmLocation);
     const disableAutomaticTypingAcquisition = hasArgument("--disableAutomaticTypingAcquisition");

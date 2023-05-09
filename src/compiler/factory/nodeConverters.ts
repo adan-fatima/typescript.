@@ -1,38 +1,48 @@
 import {
+    cast,
+    map,
+    notImplemented,
+} from "../core";
+import * as Debug from "../debug";
+import {
     ArrayBindingOrAssignmentElement,
     ArrayBindingOrAssignmentPattern,
     AssignmentPattern,
     BindingOrAssignmentElementTarget,
     BindingOrAssignmentPattern,
     Block,
-    cast,
     ConciseBody,
-    Debug,
     Expression,
     FunctionDeclaration,
+    NodeConverters,
+    NodeFactory,
+    ObjectBindingOrAssignmentElement,
+    ObjectBindingOrAssignmentPattern,
+    SyntaxKind,
+} from "../types";
+import {
     getModifiers,
+    isBindingPattern,
+    isExpression,
+    isObjectLiteralElementLike,
+} from "../utilitiesPublic";
+import {
     getStartsOnNewLine,
+    setStartsOnNewLine,
+} from "./emitNode";
+import {
     isArrayBindingPattern,
     isArrayLiteralExpression,
     isBindingElement,
-    isBindingPattern,
     isBlock,
-    isExpression,
     isIdentifier,
     isObjectBindingPattern,
-    isObjectLiteralElementLike,
     isObjectLiteralExpression,
-    map,
-    NodeConverters,
-    NodeFactory,
-    notImplemented,
-    ObjectBindingOrAssignmentElement,
-    ObjectBindingOrAssignmentPattern,
+} from "./nodeTests";
+import {
     setOriginalNode,
-    setStartsOnNewLine,
     setTextRange,
-    SyntaxKind,
-} from "../_namespaces/ts";
+} from "./utilitiesPublic";
 
 /** @internal */
 export function createNodeConverters(factory: NodeFactory): NodeConverters {

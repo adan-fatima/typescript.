@@ -1,3 +1,5 @@
+import { FileSystemEntries, matchFiles } from "../compiler/fileMatcher";
+import { getNewLineCharacter } from "../compiler/utilities";
 import * as collections from "./_namespaces/collections";
 import * as documents from "./_namespaces/documents";
 import * as Harness from "./_namespaces/Harness";
@@ -104,10 +106,10 @@ export class System implements ts.System {
     }
 
     public readDirectory(path: string, extensions?: readonly string[], exclude?: readonly string[], include?: readonly string[], depth?: number): string[] {
-        return ts.matchFiles(path, extensions, exclude, include, this.useCaseSensitiveFileNames, this.getCurrentDirectory(), depth, path => this.getAccessibleFileSystemEntries(path), path => this.realpath(path));
+        return matchFiles(path, extensions, exclude, include, this.useCaseSensitiveFileNames, this.getCurrentDirectory(), depth, path => this.getAccessibleFileSystemEntries(path), path => this.realpath(path));
     }
 
-    public getAccessibleFileSystemEntries(path: string): ts.FileSystemEntries {
+    public getAccessibleFileSystemEntries(path: string): FileSystemEntries {
         const files: string[] = [];
         const directories: string[] = [];
         try {
@@ -243,7 +245,7 @@ export class CompilerHost implements ts.CompilerHost {
         if (sys instanceof vfs.FileSystem) sys = new System(sys);
         this.sys = sys;
         this.defaultLibLocation = sys.vfs.meta.get("defaultLibLocation") || "";
-        this._newLine = ts.getNewLineCharacter(options);
+        this._newLine = getNewLineCharacter(options);
         this._sourceFiles = new collections.SortedMap<string, ts.SourceFile>({ comparer: sys.vfs.stringComparer, sort: "insertion" });
         this._setParentNodes = setParentNodes;
         this._outputsMap = new collections.SortedMap(this.vfs.stringComparer);

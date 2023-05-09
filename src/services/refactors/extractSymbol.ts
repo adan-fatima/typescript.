@@ -1,96 +1,40 @@
 import {
-    __String,
-    ANONYMOUS,
-    ApplicableRefactorInfo,
     arrayFrom,
     assertType,
-    BindingElement,
-    Block,
-    BlockLike,
-    BreakStatement,
-    CancellationToken,
-    canHaveModifiers,
-    CharacterCodes,
-    ClassElement,
-    ClassLikeDeclaration,
-    codefix,
     compareProperties,
     compareStringsCaseSensitive,
     compareValues,
     contains,
-    ContinueStatement,
-    createDiagnosticForNode,
-    createFileDiagnostic,
-    Debug,
-    Declaration,
-    Diagnostic,
-    DiagnosticCategory,
-    DiagnosticMessage,
-    Diagnostics,
-    EmitFlags,
     emptyArray,
-    EntityName,
-    Expression,
-    ExpressionStatement,
-    factory,
     find,
-    findAncestor,
-    findFirstNonJsxWhitespaceToken,
-    findTokenOnLeftOfPosition,
     first,
     firstOrUndefined,
-    forEachChild,
-    formatStringFromArgs,
-    FunctionDeclaration,
-    FunctionLikeDeclaration,
-    getContainingClass,
-    getContainingFunction,
-    getEffectiveTypeParameterDeclarations,
-    getEmitScriptTarget,
-    getEnclosingBlockScopeContainer,
-    getLocaleSpecificMessage,
-    getModifiers,
-    getNodeId,
-    getParentNodeInSpan,
-    getRefactorContextSpan,
-    getRenameLocation,
-    getSymbolId,
-    getSynthesizedDeepClone,
-    getThisContainer,
-    getUniqueName,
-    hasEffectiveModifier,
-    hasSyntacticModifier,
-    Identifier,
-    identifierToKeywordKind,
     isArray,
+    last,
+    map,
+    mapDefined,
+    singleOrUndefined,
+} from "../../compiler/core";
+import * as Debug from "../../compiler/debug";
+import { Diagnostics } from "../../compiler/diagnosticInformationMap.generated";
+import { setEmitFlags } from "../../compiler/factory/emitNode";
+import { factory } from "../../compiler/factory/nodeFactory";
+import {
     isArrowFunction,
-    isAssignmentExpression,
     isBinaryExpression,
     isBlock,
-    isBlockScope,
     isCaseClause,
-    isClassLike,
     isConstructorDeclaration,
-    isDeclaration,
-    isDeclarationWithTypeParameters,
     isElementAccessExpression,
-    isExpression,
-    isExpressionNode,
     isExpressionStatement,
-    isFunctionBody,
     isFunctionExpression,
-    isFunctionLike,
-    isFunctionLikeDeclaration,
     isIdentifier,
-    isInJSFile,
-    isIterationStatement,
     isJsxAttribute,
     isJsxElement,
     isJsxFragment,
     isJsxSelfClosingElement,
     isModuleBlock,
     isParenthesizedTypeNode,
-    isPartOfTypeNode,
     isPrivateIdentifier,
     isPropertyAccessExpression,
     isPropertyDeclaration,
@@ -98,20 +42,40 @@ import {
     isReturnStatement,
     isShorthandPropertyAssignment,
     isSourceFile,
-    isStatement,
-    isStatic,
     isStringLiteral,
     isSwitchStatement,
-    isThis,
-    isUnaryExpressionWithWrite,
     isUnionTypeNode,
     isVariableDeclaration,
     isVariableDeclarationList,
     isVariableStatement,
+} from "../../compiler/factory/nodeTests";
+import { canHaveModifiers } from "../../compiler/factory/utilitiesPublic";
+import { forEachChild } from "../../compiler/parser";
+import { positionIsSynthesized } from "../../compiler/scannerUtilities";
+import { nullTransformationContext } from "../../compiler/transformer";
+import {
+    __String,
+    BindingElement,
+    Block,
+    BlockLike,
+    BreakStatement,
+    CancellationToken,
+    CharacterCodes,
+    ClassElement,
+    ClassLikeDeclaration,
+    ContinueStatement,
+    Declaration,
+    Diagnostic,
+    DiagnosticCategory,
+    DiagnosticMessage,
+    EmitFlags,
+    EntityName,
+    Expression,
+    ExpressionStatement,
+    FunctionDeclaration,
+    FunctionLikeDeclaration,
+    Identifier,
     LabeledStatement,
-    last,
-    map,
-    mapDefined,
     MethodDeclaration,
     Modifier,
     ModifierFlags,
@@ -120,31 +84,19 @@ import {
     Node,
     NodeBuilderFlags,
     NodeFlags,
-    nullTransformationContext,
     ObjectLiteralElementLike,
     ParameterDeclaration,
-    positionIsSynthesized,
     PropertyAccessExpression,
-    rangeContainsStartEnd,
-    RefactorActionInfo,
-    RefactorContext,
-    RefactorEditInfo,
-    setEmitFlags,
     ShorthandPropertyAssignment,
     SignatureKind,
-    singleOrUndefined,
-    skipParentheses,
     SourceFile,
     Statement,
     StringLiteral,
-    suppressLeadingAndTrailingTrivia,
     Symbol,
     SymbolFlags,
     SyntaxKind,
-    textChanges,
     TextRange,
     TextSpan,
-    textSpanEnd,
     TryStatement,
     Type,
     TypeChecker,
@@ -155,15 +107,76 @@ import {
     TypeParameter,
     TypeParameterDeclaration,
     VariableDeclaration,
+    VisitResult,
+} from "../../compiler/types";
+import {
+    createDiagnosticForNode,
+    createFileDiagnostic,
+    formatStringFromArgs,
+    getContainingClass,
+    getContainingFunction,
+    getEmitScriptTarget,
+    getEnclosingBlockScopeContainer,
+    getLocaleSpecificMessage,
+    getNodeId,
+    getSymbolId,
+    getThisContainer,
+    hasEffectiveModifier,
+    hasSyntacticModifier,
+    isAssignmentExpression,
+    isBlockScope,
+    isDeclarationWithTypeParameters,
+    isExpressionNode,
+    isInJSFile,
+    isPartOfTypeNode,
+    isStatic,
+    skipParentheses,
+} from "../../compiler/utilities";
+import {
+    findAncestor,
+    getEffectiveTypeParameterDeclarations,
+    getModifiers,
+    identifierToKeywordKind,
+    isClassLike,
+    isDeclaration,
+    isExpression,
+    isFunctionBody,
+    isFunctionLike,
+    isFunctionLikeDeclaration,
+    isIterationStatement,
+    isStatement,
+    isUnaryExpressionWithWrite,
+    textSpanEnd,
+} from "../../compiler/utilitiesPublic";
+import {
     visitEachChild,
     visitNode,
     visitNodes,
-    VisitResult,
-} from "../_namespaces/ts";
+} from "../../compiler/visitorPublic";
+import { typeToAutoImportableTypeNode } from "../codefixes/helpers";
+import { createImportAdder } from "../codefixes/importAdder";
+import { registerRefactor } from "../refactorProvider";
+import { ChangeTracker } from "../textChanges";
 import {
-    refactorKindBeginsWith,
-    registerRefactor,
-} from "../_namespaces/ts.refactor";
+    ApplicableRefactorInfo,
+    RefactorActionInfo,
+    RefactorContext,
+    RefactorEditInfo,
+} from "../types";
+import {
+    ANONYMOUS,
+    findFirstNonJsxWhitespaceToken,
+    findTokenOnLeftOfPosition,
+    getParentNodeInSpan,
+    getRefactorContextSpan,
+    getRenameLocation,
+    getSynthesizedDeepClone,
+    getUniqueName,
+    isThis,
+    rangeContainsStartEnd,
+    suppressLeadingAndTrailingTrivia,
+} from "../utilities";
+import { refactorKindBeginsWith } from "./helpers";
 
 const refactorName = "Extract Symbol";
 
@@ -1035,7 +1048,7 @@ function extractFunctionInScope(
 
     const checker = context.program.getTypeChecker();
     const scriptTarget = getEmitScriptTarget(context.program.getCompilerOptions());
-    const importAdder = codefix.createImportAdder(context.file, context.program, context.preferences, context.host);
+    const importAdder = createImportAdder(context.file, context.program, context.preferences, context.host, /*useAutoImportProvider*/ false);
 
     // Make a unique name for the extracted function
     const file = scope.getSourceFile();
@@ -1054,7 +1067,7 @@ function extractFunctionInScope(
             let type = checker.getTypeOfSymbolAtLocation(usage.symbol, usage.node);
             // Widen the type so we don't emit nonsense annotations like "function fn(x: 3) {"
             type = checker.getBaseTypeOfLiteralType(type);
-            typeNode = codefix.typeToAutoImportableTypeNode(checker, importAdder, type, scope, scriptTarget, NodeBuilderFlags.NoTruncation);
+            typeNode = typeToAutoImportableTypeNode(checker, importAdder, type, scope, scriptTarget, NodeBuilderFlags.NoTruncation);
         }
 
         const paramDecl = factory.createParameterDeclaration(
@@ -1146,7 +1159,7 @@ function extractFunctionInScope(
         );
     }
 
-    const changeTracker = textChanges.ChangeTracker.fromContext(context);
+    const changeTracker = ChangeTracker.fromContext(context);
     const minInsertionPos = (isReadonlyArray(range.range) ? last(range.range) : range.range).end;
     const nodeToInsertBefore = getNodeToInsertFunctionBefore(minInsertionPos, scope);
     if (nodeToInsertBefore) {
@@ -1367,7 +1380,7 @@ function extractConstantInScope(
 
     suppressLeadingAndTrailingTrivia(initializer);
 
-    const changeTracker = textChanges.ChangeTracker.fromContext(context);
+    const changeTracker = ChangeTracker.fromContext(context);
 
     if (isClassLike(scope)) {
         Debug.assert(!isJS, "Cannot extract to a JS class"); // See CannotExtractToJSClass

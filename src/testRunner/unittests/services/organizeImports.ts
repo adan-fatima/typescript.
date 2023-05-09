@@ -1,3 +1,4 @@
+import { applyChanges } from "../../../services/textChanges";
 import * as Harness from "../../_namespaces/Harness";
 import * as ts from "../../_namespaces/ts";
 import { createProjectService } from "../helpers/tsserver";
@@ -1025,7 +1026,7 @@ export * from "lib";
             assert.equal(changes.length, 1);
             assert.equal(changes[0].fileName, testPath);
 
-            const newText = ts.textChanges.applyChanges(testContent, changes[0].textChanges);
+            const newText = applyChanges(testContent, changes[0].textChanges);
             Harness.Baseline.runBaseline(baselinePath, [
                 "// ==ORIGINAL==",
                 testContent,

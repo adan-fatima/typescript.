@@ -1,18 +1,18 @@
+import * as Debug from "../compiler/debug";
+import { computeLineStarts } from "../compiler/scanner";
 import {
-    collapseTextChangeRangesAcrossMultipleVersions,
-    computeLineStarts,
-    createTextChangeRange,
-    createTextSpan,
-    Debug,
-    IScriptSnapshot,
     TextChangeRange,
     TextSpan,
-    unchangedTextChangeRange,
-} from "./_namespaces/ts";
+} from "../compiler/types";
 import {
-    emptyArray,
-} from "./_namespaces/ts.server";
+    collapseTextChangeRangesAcrossMultipleVersions,
+    createTextChangeRange,
+    createTextSpan,
+    unchangedTextChangeRange,
+} from "../compiler/utilitiesPublic";
+import { IScriptSnapshot } from "../services/types";
 import * as protocol from "./protocol";
+import { emptyArray } from "./utilitiesPublic";
 
 const lineCollectionCapacity = 4;
 

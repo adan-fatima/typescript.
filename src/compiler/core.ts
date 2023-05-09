@@ -1,18 +1,18 @@
 import {
-    __String,
-    CharacterCodes,
     Comparer,
     Comparison,
-    Debug,
     EqualityComparer,
-    isWhiteSpaceLike,
     MapLike,
-    Queue,
     SortedArray,
     SortedReadonlyArray,
+} from "./corePublic";
+import * as Debug from "./debug";
+import {
+    __String,
+    CharacterCodes,
+    Queue,
     TextSpan,
-} from "./_namespaces/ts";
-
+} from "./types";
 
 /** @internal */
 export const emptyArray: never[] = [] as never[];
@@ -1870,7 +1870,6 @@ export function tryCast<TOut extends TIn, TIn = any>(value: TIn | undefined, tes
 /** @internal */
 export function cast<TOut extends TIn, TIn = any>(value: TIn | undefined, test: (value: TIn) => value is TOut): TOut {
     if (value !== undefined && test(value)) return value;
-
     return Debug.fail(`Invalid cast. The supplied value ${value} did not pass the test '${Debug.getFunctionName(test)}'.`);
 }
 
@@ -2082,23 +2081,6 @@ export function compose<T>(a: (t: T) => T, b: (t: T) => T, c: (t: T) => T, d: (t
         return t => t;
     }
 }
-/** @internal */
-export const enum AssertionLevel {
-    None = 0,
-    Normal = 1,
-    Aggressive = 2,
-    VeryAggressive = 3,
-}
-
-/**
- * Safer version of `Function` which should not be called.
- * Every function should be assignable to this, but this should not be assignable to every function.
- *
- * @internal
- */
-export type AnyFunction = (...args: never[]) => void;
-/** @internal */
-export type AnyConstructor = new (...args: unknown[]) => unknown;
 
 /** @internal */
 export function equateValues<T>(a: T, b: T) {
@@ -2869,16 +2851,42 @@ function trimEndImpl(s: string) {
     return s.slice(0, end + 1);
 }
 
-/** @internal */
-export function isNodeLikeSystem(): boolean {
-    // This is defined here rather than in sys.ts to prevent a cycle from its
-    // use in performanceCore.ts.
-    //
-    // We don't use the presence of `require` to check if we are in Node;
-    // when bundled using esbuild, this function will be rewritten to `__require`
-    // and definitely exist.
-    return typeof process !== "undefined"
-        && !!process.nextTick
-        && !(process as any).browser
-        && typeof module === "object";
+export function isWhiteSpaceLike(ch: number): boolean {
+    return isWhiteSpaceSingleLine(ch) || isLineBreak(ch);
+}
+
+/** Does not include line breaks. For that, see isWhiteSpaceLike. */
+export function isWhiteSpaceSingleLine(ch: number): boolean {
+    // Note: nextLine is in the Zs space, and should be considered to be a whitespace.
+    // It is explicitly not a line-break as it isn't in the exact set specified by EcmaScript.
+    return ch === CharacterCodes.space ||
+        ch === CharacterCodes.tab ||
+        ch === CharacterCodes.verticalTab ||
+        ch === CharacterCodes.formFeed ||
+        ch === CharacterCodes.nonBreakingSpace ||
+        ch === CharacterCodes.nextLine ||
+        ch === CharacterCodes.ogham ||
+        ch >= CharacterCodes.enQuad && ch <= CharacterCodes.zeroWidthSpace ||
+        ch === CharacterCodes.narrowNoBreakSpace ||
+        ch === CharacterCodes.mathematicalSpace ||
+        ch === CharacterCodes.ideographicSpace ||
+        ch === CharacterCodes.byteOrderMark;
+}
+
+export function isLineBreak(ch: number): boolean {
+    // ES5 7.3:
+    // The ECMAScript line terminator characters are listed in Table 3.
+    //     Table 3: Line Terminator Characters
+    //     Code Unit Value     Name                    Formal Name
+    //     \u000A              Line Feed               <LF>
+    //     \u000D              Carriage Return         <CR>
+    //     \u2028              Line separator          <LS>
+    //     \u2029              Paragraph separator     <PS>
+    // Only the characters in Table 3 are treated as line terminators. Other new line or line
+    // breaking characters are treated as white space but not as line terminators.
+
+    return ch === CharacterCodes.lineFeed ||
+        ch === CharacterCodes.carriageReturn ||
+        ch === CharacterCodes.lineSeparator ||
+        ch === CharacterCodes.paragraphSeparator;
 }

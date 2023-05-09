@@ -1,211 +1,104 @@
 import {
-    __String,
-    addEmitFlags,
-    addSyntheticLeadingComment,
-    addSyntheticTrailingComment,
-    AnyImportOrRequireStatement,
+    getModuleInstanceState,
+    ModuleInstanceState,
+} from "../compiler/binder";
+import { setConfigFileInOptions } from "../compiler/commandLineParser";
+import {
     assertType,
-    AssignmentDeclarationKind,
-    BinaryExpression,
     binarySearchKey,
-    BindingElement,
-    BreakOrContinueStatement,
-    CallExpression,
-    canHaveModifiers,
-    CaseClause,
     cast,
-    CatchClause,
-    CharacterCodes,
-    ClassDeclaration,
-    ClassExpression,
     clone,
-    codefix,
-    combinePaths,
-    CommentKind,
-    CommentRange,
     compareTextSpans,
     compareValues,
-    Comparison,
-    CompilerOptions,
-    ConditionalExpression,
+    concatenate,
     contains,
-    ContextFlags,
-    createPrinterWithRemoveCommentsOmitTrailingSemicolon,
-    createRange,
-    createScanner,
-    createTextSpan,
-    createTextSpanFromBounds,
-    Debug,
-    Declaration,
-    Decorator,
-    DefaultClause,
-    defaultMaximumTruncationLength,
-    DeleteExpression,
-    Diagnostic,
-    DiagnosticAndArguments,
-    DiagnosticArguments,
-    DiagnosticMessage,
-    DiagnosticWithLocation,
-    directoryProbablyExists,
-    DisplayPartsSymbolWriter,
-    DocumentPosition,
-    DocumentSpan,
-    DoStatement,
-    ElementAccessExpression,
-    EmitFlags,
-    EmitHint,
-    emitModuleKindIsNonNodeESM,
     emptyArray,
-    EndOfFileToken,
     endsWith,
-    ensureScriptKind,
-    EqualityOperator,
-    escapeString,
-    ExportAssignment,
-    ExportDeclaration,
-    Expression,
-    ExpressionStatement,
-    factory,
-    FileTextChanges,
     filter,
     find,
-    findAncestor,
-    findConfigFile,
     first,
     firstDefined,
     firstOrUndefined,
-    forEachAncestorDirectory,
-    forEachChild,
-    forEachLeadingCommentRange,
-    forEachTrailingCommentRange,
-    FormatCodeSettings,
-    formatStringFromArgs,
-    formatting,
-    FormattingHost,
-    ForOfStatement,
-    FunctionDeclaration,
-    FunctionExpression,
-    FunctionLikeDeclaration,
-    getAssignmentDeclarationKind,
-    getCombinedNodeFlagsAlwaysIncludeJSDoc,
-    getDirectoryPath,
-    getEmitModuleKind,
-    getEmitScriptTarget,
-    getExternalModuleImportEqualsDeclarationExpression,
-    getImpliedNodeFormatForFile,
-    getIndentString,
-    getJSDocEnumTag,
-    getLastChild,
-    getLineAndCharacterOfPosition,
-    getLineStarts,
-    getLocaleSpecificMessage,
-    getModuleInstanceState,
-    getNameOfDeclaration,
-    getNodeId,
-    getPackageNameFromTypesPackageName,
-    getPathComponents,
-    getRootDeclaration,
-    getSourceFileOfNode,
-    getSpanOfTokenAtPosition,
-    getSymbolId,
-    getTextOfIdentifierOrLiteral,
-    getTextOfNode,
-    getTypesPackageName,
-    hasJSFileExtension,
-    hasSyntacticModifier,
-    HeritageClause,
-    hostGetCanonicalFileName,
-    Identifier,
-    identifierIsThisKeyword,
+    forEach,
     identity,
-    idText,
-    IfStatement,
-    ImportClause,
-    ImportDeclaration,
-    ImportSpecifier,
-    ImportTypeNode,
-    indexOfNode,
-    IndexSignatureDeclaration,
-    InternalSymbolName,
-    isAmbientModule,
-    isAnyImportSyntax,
     isArray,
+    isWhiteSpaceLike,
+    isWhiteSpaceSingleLine,
+    last,
+    lastOrUndefined,
+    map,
+    maybeBind,
+    notImplemented,
+    or,
+    singleOrUndefined,
+    some,
+    SortKind,
+    stableSort,
+    startsWith,
+    stringContains,
+    tryCast,
+} from "../compiler/core";
+import { Comparison } from "../compiler/corePublic";
+import * as Debug from "../compiler/debug";
+import { createPrinterWithRemoveCommentsOmitTrailingSemicolon } from "../compiler/emitter";
+import { hasJSFileExtension } from "../compiler/extension";
+import {
+    addEmitFlags,
+    addSyntheticLeadingComment,
+    addSyntheticTrailingComment,
+} from "../compiler/factory/emitNode";
+import { factory } from "../compiler/factory/nodeFactory";
+import {
     isArrayBindingPattern,
     isArrayTypeNode,
     isAsExpression,
     isAwaitExpression,
     isBinaryExpression,
     isBindingElement,
-    isBreakOrContinueStatement,
     isCallExpression,
-    isCallOrNewExpression,
     isClassDeclaration,
     isClassExpression,
     isClassStaticBlockDeclaration,
     isConditionalTypeNode,
-    IScriptSnapshot,
-    isDeclaration,
-    isDeclarationName,
     isDecorator,
     isDefaultClause,
     isDeleteExpression,
     isElementAccessExpression,
-    isEntityName,
     isEnumDeclaration,
     isEnumMember,
     isExportAssignment,
     isExportDeclaration,
     isExportSpecifier,
-    isExpression,
-    isExpressionNode,
-    isExternalModule,
-    isExternalModuleImportEqualsDeclaration,
+    isExpressionStatement,
     isExternalModuleReference,
-    isFileLevelUniqueName,
     isForInStatement,
     isForOfStatement,
-    isFunctionBlock,
     isFunctionDeclaration,
     isFunctionExpression,
-    isFunctionLike,
     isGetAccessorDeclaration,
-    isGlobalScopeAugmentation,
     isHeritageClause,
     isIdentifier,
-    isImportCall,
     isImportClause,
     isImportDeclaration,
     isImportEqualsDeclaration,
-    isImportOrExportSpecifier,
     isImportSpecifier,
     isInferTypeNode,
-    isInJSFile,
     isInterfaceDeclaration,
-    isInternalModuleImportEqualsDeclaration,
     isJSDoc,
-    isJSDocCommentContainingNode,
     isJSDocLink,
     isJSDocLinkCode,
-    isJSDocLinkLike,
     isJSDocMemberName,
     isJSDocNameReference,
-    isJSDocTag,
     isJSDocTemplateTag,
-    isJSDocTypeAlias,
+    isJSDocTypedefTag,
     isJsxElement,
     isJsxExpression,
-    isJsxOpeningLikeElement,
     isJsxText,
-    isKeyword,
     isLabeledStatement,
-    isLet,
-    isLiteralExpression,
     isLiteralTypeNode,
     isMappedTypeNode,
-    isModifier,
     isModuleBlock,
     isModuleDeclaration,
-    isNamedDeclaration,
     isNamedExports,
     isNamedImports,
     isNamespaceExport,
@@ -214,130 +107,158 @@ import {
     isNumericLiteral,
     isObjectBindingPattern,
     isObjectLiteralExpression,
-    isOptionalChain,
-    isOptionalChainRoot,
     isParameter,
-    isPartOfTypeNode,
     isPrivateIdentifier,
     isPropertyAccessExpression,
-    isPropertyNameLiteral,
     isQualifiedName,
-    isRequireCall,
-    isRequireVariableStatement,
-    isRightSideOfQualifiedNameOrPropertyAccess,
-    isRootedDiskPath,
     isSetAccessorDeclaration,
     isSourceFile,
-    isSourceFileJS,
-    isStringDoubleQuoted,
     isStringLiteral,
-    isStringLiteralLike,
-    isStringOrNumericLiteralLike,
-    isStringTextContainingNode,
     isSyntaxList,
     isTaggedTemplateExpression,
-    isTemplateLiteralKind,
-    isToken,
-    isTransientSymbol,
     isTypeAliasDeclaration,
-    isTypeElement,
-    isTypeNode,
     isTypeOfExpression,
     isTypeOperatorNode,
     isTypeParameterDeclaration,
     isTypeReferenceNode,
-    isVarConst,
     isVariableDeclarationList,
+    isVariableStatement,
     isVoidExpression,
-    isWhiteSpaceLike,
-    isWhiteSpaceSingleLine,
     isYieldExpression,
+} from "../compiler/factory/nodeTests";
+import {
+    canHaveModifiers,
+    setOriginalNode,
+    setTextRange,
+} from "../compiler/factory/utilitiesPublic";
+import {
+    getPackageNameFromTypesPackageName,
+    getTypesPackageName,
+} from "../compiler/moduleNameResolver";
+import { getNodeModulesPackageName } from "../compiler/moduleSpecifiers";
+import { forEachChild } from "../compiler/parser";
+import { getLastChild } from "../compiler/parserUtilities";
+import {
+    combinePaths,
+    forEachAncestorDirectory,
+    getDirectoryPath,
+    getPathComponents,
+    isRootedDiskPath,
+    normalizePath,
+    pathIsRelative,
+    toPath,
+} from "../compiler/path";
+import { findConfigFile, getImpliedNodeFormatForFile } from "../compiler/program";
+import {
+    createScanner,
+    forEachLeadingCommentRange,
+    forEachTrailingCommentRange,
+    getLineAndCharacterOfPosition,
+    getLineStarts,
+    getTrailingCommentRanges,
+    Scanner,
+    stringToToken,
+    tokenToString,
+} from "../compiler/scanner";
+import { nullTransformationContext } from "../compiler/transformer";
+import {
+    __String,
+    AnyImportOrRequireStatement,
+    AssignmentDeclarationKind,
+    BinaryExpression,
+    BindingElement,
+    BreakOrContinueStatement,
+    CallExpression,
+    CaseClause,
+    CatchClause,
+    CharacterCodes,
+    ClassDeclaration,
+    ClassExpression,
+    CommentKind,
+    CommentRange,
+    CompilerOptions,
+    ConditionalExpression,
+    ContextFlags,
+    Declaration,
+    Decorator,
+    DefaultClause,
+    DeleteExpression,
+    Diagnostic,
+    DiagnosticAndArguments,
+    DiagnosticArguments,
+    DiagnosticMessage,
+    DiagnosticWithLocation,
+    DocumentPosition,
+    DoStatement,
+    ElementAccessExpression,
+    EmitFlags,
+    EmitHint,
+    EndOfFileToken,
+    EqualityOperator,
+    ExportAssignment,
+    ExportDeclaration,
+    Expression,
+    ExpressionStatement,
+    ForInOrOfStatement,
+    ForOfStatement,
+    FunctionDeclaration,
+    FunctionExpression,
+    FunctionLikeDeclaration,
+    HeritageClause,
+    Identifier,
+    IfStatement,
+    ImportClause,
+    ImportDeclaration,
+    ImportSpecifier,
+    ImportTypeNode,
+    IndexSignatureDeclaration,
+    InternalSymbolName,
     IterationStatement,
     JSDocLink,
     JSDocLinkCode,
-    JSDocLinkDisplayPart,
     JSDocLinkPlain,
     JSDocTypedefTag,
-    JsTyping,
     JsxEmit,
     JsxOpeningLikeElement,
     LabeledStatement,
-    LanguageServiceHost,
-    last,
-    lastOrUndefined,
     LiteralExpression,
-    map,
-    maybeBind,
     Modifier,
     ModifierFlags,
     ModuleDeclaration,
-    ModuleInstanceState,
     ModuleKind,
     ModuleResolutionKind,
     ModuleSpecifierResolutionHost,
-    moduleSpecifiers,
     Mutable,
+    NamedDeclaration,
     NewExpression,
     NewLineKind,
     Node,
     NodeArray,
     NodeBuilderFlags,
     NodeFlags,
-    nodeIsMissing,
-    nodeIsPresent,
-    nodeIsSynthesized,
-    normalizePath,
     NoSubstitutionTemplateLiteral,
-    notImplemented,
-    nullTransformationContext,
     NumericLiteral,
-    or,
-    OrganizeImports,
-    PackageJsonDependencyGroup,
-    parseBigInt,
-    pathIsRelative,
+    ParameterDeclaration,
     PrefixUnaryExpression,
     Program,
-    ProjectPackageJsonInfo,
     PropertyAccessExpression,
     PropertyAssignment,
+    PropertyDeclaration,
     PropertyName,
+    PropertySignature,
     PseudoBigInt,
-    pseudoBigIntToString,
     QualifiedName,
-    RefactorContext,
-    Scanner,
-    ScriptElementKind,
-    ScriptElementKindModifier,
     ScriptKind,
     ScriptTarget,
-    SemicolonPreference,
-    setConfigFileInOptions,
-    setOriginalNode,
-    setTextRange,
     Signature,
     SignatureDeclaration,
-    singleOrUndefined,
-    skipAlias,
-    skipOuterExpressions,
-    skipParentheses,
-    some,
-    SortKind,
     SourceFile,
     SourceFileLike,
-    SourceMapper,
     SpreadElement,
-    stableSort,
-    startsWith,
-    stringContains,
     StringLiteral,
     StringLiteralLike,
-    stringToToken,
-    stripQuotes,
     Symbol,
     SymbolAccessibility,
-    SymbolDisplayPart,
-    SymbolDisplayPartKind,
     SymbolFlags,
     SymbolFormatFlags,
     SymbolTracker,
@@ -347,17 +268,9 @@ import {
     TemplateExpression,
     TemplateLiteralToken,
     TemplateSpan,
-    TextChange,
-    textChanges,
     TextRange,
     TextSpan,
-    textSpanContainsPosition,
-    textSpanContainsTextSpan,
-    textSpanEnd,
     Token,
-    tokenToString,
-    toPath,
-    tryCast,
     Type,
     TypeChecker,
     TypeFlags,
@@ -365,14 +278,152 @@ import {
     TypeNode,
     TypeOfExpression,
     TypeQueryNode,
-    unescapeLeadingUnderscores,
     UserPreferences,
     VariableDeclaration,
-    visitEachChild,
     VoidExpression,
-    walkUpParenthesizedExpressions,
     YieldExpression,
-} from "./_namespaces/ts";
+} from "../compiler/types";
+import {
+    createRange,
+    defaultMaximumTruncationLength,
+    directoryProbablyExists,
+    emitModuleKindIsNonNodeESM,
+    ensureScriptKind,
+    escapeString,
+    formatStringFromArgs,
+    getAssignmentDeclarationKind,
+    getEmitModuleKind,
+    getEmitScriptTarget,
+    getExternalModuleImportEqualsDeclarationExpression,
+    getIndentString,
+    getLeadingCommentRangesOfNode,
+    getLocaleSpecificMessage,
+    getNodeId,
+    getRootDeclaration,
+    getSourceFileOfNode,
+    getSpanOfTokenAtPosition,
+    getSymbolId,
+    getTextOfIdentifierOrLiteral,
+    getTextOfNode,
+    hasSyntacticModifier,
+    hostGetCanonicalFileName,
+    identifierIsThisKeyword,
+    indexOfNode,
+    isAmbientModule,
+    isAnyImportSyntax,
+    isDeclarationName,
+    isExpressionNode,
+    isExternalModule,
+    isExternalModuleImportEqualsDeclaration,
+    isFileLevelUniqueName,
+    isFunctionBlock,
+    isGlobalScopeAugmentation,
+    isImportCall,
+    isInJSFile,
+    isInternalModuleImportEqualsDeclaration,
+    isJSDocTypeAlias,
+    isKeyword,
+    isLet,
+    isPartOfTypeNode,
+    isPropertyNameLiteral,
+    isRequireCall,
+    isRequireVariableStatement,
+    isRightSideOfQualifiedNameOrPropertyAccess,
+    isSourceFileJS,
+    isStringDoubleQuoted,
+    isStringOrNumericLiteralLike,
+    isTransientSymbol,
+    isVarConst,
+    nodeIsMissing,
+    nodeIsPresent,
+    nodeIsSynthesized,
+    parseBigInt,
+    pseudoBigIntToString,
+    skipAlias,
+    skipOuterExpressions,
+    skipParentheses,
+    stripQuotes,
+    walkUpParenthesizedExpressions,
+} from "../compiler/utilities";
+import {
+    createTextSpan,
+    createTextSpanFromBounds,
+    findAncestor,
+    getCombinedNodeFlagsAlwaysIncludeJSDoc,
+    getJSDocEnumTag,
+    getJSDocReturnType,
+    getJSDocType,
+    getNameOfDeclaration,
+    hasJSDocNodes,
+    idText,
+    isBreakOrContinueStatement,
+    isCallOrNewExpression,
+    isDeclaration,
+    isEntityName,
+    isExpression,
+    isForInOrOfStatement,
+    isFunctionLike,
+    isFunctionLikeDeclaration,
+    isImportOrExportSpecifier,
+    isJSDocCommentContainingNode,
+    isJSDocLinkLike,
+    isJSDocTag,
+    isJsxOpeningLikeElement,
+    isLiteralExpression,
+    isModifier,
+    isNamedDeclaration,
+    isOptionalChain,
+    isOptionalChainRoot,
+    isStringLiteralLike,
+    isStringTextContainingNode,
+    isTemplateLiteralKind,
+    isToken,
+    isTypeElement,
+    isTypeNode,
+    textSpanContainsPosition,
+    textSpanContainsTextSpan,
+    textSpanEnd,
+    unescapeLeadingUnderscores,
+} from "../compiler/utilitiesPublic";
+import { visitEachChild } from "../compiler/visitorPublic";
+import * as JsTyping from "../jsTyping/jsTyping";
+import { moduleSymbolToValidIdentifier } from "./codefixes/importAdder";
+import {
+    compareImportsOrRequireStatements,
+    detectImportDeclarationSorting,
+    getImportDeclarationInsertionIndex,
+    getOrganizeImportsComparer,
+} from "./organizeImports";
+import { DisplayPartsSymbolWriter } from "./services";
+import { SourceMapper } from "./sourcemaps";
+import {
+    ChangeTracker,
+    LeadingTriviaOption,
+} from "./textChanges";
+import {
+    ContextNode,
+    ContextWithStartAndEndNode,
+    DocumentSpan,
+    Entry,
+    EntryKind,
+    FileTextChanges,
+    FormatCodeSettings,
+    FormatContext,
+    FormattingHost,
+    IScriptSnapshot,
+    JSDocLinkDisplayPart,
+    LanguageServiceHost,
+    PackageJsonDependencyGroup,
+    ProjectPackageJsonInfo,
+    RefactorContext,
+    ScriptElementKind,
+    ScriptElementKindModifier,
+    SemicolonPreference,
+    SymbolDisplayPart,
+    SymbolDisplayPartKind,
+    TextChange,
+    TextRangeWithKind,
+} from "./types";
 
 // These utilities are common to multiple language service features.
 //#region
@@ -2118,7 +2169,7 @@ export function getPossibleTypeArgumentsInfo(tokenIn: Node | undefined, sourceFi
  * @internal
  */
 export function isInComment(sourceFile: SourceFile, position: number, tokenAtPosition?: Node): CommentRange | undefined {
-    return formatting.getRangeOfEnclosingComment(sourceFile, position, /*precedingToken*/ undefined, tokenAtPosition);
+    return getRangeOfEnclosingComment(sourceFile, position, /*precedingToken*/ undefined, tokenAtPosition);
 }
 
 /** @internal */
@@ -2575,24 +2626,24 @@ export function findModifier(node: Node, kind: Modifier["kind"]): Modifier | und
 }
 
 /** @internal */
-export function insertImports(changes: textChanges.ChangeTracker, sourceFile: SourceFile, imports: AnyImportOrRequireStatement | readonly AnyImportOrRequireStatement[], blankLineBetween: boolean, preferences: UserPreferences): void {
+export function insertImports(changes: ChangeTracker, sourceFile: SourceFile, imports: AnyImportOrRequireStatement | readonly AnyImportOrRequireStatement[], blankLineBetween: boolean, preferences: UserPreferences): void {
     const decl = isArray(imports) ? imports[0] : imports;
     const importKindPredicate: (node: Node) => node is AnyImportOrRequireStatement = decl.kind === SyntaxKind.VariableStatement ? isRequireVariableStatement : isAnyImportSyntax;
     const existingImportStatements = filter(sourceFile.statements, importKindPredicate);
-    let sortKind = isArray(imports) ? OrganizeImports.detectImportDeclarationSorting(imports, preferences) : SortKind.Both;
-    const comparer = OrganizeImports.getOrganizeImportsComparer(preferences, sortKind === SortKind.CaseInsensitive);
-    const sortedNewImports = isArray(imports) ? stableSort(imports, (a, b) => OrganizeImports.compareImportsOrRequireStatements(a, b, comparer)) : [imports];
+    let sortKind = isArray(imports) ? detectImportDeclarationSorting(imports, preferences) : SortKind.Both;
+    const comparer = getOrganizeImportsComparer(preferences, sortKind === SortKind.CaseInsensitive);
+    const sortedNewImports = isArray(imports) ? stableSort(imports, (a, b) => compareImportsOrRequireStatements(a, b, comparer)) : [imports];
     if (!existingImportStatements.length) {
         changes.insertNodesAtTopOfFile(sourceFile, sortedNewImports, blankLineBetween);
     }
-    else if (existingImportStatements && (sortKind = OrganizeImports.detectImportDeclarationSorting(existingImportStatements, preferences))) {
-        const comparer = OrganizeImports.getOrganizeImportsComparer(preferences, sortKind === SortKind.CaseInsensitive);
+    else if (existingImportStatements && (sortKind = detectImportDeclarationSorting(existingImportStatements, preferences))) {
+        const comparer = getOrganizeImportsComparer(preferences, sortKind === SortKind.CaseInsensitive);
         for (const newImport of sortedNewImports) {
-            const insertionIndex = OrganizeImports.getImportDeclarationInsertionIndex(existingImportStatements, newImport, comparer);
+            const insertionIndex = getImportDeclarationInsertionIndex(existingImportStatements, newImport, comparer);
             if (insertionIndex === 0) {
                 // If the first import is top-of-file, insert after the leading comment which is likely the header.
                 const options = existingImportStatements[0] === sourceFile.statements[0] ?
-                { leadingTriviaOption: textChanges.LeadingTriviaOption.Exclude } : {};
+                { leadingTriviaOption: LeadingTriviaOption.Exclude } : {};
                 changes.insertNodeBefore(sourceFile, existingImportStatements[0], newImport, /*blankLineBetween*/ false, options);
             }
             else {
@@ -3817,7 +3868,7 @@ export function createPackageJsonImportFilter(fromFile: SourceFile, preferences:
         if (!stringContains(importedFileName, "node_modules")) {
             return undefined;
         }
-        const specifier = moduleSpecifiers.getNodeModulesPackageName(
+        const specifier = getNodeModulesPackageName(
             host.getCompilationSettings(),
             fromFile,
             importedFileName,
@@ -3959,8 +4010,8 @@ export function getNamesForExportedSymbol(symbol: Symbol, scriptTarget: ScriptTa
     if (needsNameFromDeclaration(symbol)) {
         const fromDeclaration = getDefaultLikeExportNameFromDeclaration(symbol);
         if (fromDeclaration) return fromDeclaration;
-        const fileNameCase = codefix.moduleSymbolToValidIdentifier(getSymbolParentOrFail(symbol), scriptTarget, /*forceCapitalize*/ false);
-        const capitalized = codefix.moduleSymbolToValidIdentifier(getSymbolParentOrFail(symbol), scriptTarget, /*forceCapitalize*/ true);
+        const fileNameCase = moduleSymbolToValidIdentifier(getSymbolParentOrFail(symbol), scriptTarget, /*forceCapitalize*/ false);
+        const capitalized = moduleSymbolToValidIdentifier(getSymbolParentOrFail(symbol), scriptTarget, /*forceCapitalize*/ true);
         if (fileNameCase === capitalized) return fileNameCase;
         return [fileNameCase, capitalized];
     }
@@ -3972,7 +4023,7 @@ export function getNameForExportedSymbol(symbol: Symbol, scriptTarget: ScriptTar
     if (needsNameFromDeclaration(symbol)) {
         // Name of "export default foo;" is "foo". Name of "export default 0" is the filename converted to camelCase.
         return getDefaultLikeExportNameFromDeclaration(symbol)
-            || codefix.moduleSymbolToValidIdentifier(getSymbolParentOrFail(symbol), scriptTarget, !!preferCapitalized);
+            || moduleSymbolToValidIdentifier(getSymbolParentOrFail(symbol), scriptTarget, !!preferCapitalized);
     }
     return symbol.name;
 
@@ -4088,7 +4139,7 @@ export function diagnosticToString(diag: DiagnosticOrDiagnosticAndArguments): st
  *
  * @internal
  */
-export function getFormatCodeSettingsForWriting({ options }: formatting.FormatContext, sourceFile: SourceFile): FormatCodeSettings {
+export function getFormatCodeSettingsForWriting({ options }: FormatContext, sourceFile: SourceFile): FormatCodeSettings {
     const shouldAutoDetectSemicolonPreference = !options.semicolons || options.semicolons === SemicolonPreference.Ignore;
     const shouldRemoveSemicolons = options.semicolons === SemicolonPreference.Remove || shouldAutoDetectSemicolonPreference && !probablyUsesSemicolons(sourceFile);
     return {
@@ -4105,6 +4156,158 @@ export function jsxModeNeedsExplicitImport(jsx: JsxEmit | undefined) {
 /** @internal */
 export function isSourceFileFromLibrary(program: Program, node: SourceFile) {
     return program.isSourceFileFromExternalLibrary(node) || program.isSourceFileDefaultLibrary(node);
+}
+
+/** @internal */
+export type DeclarationWithType = | FunctionLikeDeclaration | VariableDeclaration | PropertySignature | PropertyDeclaration;
+
+/** @internal */
+export function parameterShouldGetTypeFromJSDoc(node: Node): node is DeclarationWithType {
+    return isDeclarationWithType(node) && hasUsableJSDoc(node);
+}
+
+function isDeclarationWithType(node: Node): node is DeclarationWithType {
+    return isFunctionLikeDeclaration(node)
+        || node.kind === SyntaxKind.VariableDeclaration
+        || node.kind === SyntaxKind.PropertySignature
+        || node.kind === SyntaxKind.PropertyDeclaration;
+}
+
+function hasUsableJSDoc(decl: DeclarationWithType | ParameterDeclaration): boolean {
+    return isFunctionLikeDeclaration(decl) ? decl.parameters.some(hasUsableJSDoc) || (!decl.type && !!getJSDocReturnType(decl)) : !decl.type && !!getJSDocType(decl);
+}
+
+/** @internal */
+export function getContextNode(node: NamedDeclaration | BinaryExpression | ForInOrOfStatement | undefined): ContextNode | undefined {
+    if (!node) return undefined;
+    switch (node.kind) {
+        case SyntaxKind.VariableDeclaration:
+            return !isVariableDeclarationList(node.parent) || node.parent.declarations.length !== 1 ?
+                node :
+                isVariableStatement(node.parent.parent) ?
+                    node.parent.parent :
+                    isForInOrOfStatement(node.parent.parent) ?
+                        getContextNode(node.parent.parent) :
+                        node.parent;
+
+        case SyntaxKind.BindingElement:
+            return getContextNode(node.parent.parent as NamedDeclaration);
+
+        case SyntaxKind.ImportSpecifier:
+            return node.parent.parent.parent;
+
+        case SyntaxKind.ExportSpecifier:
+        case SyntaxKind.NamespaceImport:
+            return node.parent.parent;
+
+        case SyntaxKind.ImportClause:
+        case SyntaxKind.NamespaceExport:
+            return node.parent;
+
+        case SyntaxKind.BinaryExpression:
+            return isExpressionStatement(node.parent) ?
+                node.parent :
+                node;
+
+        case SyntaxKind.ForOfStatement:
+        case SyntaxKind.ForInStatement:
+            return {
+                start: (node as ForInOrOfStatement).initializer,
+                end: (node as ForInOrOfStatement).expression
+            };
+
+        case SyntaxKind.PropertyAssignment:
+        case SyntaxKind.ShorthandPropertyAssignment:
+            return isArrayLiteralOrObjectLiteralDestructuringPattern(node.parent) ?
+                getContextNode(
+                    findAncestor(node.parent, node =>
+                        isBinaryExpression(node) || isForInOrOfStatement(node)
+                    ) as BinaryExpression | ForInOrOfStatement
+                ) :
+                node;
+
+        default:
+            return node;
+    }
+}
+
+/** @internal */
+export function toContextSpan(textSpan: TextSpan, sourceFile: SourceFile, context?: ContextNode): { contextSpan: TextSpan } | undefined {
+    if (!context) return undefined;
+    const contextSpan = isContextWithStartAndEndNode(context) ? getTextSpan(context.start, sourceFile, context.end) : getTextSpan(context, sourceFile);
+    return contextSpan.start !== textSpan.start || contextSpan.length !== textSpan.length ? { contextSpan } : undefined;
+}
+
+/** @internal */
+export function isContextWithStartAndEndNode(node: ContextNode): node is ContextWithStartAndEndNode {
+    return node && (node as Node).kind === undefined;
+}
+
+/** @internal */
+export function getTextSpan(node: Node, sourceFile: SourceFile, endNode?: Node): TextSpan {
+    let start = node.getStart(sourceFile);
+    let end = (endNode || node).getEnd();
+    if (isStringLiteralLike(node) && (end - start) > 2) {
+        Debug.assert(endNode === undefined);
+        start += 1;
+        end -= 1;
+    }
+    return createTextSpanFromBounds(start, end);
+}
+
+/** @internal */
+export function getTextSpanOfEntry(entry: Entry) {
+    return entry.kind === EntryKind.Span ? entry.textSpan : getTextSpan(entry.node, entry.node.getSourceFile());
+}
+
+/** @internal */
+export function getRangeOfEnclosingComment(
+    sourceFile: SourceFile,
+    position: number,
+    precedingToken?: Node | null,
+    tokenAtPosition = getTokenAtPosition(sourceFile, position),
+): CommentRange | undefined {
+    const jsdoc = findAncestor(tokenAtPosition, isJSDoc);
+    if (jsdoc) tokenAtPosition = jsdoc.parent;
+    const tokenStart = tokenAtPosition.getStart(sourceFile);
+    if (tokenStart <= position && position < tokenAtPosition.getEnd()) {
+        return undefined;
+    }
+
+    // eslint-disable-next-line no-null/no-null
+    precedingToken = precedingToken === null ? undefined : precedingToken === undefined ? findPrecedingToken(position, sourceFile) : precedingToken;
+
+    // Between two consecutive tokens, all comments are either trailing on the former
+    // or leading on the latter (and none are in both lists).
+    const trailingRangesOfPreviousToken = precedingToken && getTrailingCommentRanges(sourceFile.text, precedingToken.end);
+    const leadingCommentRangesOfNextToken = getLeadingCommentRangesOfNode(tokenAtPosition, sourceFile);
+    const commentRanges = concatenate(trailingRangesOfPreviousToken, leadingCommentRangesOfNextToken);
+    return commentRanges && find(commentRanges, range => rangeContainsPositionExclusive(range, position) ||
+        // The end marker of a single-line comment does not include the newline character.
+        // With caret at `^`, in the following case, we are inside a comment (^ denotes the cursor position):
+        //
+        //    // asdf   ^\n
+        //
+        // But for closed multi-line comments, we don't want to be inside the comment in the following case:
+        //
+        //    /* asdf */^
+        //
+        // However, unterminated multi-line comments *do* contain their end.
+        //
+        // Internally, we represent the end of the comment at the newline and closing '/', respectively.
+        //
+        position === range.end && (range.kind === SyntaxKind.SingleLineCommentTrivia || position === sourceFile.getFullWidth()));
+}
+
+/** @internal */
+export function createTextRangeWithKind<T extends SyntaxKind>(pos: number, end: number, kind: T): TextRangeWithKind<T> {
+    const textRangeWithKind: TextRangeWithKind<T> = { pos, end, kind };
+    if (Debug.isDebugging) {
+        Object.defineProperty(textRangeWithKind, "__debugKind", {
+            get: () => Debug.formatSyntaxKind(kind),
+        });
+    }
+    return textRangeWithKind;
 }
 
 /** @internal */
@@ -4218,4 +4421,12 @@ export function fileShouldUseJavaScriptRequire(file: SourceFile | string, progra
         }
     }
     return preferRequire;
+}
+
+/** @internal */
+export function getJSDocTypedefNode(node: Node): JSDocTypedefTag | undefined {
+    if (hasJSDocNodes(node)) {
+        return forEach(node.jsDoc, (node) => node.tags?.find(isJSDocTypedefTag));
+    }
+    return undefined;
 }

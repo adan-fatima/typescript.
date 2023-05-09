@@ -1,10 +1,11 @@
 import {
-    BaseType,
     clear,
-    EntityNameOrEntityNameExpression,
     forEach,
     getOwnValues,
-    getSymbolId,
+} from "./core";
+import {
+    BaseType,
+    EntityNameOrEntityNameExpression,
     Identifier,
     IndexedAccessType,
     IndexType,
@@ -24,7 +25,8 @@ import {
     TypeQueryNode,
     TypeReference,
     UnionOrIntersectionType,
-} from "./_namespaces/ts";
+} from "./types";
+import { getSymbolId } from "./utilities";
 
 /** @internal */
 export function createGetSymbolWalker(

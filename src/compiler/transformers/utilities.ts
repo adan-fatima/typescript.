@@ -1,12 +1,31 @@
 import {
+    append,
+    cast,
+    createMultiMap,
+    filter,
+    map,
+    some,
+} from "../core";
+import {
+    isClassStaticBlockDeclaration,
+    isExpressionStatement,
+    isIdentifier,
+    isNamedExports,
+    isNamedImports,
+    isOmittedExpression,
+    isPrivateIdentifier,
+    isPropertyDeclaration,
+} from "../factory/nodeTests";
+import {
+    createExternalHelpersImportDeclarationIfNeeded, getNodeForGeneratedName, isLocalName,
+} from "../factory/utilities";
+import {
     __String,
     AccessorDeclaration,
     AllDecorators,
-    append,
     BinaryOperator,
     BindingElement,
     Bundle,
-    cast,
     ClassDeclaration,
     ClassElement,
     ClassExpression,
@@ -15,69 +34,34 @@ import {
     CompilerOptions,
     CompoundAssignmentOperator,
     CoreTransformationContext,
-    createExternalHelpersImportDeclarationIfNeeded,
-    createMultiMap,
     Decorator,
     EmitResolver,
     ExportAssignment,
     ExportDeclaration,
     ExportSpecifier,
     Expression,
-    filter,
     FunctionDeclaration,
     FunctionLikeDeclaration,
-    getAllAccessorDeclarations,
-    getDecorators,
-    getFirstConstructorWithBody,
-    getNamespaceDeclarationNode,
-    getNodeForGeneratedName,
-    getNodeId,
-    getOriginalNode,
-    hasDecorators,
-    hasStaticModifier,
-    hasSyntacticModifier,
     Identifier,
-    idText,
     ImportDeclaration,
     ImportEqualsDeclaration,
     ImportSpecifier,
     InitializedPropertyDeclaration,
     InternalSymbolName,
-    isAutoAccessorPropertyDeclaration,
-    isBindingPattern,
-    isClassStaticBlockDeclaration,
-    isDefaultImport,
-    isExpressionStatement,
-    isGeneratedIdentifier,
-    isGeneratedPrivateIdentifier,
-    isIdentifier,
-    isKeyword,
-    isLocalName,
-    isMethodOrAccessor,
-    isNamedExports,
-    isNamedImports,
-    isOmittedExpression,
-    isPrivateIdentifier,
-    isPropertyDeclaration,
-    isStatic,
-    isStringLiteralLike,
-    isSuperCall,
     LogicalOperatorOrHigher,
-    map,
     MethodDeclaration,
     ModifierFlags,
+    ModuleKind,
     NamedImportBindings,
     NamespaceExport,
     Node,
     NodeArray,
-    parameterIsThisKeyword,
     PrivateIdentifier,
     PrivateIdentifierAccessorDeclaration,
     PrivateIdentifierAutoAccessorPropertyDeclaration,
     PrivateIdentifierMethodDeclaration,
     PropertyDeclaration,
-    skipParentheses,
-    some,
+    ScriptKind,
     SourceFile,
     Statement,
     SuperCall,
@@ -85,7 +69,38 @@ import {
     TransformationContext,
     VariableDeclaration,
     VariableStatement,
-} from "../_namespaces/ts";
+} from "../types";
+import {
+    getAllAccessorDeclarations,
+    getEmitModuleKind,
+    getFirstConstructorWithBody,
+    getIsolatedModules,
+    getNamespaceDeclarationNode,
+    getNodeId,
+    getStrictOptionValue,
+    hasDecorators,
+    hasStaticModifier,
+    hasSyntacticModifier,
+    isDefaultImport,
+    isExternalModule,
+    isKeyword,
+    isStatic,
+    isSuperCall,
+    parameterIsThisKeyword,
+    skipParentheses,
+    startsWithUseStrict,
+} from "../utilities";
+import {
+    getDecorators,
+    getOriginalNode,
+    idText,
+    isAutoAccessorPropertyDeclaration,
+    isBindingPattern,
+    isGeneratedIdentifier,
+    isGeneratedPrivateIdentifier,
+    isMethodOrAccessor,
+    isStringLiteralLike,
+} from "../utilitiesPublic";
 
 /** @internal */
 export function getOriginalNodeId(node: Node) {
@@ -724,4 +739,43 @@ export function accessPrivateIdentifier<
     name: PrivateIdentifier,
 ) {
     return walkUpLexicalEnvironments(env, env => getPrivateIdentifier(env.privateEnv, name));
+}
+
+/**
+ * Returns whether the source file will be treated as if it were in strict mode at runtime.
+ *
+ * @internal
+ */
+export function isEffectiveStrictModeSourceFile(node: SourceFile, compilerOptions: CompilerOptions) {
+    // We can only verify strict mode for JS/TS files
+    switch (node.scriptKind) {
+        case ScriptKind.JS:
+        case ScriptKind.TS:
+        case ScriptKind.JSX:
+        case ScriptKind.TSX:
+            break;
+        default:
+            return false;
+    }
+    // Strict mode does not matter for declaration files.
+    if (node.isDeclarationFile) {
+        return false;
+    }
+    // If `alwaysStrict` is set, then treat the file as strict.
+    if (getStrictOptionValue(compilerOptions, "alwaysStrict")) {
+        return true;
+    }
+    // Starting with a "use strict" directive indicates the file is strict.
+    if (startsWithUseStrict(node.statements)) {
+        return true;
+    }
+    if (isExternalModule(node) || getIsolatedModules(compilerOptions)) {
+        // ECMAScript Modules are always strict.
+        if (getEmitModuleKind(compilerOptions) >= ModuleKind.ES2015) {
+            return true;
+        }
+        // Other modules are strict unless otherwise specified.
+        return !compilerOptions.noImplicitUseStrict;
+    }
+    return false;
 }

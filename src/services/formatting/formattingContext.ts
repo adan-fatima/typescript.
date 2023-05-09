@@ -1,12 +1,14 @@
+import * as Debug from "../../compiler/debug";
 import {
-    Debug,
-    findChildOfKind,
-    FormatCodeSettings,
     Node,
     SourceFileLike,
     SyntaxKind,
-} from "../_namespaces/ts";
-import { TextRangeWithKind } from "../_namespaces/ts.formatting";
+} from "../../compiler/types";
+import {
+    FormatCodeSettings,
+    TextRangeWithKind,
+} from "../types";
+import { findChildOfKind } from "../utilities";
 
 /** @internal */
 export const enum FormattingRequestKind {

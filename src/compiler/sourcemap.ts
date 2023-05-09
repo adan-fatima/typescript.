@@ -1,32 +1,36 @@
 import {
     arrayFrom,
     binarySearchKey,
-    CharacterCodes,
-    combinePaths,
     compareValues,
-    Debug,
+    emptyArray,
+    every,
+    identity,
+    isArray,
+    isString,
+    some,
+    sortAndDeduplicate,
+    trimStringEnd,
+} from "./core";
+import { SortedReadonlyArray } from "./corePublic";
+import * as Debug from "./debug";
+import {
+    combinePaths,
+    getDirectoryPath,
+    getNormalizedAbsolutePath,
+    getRelativePathToDirectoryOrUrl,
+} from "./path";
+import * as performance from "./performance";
+import { getPositionOfLineAndCharacter } from "./scanner";
+import {
+    CharacterCodes,
     DocumentPosition,
     DocumentPositionMapper,
     DocumentPositionMapperHost,
     EmitHost,
-    emptyArray,
-    every,
-    getDirectoryPath,
-    getNormalizedAbsolutePath,
-    getPositionOfLineAndCharacter,
-    getRelativePathToDirectoryOrUrl,
-    identity,
-    isArray,
-    isString,
     LineAndCharacter,
     RawSourceMap,
-    some,
-    sortAndDeduplicate,
-    SortedReadonlyArray,
     SourceMapGenerator,
-    trimStringEnd,
-} from "./_namespaces/ts";
-import * as performance from "./_namespaces/ts.performance";
+} from "./types";
 
 /** @internal */
 export interface SourceMapGeneratorOptions {
@@ -40,7 +44,7 @@ export function createSourceMapGenerator(host: EmitHost, file: string, sourceRoo
     /* eslint-disable no-var */
     var { enter, exit } = generatorOptions.extendedDiagnostics
         ? performance.createTimer("Source Map", "beforeSourcemap", "afterSourcemap")
-        : performance.nullTimer;
+        : performance.createNullTimer();
 
     // Current source map file and its index in the sources list
     var rawSources: string[] = [];

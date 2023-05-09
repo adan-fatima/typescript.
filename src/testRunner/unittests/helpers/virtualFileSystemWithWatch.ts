@@ -1,3 +1,5 @@
+import { matchFiles } from "../../../compiler/fileMatcher";
+import { ModuleImportResult } from "../../../server/types";
 import * as Harness from "../../_namespaces/Harness";
 import {
     clear,
@@ -30,8 +32,6 @@ import {
     isArray,
     isString,
     mapDefined,
-    matchFiles,
-    ModuleImportResult,
     ModuleResolutionHost,
     MultiMap,
     noop,

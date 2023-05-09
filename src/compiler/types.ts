@@ -1,22 +1,23 @@
+import { ProgramBuildInfo } from "./builder";
+import { OptionsNameMap } from "./commandLineParser";
 import {
-    BaseNodeFactory,
-    CreateSourceFileOptions,
-    EmitHelperFactory,
     GetCanonicalFileName,
-    MapLike,
+    MultiMap,
+    Pattern,
+} from "./core";
+import { MapLike } from "./corePublic";
+import { BaseNodeFactory } from "./factory/baseNodeFactory";
+import { NodeFactoryFlags } from "./factory/nodeFactory";
+import {
     ModeAwareCache,
     ModeAwareCacheKey,
     ModuleResolutionCache,
-    MultiMap,
-    NodeFactoryFlags,
-    OptionsNameMap,
     PackageJsonInfo,
     PackageJsonInfoCache,
-    Pattern,
-    ProgramBuildInfo,
-    SymlinkCache,
-    ThisContainer,
-} from "./_namespaces/ts";
+} from "./moduleNameResolver";
+import { CreateSourceFileOptions } from "./parser";
+import { SymlinkCache } from "./symlinkCache";
+import { ThisContainer } from "./utilities";
 
 // branded string type used to store absolute, normalized and canonicalized paths
 // arbitrary file name can be converted to Path via toPath function
@@ -5712,6 +5713,117 @@ export interface EmitResolver {
     isImportRequiredByAugmentation(decl: ImportDeclaration): boolean;
 }
 
+
+
+/** @internal */
+export const enum TypeFacts {
+    None = 0,
+    TypeofEQString = 1 << 0,      // typeof x === "string"
+    TypeofEQNumber = 1 << 1,      // typeof x === "number"
+    TypeofEQBigInt = 1 << 2,      // typeof x === "bigint"
+    TypeofEQBoolean = 1 << 3,     // typeof x === "boolean"
+    TypeofEQSymbol = 1 << 4,      // typeof x === "symbol"
+    TypeofEQObject = 1 << 5,      // typeof x === "object"
+    TypeofEQFunction = 1 << 6,    // typeof x === "function"
+    TypeofEQHostObject = 1 << 7,  // typeof x === "xxx"
+    TypeofNEString = 1 << 8,      // typeof x !== "string"
+    TypeofNENumber = 1 << 9,      // typeof x !== "number"
+    TypeofNEBigInt = 1 << 10,     // typeof x !== "bigint"
+    TypeofNEBoolean = 1 << 11,    // typeof x !== "boolean"
+    TypeofNESymbol = 1 << 12,     // typeof x !== "symbol"
+    TypeofNEObject = 1 << 13,     // typeof x !== "object"
+    TypeofNEFunction = 1 << 14,   // typeof x !== "function"
+    TypeofNEHostObject = 1 << 15, // typeof x !== "xxx"
+    EQUndefined = 1 << 16,        // x === undefined
+    EQNull = 1 << 17,             // x === null
+    EQUndefinedOrNull = 1 << 18,  // x === undefined / x === null
+    NEUndefined = 1 << 19,        // x !== undefined
+    NENull = 1 << 20,             // x !== null
+    NEUndefinedOrNull = 1 << 21,  // x != undefined / x != null
+    Truthy = 1 << 22,             // x
+    Falsy = 1 << 23,              // !x
+    IsUndefined = 1 << 24,        // Contains undefined or intersection with undefined
+    IsNull = 1 << 25,             // Contains null or intersection with null
+    IsUndefinedOrNull = IsUndefined | IsNull,
+    All = (1 << 27) - 1,
+    // The following members encode facts about particular kinds of types for use in the getTypeFacts function.
+    // The presence of a particular fact means that the given test is true for some (and possibly all) values
+    // of that kind of type.
+    BaseStringStrictFacts = TypeofEQString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | TypeofNEFunction | TypeofNEHostObject | NEUndefined | NENull | NEUndefinedOrNull,
+    BaseStringFacts = BaseStringStrictFacts | EQUndefined | EQNull | EQUndefinedOrNull | Falsy,
+    StringStrictFacts = BaseStringStrictFacts | Truthy | Falsy,
+    StringFacts = BaseStringFacts | Truthy,
+    EmptyStringStrictFacts = BaseStringStrictFacts | Falsy,
+    EmptyStringFacts = BaseStringFacts,
+    NonEmptyStringStrictFacts = BaseStringStrictFacts | Truthy,
+    NonEmptyStringFacts = BaseStringFacts | Truthy,
+    BaseNumberStrictFacts = TypeofEQNumber | TypeofNEString | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | TypeofNEFunction | TypeofNEHostObject | NEUndefined | NENull | NEUndefinedOrNull,
+    BaseNumberFacts = BaseNumberStrictFacts | EQUndefined | EQNull | EQUndefinedOrNull | Falsy,
+    NumberStrictFacts = BaseNumberStrictFacts | Truthy | Falsy,
+    NumberFacts = BaseNumberFacts | Truthy,
+    ZeroNumberStrictFacts = BaseNumberStrictFacts | Falsy,
+    ZeroNumberFacts = BaseNumberFacts,
+    NonZeroNumberStrictFacts = BaseNumberStrictFacts | Truthy,
+    NonZeroNumberFacts = BaseNumberFacts | Truthy,
+    BaseBigIntStrictFacts = TypeofEQBigInt | TypeofNEString | TypeofNENumber | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | TypeofNEFunction | TypeofNEHostObject | NEUndefined | NENull | NEUndefinedOrNull,
+    BaseBigIntFacts = BaseBigIntStrictFacts | EQUndefined | EQNull | EQUndefinedOrNull | Falsy,
+    BigIntStrictFacts = BaseBigIntStrictFacts | Truthy | Falsy,
+    BigIntFacts = BaseBigIntFacts | Truthy,
+    ZeroBigIntStrictFacts = BaseBigIntStrictFacts | Falsy,
+    ZeroBigIntFacts = BaseBigIntFacts,
+    NonZeroBigIntStrictFacts = BaseBigIntStrictFacts | Truthy,
+    NonZeroBigIntFacts = BaseBigIntFacts | Truthy,
+    BaseBooleanStrictFacts = TypeofEQBoolean | TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNESymbol | TypeofNEObject | TypeofNEFunction | TypeofNEHostObject | NEUndefined | NENull | NEUndefinedOrNull,
+    BaseBooleanFacts = BaseBooleanStrictFacts | EQUndefined | EQNull | EQUndefinedOrNull | Falsy,
+    BooleanStrictFacts = BaseBooleanStrictFacts | Truthy | Falsy,
+    BooleanFacts = BaseBooleanFacts | Truthy,
+    FalseStrictFacts = BaseBooleanStrictFacts | Falsy,
+    FalseFacts = BaseBooleanFacts,
+    TrueStrictFacts = BaseBooleanStrictFacts | Truthy,
+    TrueFacts = BaseBooleanFacts | Truthy,
+    SymbolStrictFacts = TypeofEQSymbol | TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNEObject | TypeofNEFunction | TypeofNEHostObject | NEUndefined | NENull | NEUndefinedOrNull | Truthy,
+    SymbolFacts = SymbolStrictFacts | EQUndefined | EQNull | EQUndefinedOrNull | Falsy,
+    ObjectStrictFacts = TypeofEQObject | TypeofEQHostObject | TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEFunction | NEUndefined | NENull | NEUndefinedOrNull | Truthy,
+    ObjectFacts = ObjectStrictFacts | EQUndefined | EQNull | EQUndefinedOrNull | Falsy,
+    FunctionStrictFacts = TypeofEQFunction | TypeofEQHostObject | TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | NEUndefined | NENull | NEUndefinedOrNull | Truthy,
+    FunctionFacts = FunctionStrictFacts | EQUndefined | EQNull | EQUndefinedOrNull | Falsy,
+    VoidFacts = TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | TypeofNEFunction | TypeofNEHostObject | EQUndefined | EQUndefinedOrNull | NENull | Falsy,
+    UndefinedFacts = TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | TypeofNEFunction | TypeofNEHostObject | EQUndefined | EQUndefinedOrNull | NENull | Falsy | IsUndefined,
+    NullFacts = TypeofEQObject | TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEFunction | TypeofNEHostObject | EQNull | EQUndefinedOrNull | NEUndefined | Falsy | IsNull,
+    EmptyObjectStrictFacts = All & ~(EQUndefined | EQNull | EQUndefinedOrNull | IsUndefinedOrNull),
+    EmptyObjectFacts = All & ~IsUndefinedOrNull,
+    UnknownFacts = All & ~IsUndefinedOrNull,
+    AllTypeofNE = TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | TypeofNEFunction | NEUndefined,
+    // Masks
+    OrFactsMask = TypeofEQFunction | TypeofNEObject,
+    AndFactsMask = All & ~OrFactsMask,
+}
+
+/** @internal */
+export const enum CheckMode {
+    Normal = 0,                                     // Normal type checking
+    Contextual = 1 << 0,                            // Explicitly assigned contextual type, therefore not cacheable
+    Inferential = 1 << 1,                           // Inferential typing
+    SkipContextSensitive = 1 << 2,                  // Skip context sensitive function expressions
+    SkipGenericFunctions = 1 << 3,                  // Skip single signature generic functions
+    IsForSignatureHelp = 1 << 4,                    // Call resolution for purposes of signature help
+    IsForStringLiteralArgumentCompletions = 1 << 5, // Do not infer from the argument currently being typed
+    RestBindingElement = 1 << 6,                    // Checking a type that is going to be used to determine the type of a rest binding element
+                                                    //   e.g. in `const { a, ...rest } = foo`, when checking the type of `foo` to determine the type of `rest`,
+                                                    //   we need to preserve generic types instead of substituting them for constraints
+}
+
+/** @internal */
+export const enum SignatureCheckMode {
+    None = 0,
+    BivariantCallback = 1 << 0,
+    StrictCallback = 1 << 1,
+    IgnoreReturnTypes = 1 << 2,
+    StrictArity = 1 << 3,
+    StrictTopSignature = 1 << 4,
+    Callback = BivariantCallback | StrictCallback,
+}
+
 export const enum SymbolFlags {
     None                    = 0,
     FunctionScopedVariable  = 1 << 0,   // Variable (var) or parameter
@@ -9973,4 +10085,276 @@ export interface Queue<T> {
     enqueue(...items: T[]): void;
     dequeue(): T;
     isEmpty(): boolean;
+}
+
+/**
+ * Describes the decorator context object passed to a native ECMAScript decorator for a class.
+ *
+ * @internal
+ */
+export interface ESDecorateClassContext {
+    /**
+     * The kind of the decorated element.
+     */
+    kind: "class";
+
+    /**
+     * The name of the decorated element.
+     */
+    name: Expression;
+}
+
+/**
+ * Describes the decorator context object passed to a native ECMAScript decorator for a class element.
+ *
+ * @internal
+ */
+export interface ESDecorateClassElementContext {
+    /**
+     * The kind of the decorated element.
+     */
+    kind: "method" | "getter" | "setter" | "accessor" | "field";
+    name: ESDecorateName;
+    static: boolean;
+    private: boolean;
+    access: ESDecorateClassElementAccess;
+}
+
+/** @internal */
+export interface ESDecorateClassElementAccess {
+    get?: boolean;
+    set?: boolean;
+}
+
+/** @internal */
+export type ESDecorateName =
+    | { computed: true, name: Expression }
+    | { computed: false, name: Identifier | PrivateIdentifier }
+    ;
+
+/** @internal */
+export type ESDecorateContext =
+    | ESDecorateClassContext
+    | ESDecorateClassElementContext
+    ;
+
+/** @internal */
+export interface EmitHelperFactory {
+    getUnscopedHelperName(name: string): Identifier;
+    // TypeScript Helpers
+    createDecorateHelper(decoratorExpressions: readonly Expression[], target: Expression, memberName?: Expression, descriptor?: Expression): Expression;
+    createMetadataHelper(metadataKey: string, metadataValue: Expression): Expression;
+    createParamHelper(expression: Expression, parameterOffset: number): Expression;
+    // ES Decorators Helpers
+    createESDecorateHelper(ctor: Expression, descriptorIn: Expression, decorators: Expression, contextIn: ESDecorateContext, initializers: Expression, extraInitializers: Expression): Expression;
+    createRunInitializersHelper(thisArg: Expression, initializers: Expression, value?: Expression): Expression;
+    // ES2018 Helpers
+    createAssignHelper(attributesSegments: readonly Expression[]): Expression;
+    createAwaitHelper(expression: Expression): Expression;
+    createAsyncGeneratorHelper(generatorFunc: FunctionExpression, hasLexicalThis: boolean): Expression;
+    createAsyncDelegatorHelper(expression: Expression): Expression;
+    createAsyncValuesHelper(expression: Expression): Expression;
+    // ES2018 Destructuring Helpers
+    createRestHelper(value: Expression, elements: readonly BindingOrAssignmentElement[], computedTempVariables: readonly Expression[] | undefined, location: TextRange): Expression;
+    // ES2017 Helpers
+    createAwaiterHelper(hasLexicalThis: boolean, hasLexicalArguments: boolean, promiseConstructor: EntityName | Expression | undefined, body: Block): Expression;
+    // ES2015 Helpers
+    createExtendsHelper(name: Identifier): Expression;
+    createTemplateObjectHelper(cooked: ArrayLiteralExpression, raw: ArrayLiteralExpression): Expression;
+    createSpreadArrayHelper(to: Expression, from: Expression, packFrom: boolean): Expression;
+    createPropKeyHelper(expr: Expression): Expression;
+    createSetFunctionNameHelper(f: Expression, name: Expression, prefix?: string): Expression;
+    // ES2015 Destructuring Helpers
+    createValuesHelper(expression: Expression): Expression;
+    createReadHelper(iteratorRecord: Expression, count: number | undefined): Expression;
+    // ES2015 Generator Helpers
+    createGeneratorHelper(body: FunctionExpression): Expression;
+    // ES Module Helpers
+    createCreateBindingHelper(module: Expression, inputName: Expression, outputName: Expression | undefined): Expression;
+    createImportStarHelper(expression: Expression): Expression;
+    createImportStarCallbackHelper(): Expression;
+    createImportDefaultHelper(expression: Expression): Expression;
+    createExportStarHelper(moduleExpression: Expression, exportsExpression?: Expression): Expression;
+    // Class Fields Helpers
+    createClassPrivateFieldGetHelper(receiver: Expression, state: Identifier, kind: PrivateIdentifierKind, f: Identifier | undefined): Expression;
+    createClassPrivateFieldSetHelper(receiver: Expression, state: Identifier, value: Expression, kind: PrivateIdentifierKind, f: Identifier | undefined): Expression;
+    createClassPrivateFieldInHelper(state: Identifier, receiver: Expression): Expression;
+}
+
+/** @internal */
+export const enum PrivateIdentifierKind {
+    Field = "f",
+    Method = "m",
+    Accessor = "a"
+}
+
+/**
+ * Safer version of `Function` which should not be called.
+ * Every function should be assignable to this, but this should not be assignable to every function.
+ *
+ * @internal
+ */
+export type AnyFunction = (...args: never[]) => void;
+
+/** @internal */
+export type AnyConstructor = new (...args: unknown[]) => unknown;
+
+/** @internal */
+export type Mutable<T extends object> = { -readonly [K in keyof T]: T[K] };
+
+export type BufferEncoding = "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "latin1" | "binary" | "hex";
+
+/** @internal */
+export interface NodeBuffer extends Uint8Array {
+    constructor: any;
+    write(str: string, encoding?: BufferEncoding): number;
+    write(str: string, offset: number, encoding?: BufferEncoding): number;
+    write(str: string, offset: number, length: number, encoding?: BufferEncoding): number;
+    toString(encoding?: string, start?: number, end?: number): string;
+    toJSON(): { type: "Buffer"; data: number[] };
+    equals(otherBuffer: Uint8Array): boolean;
+    compare(
+        otherBuffer: Uint8Array,
+        targetStart?: number,
+        targetEnd?: number,
+        sourceStart?: number,
+        sourceEnd?: number
+    ): number;
+    copy(targetBuffer: Uint8Array, targetStart?: number, sourceStart?: number, sourceEnd?: number): number;
+    slice(begin?: number, end?: number): Buffer;
+    subarray(begin?: number, end?: number): Buffer;
+    writeUIntLE(value: number, offset: number, byteLength: number): number;
+    writeUIntBE(value: number, offset: number, byteLength: number): number;
+    writeIntLE(value: number, offset: number, byteLength: number): number;
+    writeIntBE(value: number, offset: number, byteLength: number): number;
+    readUIntLE(offset: number, byteLength: number): number;
+    readUIntBE(offset: number, byteLength: number): number;
+    readIntLE(offset: number, byteLength: number): number;
+    readIntBE(offset: number, byteLength: number): number;
+    readUInt8(offset: number): number;
+    readUInt16LE(offset: number): number;
+    readUInt16BE(offset: number): number;
+    readUInt32LE(offset: number): number;
+    readUInt32BE(offset: number): number;
+    readInt8(offset: number): number;
+    readInt16LE(offset: number): number;
+    readInt16BE(offset: number): number;
+    readInt32LE(offset: number): number;
+    readInt32BE(offset: number): number;
+    readFloatLE(offset: number): number;
+    readFloatBE(offset: number): number;
+    readDoubleLE(offset: number): number;
+    readDoubleBE(offset: number): number;
+    reverse(): this;
+    swap16(): Buffer;
+    swap32(): Buffer;
+    swap64(): Buffer;
+    writeUInt8(value: number, offset: number): number;
+    writeUInt16LE(value: number, offset: number): number;
+    writeUInt16BE(value: number, offset: number): number;
+    writeUInt32LE(value: number, offset: number): number;
+    writeUInt32BE(value: number, offset: number): number;
+    writeInt8(value: number, offset: number): number;
+    writeInt16LE(value: number, offset: number): number;
+    writeInt16BE(value: number, offset: number): number;
+    writeInt32LE(value: number, offset: number): number;
+    writeInt32BE(value: number, offset: number): number;
+    writeFloatLE(value: number, offset: number): number;
+    writeFloatBE(value: number, offset: number): number;
+    writeDoubleLE(value: number, offset: number): number;
+    writeDoubleBE(value: number, offset: number): number;
+    readBigUInt64BE?(offset?: number): bigint;
+    readBigUInt64LE?(offset?: number): bigint;
+    readBigInt64BE?(offset?: number): bigint;
+    readBigInt64LE?(offset?: number): bigint;
+    writeBigInt64BE?(value: bigint, offset?: number): number;
+    writeBigInt64LE?(value: bigint, offset?: number): number;
+    writeBigUInt64BE?(value: bigint, offset?: number): number;
+    writeBigUInt64LE?(value: bigint, offset?: number): number;
+    fill(value: string | Uint8Array | number, offset?: number, end?: number, encoding?: BufferEncoding): this;
+    indexOf(value: string | number | Uint8Array, byteOffset?: number, encoding?: BufferEncoding): number;
+    lastIndexOf(value: string | number | Uint8Array, byteOffset?: number, encoding?: BufferEncoding): number;
+    entries(): IterableIterator<[number, number]>;
+    includes(value: string | number | Buffer, byteOffset?: number, encoding?: BufferEncoding): boolean;
+    keys(): IterableIterator<number>;
+    values(): IterableIterator<number>;
+}
+
+/** @internal */
+export interface Buffer extends NodeBuffer { }
+
+export interface FileWatcher {
+    close(): void;
+}
+
+export enum FileWatcherEventKind {
+    Created,
+    Changed,
+    Deleted
+}
+
+export type FileWatcherCallback = (fileName: string, eventKind: FileWatcherEventKind, modifiedTime?: Date) => void;
+export type DirectoryWatcherCallback = (fileName: string) => void;
+
+export interface System {
+    args: string[];
+    newLine: string;
+    useCaseSensitiveFileNames: boolean;
+    write(s: string): void;
+    writeOutputIsTTY?(): boolean;
+    getWidthOfTerminal?(): number;
+    readFile(path: string, encoding?: string): string | undefined;
+    getFileSize?(path: string): number;
+    writeFile(path: string, data: string, writeByteOrderMark?: boolean): void;
+
+    /**
+     * @pollingInterval - this parameter is used in polling-based watchers and ignored in watchers that
+     * use native OS file watching
+     */
+    watchFile?(path: string, callback: FileWatcherCallback, pollingInterval?: number, options?: WatchOptions): FileWatcher;
+    watchDirectory?(path: string, callback: DirectoryWatcherCallback, recursive?: boolean, options?: WatchOptions): FileWatcher;
+    resolvePath(path: string): string;
+    fileExists(path: string): boolean;
+    directoryExists(path: string): boolean;
+    createDirectory(path: string): void;
+    getExecutingFilePath(): string;
+    getCurrentDirectory(): string;
+    getDirectories(path: string): string[];
+    readDirectory(path: string, extensions?: readonly string[], exclude?: readonly string[], include?: readonly string[], depth?: number): string[];
+    getModifiedTime?(path: string): Date | undefined;
+    setModifiedTime?(path: string, time: Date): void;
+    deleteFile?(path: string): void;
+    /**
+     * A good implementation is node.js' `crypto.createHash`. (https://nodejs.org/api/crypto.html#crypto_crypto_createhash_algorithm)
+     */
+    createHash?(data: string): string;
+    /** This must be cryptographically secure. Only implement this method using `crypto.createHash("sha256")`. */
+    createSHA256Hash?(data: string): string;
+    getMemoryUsage?(): number;
+    exit(exitCode?: number): void;
+    /** @internal */ enableCPUProfiler?(path: string, continuation: () => void): boolean;
+    /** @internal */ disableCPUProfiler?(continuation: () => void): boolean;
+    /** @internal */ cpuProfilingEnabled?(): boolean;
+    realpath?(path: string): string;
+    /** @internal */ getEnvironmentVariable(name: string): string;
+    /** @internal */ tryEnableSourceMapsForHost?(): void;
+    /** @internal */ debugMode?: boolean;
+    setTimeout?(callback: (...args: any[]) => void, ms: number, ...args: any[]): any;
+    clearTimeout?(timeoutId: any): void;
+    clearScreen?(): void;
+    /** @internal */ setBlocking?(): void;
+    base64decode?(input: string): string;
+    base64encode?(input: string): string;
+    /** @internal */ bufferFrom?(input: string, encoding?: string): Buffer;
+    /** @internal */ require?(baseDir: string, moduleName: string): ModuleImportResult;
+
+    // For testing
+    /** @internal */ now?(): Date;
+    /** @internal */ storeFilesChangingSignatureDuringEmit?: boolean;
+}
+
+/** @internal */
+export interface ResolutionNameAndModeGetter<Entry, SourceFile> {
+    getName(entry: Entry): string;
+    getMode(entry: Entry, file: SourceFile): ResolutionMode;
 }

@@ -1,169 +1,170 @@
+import { EmitOutput } from "../compiler/builderStatePublic";
 import {
     arrayFrom,
     arrayReverseIterator,
-    BufferEncoding,
-    CallHierarchyIncomingCall,
-    CallHierarchyItem,
-    CallHierarchyOutgoingCall,
     cast,
-    CodeAction,
-    CodeActionCommand,
-    CodeFixAction,
-    CombinedCodeActions,
-    CompilerOptions,
-    CompletionEntry,
-    CompletionEntryData,
-    CompletionEntryDetails,
-    CompletionInfo,
-    CompletionTriggerKind,
-    computeLineAndCharacterOfPosition,
-    computeLineStarts,
     concatenate,
     createQueue,
     createSet,
-    createTextSpan,
-    createTextSpanFromBounds,
-    Debug,
-    decodedTextSpanIntersectsWith,
     deduplicate,
-    DefinitionInfo,
-    DefinitionInfoAndBoundSpan,
-    Diagnostic,
-    diagnosticCategoryName,
-    DiagnosticRelatedInformation,
-    displayPartsToString,
-    DocumentHighlights,
-    DocumentPosition,
-    DocumentSpan,
-    documentSpansEqual,
-    EmitOutput,
     equateValues,
-    FileTextChanges,
     filter,
     find,
-    FindAllReferences,
     first,
     firstIterator,
     firstOrUndefined,
     flatMap,
     flatMapToMutable,
-    flattenDiagnosticMessageText,
-    forEachNameInAccessChainWalkingLeft,
-    FormatCodeSettings,
-    formatting,
-    getDeclarationFromName,
-    getDeclarationOfKind,
-    getEmitDeclarations,
-    getEntrypointsFromPackageJsonInfo,
-    getLineAndCharacterOfPosition,
-    getMappedContextSpan,
-    getMappedDocumentSpan,
-    getMappedLocation,
-    getNodeModulePathParts,
-    getNormalizedAbsolutePath,
-    getPackageNameFromTypesPackageName,
-    getPackageScopeForPath,
-    getSnapshotText,
-    getSupportedCodeFixes,
-    getTemporaryModuleResolutionState,
-    getTextOfIdentifierOrLiteral,
-    getTouchingPropertyName,
-    GoToDefinition,
-    HostCancellationToken,
     identity,
-    ImplementationLocation,
-    ImportSpecifier,
-    isAccessExpression,
     isArray,
-    isDeclarationFileName,
-    isIdentifier,
     isString,
-    isStringLiteralLike,
-    JSDocLinkDisplayPart,
-    JSDocTagInfo,
-    LanguageServiceMode,
-    LineAndCharacter,
-    LinkedEditingInfo,
     map,
     mapDefined,
     mapDefinedIterator,
     mapIterator,
-    mapOneOrMany,
     memoize,
-    ModuleResolutionKind,
     MultiMap,
+    singleIterator,
+    some,
+    startsWith,
+    stringContains,
+    toArray,
+    toFileNameLowerCase,
+} from "../compiler/core";
+import { version } from "../compiler/corePublic";
+import * as Debug from "../compiler/debug";
+import { removeFileExtension } from "../compiler/extension";
+import { isIdentifier } from "../compiler/factory/nodeTests";
+import {
+    getEntrypointsFromPackageJsonInfo,
+    getPackageNameFromTypesPackageName,
+    getPackageScopeForPath,
+    getTemporaryModuleResolutionState,
+    nodeModulesPathPart,
+    unmangleScopedPackageName,
+} from "../compiler/moduleNameResolver";
+import { getNodeModulePathParts } from "../compiler/moduleSpecifiersUtilities";
+import { isDeclarationFileName } from "../compiler/parser";
+import {
+    getNormalizedAbsolutePath,
+    normalizePath,
+} from "../compiler/path";
+import { perfLogger } from "../compiler/perfLogger";
+import { flattenDiagnosticMessageText } from "../compiler/program";
+import {
+    computeLineAndCharacterOfPosition,
+    computeLineStarts,
+    getLineAndCharacterOfPosition,
+} from "../compiler/scanner";
+import { tracing } from "../compiler/tracing";
+import {
+    BufferEncoding,
+    CompilerOptions,
+    Diagnostic,
+    diagnosticCategoryName,
+    DiagnosticRelatedInformation,
+    DocumentPosition,
+    ImportSpecifier,
+    LineAndCharacter,
+    ModuleResolutionKind,
+    OperationCanceledException,
+    Path,
+    Program,
+    ScriptKind,
+    SourceFile,
+    SyntaxKind,
+    TextRange,
+    TextSpan,
+} from "../compiler/types";
+import {
+    forEachNameInAccessChainWalkingLeft,
+    getDeclarationFromName,
+    getDeclarationOfKind,
+    getEmitDeclarations,
+    getTextOfIdentifierOrLiteral,
+    isAccessExpression,
+    outFile,
+} from "../compiler/utilities";
+import {
+    createTextSpan,
+    createTextSpanFromBounds,
+    decodedTextSpanIntersectsWith,
+    isStringLiteralLike,
+    textSpanEnd,
+} from "../compiler/utilitiesPublic";
+import { Core as FindAllReferences } from "../services/findAllReferences";
+import { getIndentationString } from "../services/formatting/formatting";
+import { createDefinitionInfo } from "../services/goToDefinition";
+import {
+    displayPartsToString,
+    getSupportedCodeFixes,
+} from "../services/services";
+import {
+    CallHierarchyIncomingCall,
+    CallHierarchyItem,
+    CallHierarchyOutgoingCall,
+    CodeAction,
+    CodeActionCommand,
+    CodeFixAction,
+    CombinedCodeActions,
+    CompletionEntry,
+    CompletionEntryData,
+    CompletionEntryDetails,
+    CompletionInfo,
+    CompletionTriggerKind,
+    DefinitionInfo,
+    DefinitionInfoAndBoundSpan,
+    DocumentHighlights,
+    DocumentSpan,
+    FileTextChanges,
+    FormatCodeSettings,
+    HostCancellationToken,
+    ImplementationLocation,
+    JSDocLinkDisplayPart,
+    JSDocTagInfo,
+    LanguageServiceMode,
+    LinkedEditingInfo,
     NavigateToItem,
     NavigationBarItem,
     NavigationTree,
-    nodeModulesPathPart,
-    normalizePath,
-    OperationCanceledException,
     OrganizeImportsMode,
-    outFile,
     OutliningSpan,
-    Path,
-    perfLogger,
     PerformanceEvent,
-    PossibleProgramFileInfo,
-    Program,
     QuickInfo,
     RefactorEditInfo,
     ReferencedSymbol,
     ReferencedSymbolDefinitionInfo,
     ReferencedSymbolEntry,
     ReferenceEntry,
-    removeFileExtension,
     RenameInfo,
     RenameLocation,
-    ScriptKind,
     SelectionRange,
     SemanticClassificationFormat,
     SignatureHelpItem,
     SignatureHelpItems,
-    singleIterator,
-    some,
-    SourceFile,
-    startsWith,
-    stringContains,
     SymbolDisplayPart,
-    SyntaxKind,
     TextChange,
     TextInsertion,
-    TextRange,
-    TextSpan,
-    textSpanEnd,
-    toArray,
-    toFileNameLowerCase,
-    tracing,
-    unmangleScopedPackageName,
-    version,
     WithMetadata,
-} from "./_namespaces/ts";
+} from "../services/types";
+import {
+    documentSpansEqual,
+    getMappedContextSpan,
+    getMappedDocumentSpan,
+    getMappedLocation,
+    getSnapshotText,
+    getTouchingPropertyName,
+    mapOneOrMany,
+    PossibleProgramFileInfo,
+} from "../services/utilities";
 import {
     ConfigFileDiagEvent,
-    ConfiguredProject,
     convertFormatOptions,
     convertScriptKindName,
     convertUserPreferences,
-    EmitResult,
-    emptyArray,
-    Errors,
-    GcTimer,
-    indent,
     isConfigFile,
-    isConfiguredProject,
-    isExternalProject,
-    isInferredProject,
-    ITypingsInstaller,
     LargeFileReferencedEvent,
-    Logger,
-    LogLevel,
-    Msg,
-    NormalizedPath,
-    nullTypingsInstaller,
-    Project,
     ProjectInfoTelemetryEvent,
-    ProjectKind,
     ProjectLanguageServiceStateEvent,
     ProjectLoadingFinishEvent,
     ProjectLoadingStartEvent,
@@ -172,14 +173,36 @@ import {
     ProjectServiceEventHandler,
     ProjectServiceOptions,
     ProjectsUpdatedInBackgroundEvent,
-    ScriptInfo,
     ScriptInfoOrConfig,
-    ServerHost,
-    stringifyIndented,
-    toNormalizedPath,
     updateProjectIfDirty,
-} from "./_namespaces/ts.server";
+} from "./editorServices";
+import {
+    ConfiguredProject,
+    EmitResult,
+    isConfiguredProject,
+    isExternalProject,
+    isInferredProject,
+    Project,
+    ProjectKind,
+} from "./project";
 import * as protocol from "./protocol";
+import { ScriptInfo } from "./scriptInfo";
+import { ServerHost } from "./types";
+import { ITypingsInstaller, nullTypingsInstaller } from "./typingsCache";
+import {
+    GcTimer,
+    indent,
+    stringifyIndented,
+} from "./utilities";
+import {
+    emptyArray,
+    Errors,
+    Logger,
+    LogLevel,
+    Msg,
+    NormalizedPath,
+    toNormalizedPath,
+} from "./utilitiesPublic";
 
 interface StackTraceError extends Error {
     stack?: string;
@@ -1632,14 +1655,14 @@ export class Session<TMessage = string> implements EventSender {
         }
 
         function searchForDeclaration(declarationName: string, fileToSearch: SourceFile, noDtsProgram: Program) {
-            const matches = FindAllReferences.Core.getTopMostDeclarationNamesInFile(declarationName, fileToSearch);
+            const matches = FindAllReferences.getTopMostDeclarationNamesInFile(declarationName, fileToSearch);
             return mapDefined(matches, match => {
                 const symbol = noDtsProgram.getTypeChecker().getSymbolAtLocation(match);
                 const decl = getDeclarationFromName(match);
                 if (symbol && decl) {
                     // I think the last argument to this is supposed to be the start node, but it doesn't seem important.
                     // Callers internal to GoToDefinition already get confused about this.
-                    return GoToDefinition.createDefinitionInfo(decl, noDtsProgram.getTypeChecker(), symbol, decl, /*unverified*/ true);
+                    return createDefinitionInfo(decl, noDtsProgram.getTypeChecker(), symbol, decl, /*unverified*/ true);
                 }
             });
         }
@@ -2218,7 +2241,7 @@ export class Session<TMessage = string> implements EventSender {
                     const firstNoWhiteSpacePosition = absolutePosition + i;
                     edits.push({
                         span: createTextSpanFromBounds(absolutePosition, firstNoWhiteSpacePosition),
-                        newText: formatting.getIndentationString(preferredIndent, formatOptions)
+                        newText: getIndentationString(preferredIndent, formatOptions)
                     });
                 }
             }

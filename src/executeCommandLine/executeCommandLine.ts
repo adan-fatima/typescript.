@@ -1,94 +1,116 @@
-import * as performance from "../compiler/performance";
 import {
-    arrayFrom,
     BuilderProgram,
-    BuildOptions,
+    EmitAndSemanticDiagnosticsBuilderProgram,
+} from "../compiler/builderPublic";
+import {
     buildOpts,
-    changeCompilerHostLikeToUseCache,
-    CharacterCodes,
-    combinePaths,
-    CommandLineOption,
-    compareStringsCaseInsensitive,
-    CompilerOptions,
-    contains,
     convertToOptionsWithAbsolutePaths,
     convertToTSConfig,
-    createBuilderStatusReporter,
-    createCompilerDiagnostic,
-    createCompilerHostWorker,
-    createDiagnosticReporter,
+    DiagnosticReporter,
+    ExtendedConfigCacheEntry,
+    generateTSConfig,
+    getCompilerOptionsDiffValue,
+    getDiagnosticText,
+    optionDeclarations,
+    optionsForBuild,
+    optionsForWatch,
+    parseBuildCommand,
+    parseCommandLine,
+} from "../compiler/commandLineParser";
+import {
+    arrayFrom,
+    compareStringsCaseInsensitive,
+    contains,
     createGetCanonicalFileName,
-    createIncrementalCompilerHost,
-    CreateProgram,
+    filter,
+    forEach,
+    padLeft,
+    padRight,
+    reduceLeftIterator,
+    sort,
+    startsWith,
+    stringContains,
+} from "../compiler/core";
+import { version } from "../compiler/corePublic";
+import * as Debug from "../compiler/debug";
+import { Diagnostics } from "../compiler/diagnosticInformationMap.generated";
+import {
+    supportedJSExtensionsFlat,
+    supportedTSExtensionsFlat,
+} from "../compiler/extension";
+import {
+    combinePaths,
+    fileExtensionIs,
+    fileExtensionIsOneOf,
+    getNormalizedAbsolutePath,
+    normalizePath,
+    toPath,
+} from "../compiler/path";
+import * as performance from "../compiler/performance";
+import {
+    changeCompilerHostLikeToUseCache,
+    createCompilerHostWorker,
     createProgram,
-    CreateProgramOptions,
+    findConfigFile,
+    getConfigFileParsingDiagnostics,
+} from "../compiler/program";
+import { getLineStarts } from "../compiler/scanner";
+import { sys } from "../compiler/sys";
+import {
+    dumpTracingLegend,
+    startTracing,
+    tracing,
+} from "../compiler/tracing";
+import {
+    BuildOptions,
+    createBuilderStatusReporter,
     createSolutionBuilder,
     createSolutionBuilderHost,
     createSolutionBuilderWithWatch,
     createSolutionBuilderWithWatchHost,
-    createWatchCompilerHostOfConfigFile,
-    createWatchCompilerHostOfFilesAndCompilerOptions,
-    createWatchProgram,
-    createWatchStatusReporter as ts_createWatchStatusReporter,
-    Debug,
-    Diagnostic,
-    DiagnosticMessage,
-    DiagnosticReporter,
-    Diagnostics,
-    dumpTracingLegend,
-    EmitAndSemanticDiagnosticsBuilderProgram,
-    emitFilesAndReportErrorsAndGetExitStatus,
-    ExitStatus,
-    ExtendedConfigCacheEntry,
-    Extension,
-    fileExtensionIs,
-    fileExtensionIsOneOf,
-    filter,
-    findConfigFile,
-    forEach,
-    formatMessage,
-    generateTSConfig,
     getBuildOrderFromAnyBuildOrder,
-    getCompilerOptionsDiffValue,
-    getConfigFileParsingDiagnostics,
-    getDiagnosticText,
-    getErrorSummaryText,
-    getLineStarts,
-    getNormalizedAbsolutePath,
-    isIncrementalCompilation,
-    isWatchSet,
-    normalizePath,
-    optionDeclarations,
-    optionsForBuild,
-    optionsForWatch,
-    padLeft,
-    padRight,
-    parseBuildCommand,
-    parseCommandLine,
-    parseConfigFileWithSystem,
-    ParsedCommandLine,
-    performIncrementalCompilation as ts_performIncrementalCompilation,
-    Program,
-    reduceLeftIterator,
     ReportEmitErrorSummary,
     SolutionBuilder,
     SolutionBuilderHostBase,
-    sort,
+} from "../compiler/tsbuildPublic";
+import {
+    CharacterCodes,
+    CommandLineOption,
+    CompilerOptions,
+    CreateProgramOptions,
+    Diagnostic,
+    DiagnosticMessage,
+    ExitStatus,
+    Extension,
+    ParsedCommandLine,
+    Program,
     SourceFile,
-    startsWith,
-    startTracing,
-    stringContains,
-    supportedJSExtensionsFlat,
-    supportedTSExtensionsFlat,
-    sys,
     System,
-    toPath,
-    tracing,
-    validateLocaleAndSetLanguage,
-    version,
-    WatchCompilerHost,
     WatchOptions,
-} from "./_namespaces/ts";
+} from "../compiler/types";
+import {
+    createCompilerDiagnostic,
+    formatMessage,
+    isIncrementalCompilation,
+    isWatchSet,
+} from "../compiler/utilities";
+import { validateLocaleAndSetLanguage } from "../compiler/utilitiesPublic";
+import {
+    createDiagnosticReporter,
+    createWatchCompilerHostOfConfigFile,
+    createWatchCompilerHostOfFilesAndCompilerOptions,
+    createWatchStatusReporter,
+    emitFilesAndReportErrorsAndGetExitStatus,
+    getErrorSummaryText,
+    parseConfigFileWithSystem,
+    performIncrementalCompilation,
+} from "../compiler/watch";
+import {
+    createIncrementalCompilerHost,
+    CreateProgram,
+    createWatchProgram,
+    WatchCompilerHost,
+} from "../compiler/watchPublic";
 
 interface Statistic {
     name: string;
@@ -674,7 +696,7 @@ function executeCommandLineWorker(
             );
         }
         else if (isIncrementalCompilation(configParseResult.options)) {
-            performIncrementalCompilation(
+            performIncrementalCompilationWorker(
                 sys,
                 cb,
                 reportDiagnostic,
@@ -713,7 +735,7 @@ function executeCommandLineWorker(
             );
         }
         else if (isIncrementalCompilation(commandLineOptions)) {
-            performIncrementalCompilation(
+            performIncrementalCompilationWorker(
                 sys,
                 cb,
                 reportDiagnostic,
@@ -839,7 +861,7 @@ function performBuild(
             /*createProgram*/ undefined,
             reportDiagnostic,
             createBuilderStatusReporter(sys, shouldBePretty(sys, buildOptions)),
-            createWatchStatusReporter(sys, buildOptions)
+            createWatchStatusReporterWorker(sys, buildOptions)
         );
         const solutionPerformance = enableSolutionPerformance(sys, buildOptions);
         updateSolutionBuilderHost(sys, cb, buildHost, solutionPerformance);
@@ -915,7 +937,7 @@ function performCompilation(
     return sys.exit(exitStatus);
 }
 
-function performIncrementalCompilation(
+function performIncrementalCompilationWorker(
     sys: System,
     cb: ExecuteCommandLineCallbacks,
     reportDiagnostic: DiagnosticReporter,
@@ -924,7 +946,7 @@ function performIncrementalCompilation(
     const { options, fileNames, projectReferences } = config;
     enableStatisticsAndTracing(sys, options, /*isBuildMode*/ false);
     const host = createIncrementalCompilerHost(options, sys);
-    const exitStatus = ts_performIncrementalCompilation({
+    const exitStatus = performIncrementalCompilation({
         host,
         system: sys,
         rootNames: fileNames,
@@ -984,8 +1006,8 @@ function updateWatchCompilationHost(
     };
 }
 
-function createWatchStatusReporter(sys: System, options: CompilerOptions | BuildOptions) {
-    return ts_createWatchStatusReporter(sys, shouldBePretty(sys, options));
+function createWatchStatusReporterWorker(sys: System, options: CompilerOptions | BuildOptions) {
+    return createWatchStatusReporter(sys, shouldBePretty(sys, options));
 }
 
 function createWatchOfConfigFile(
@@ -1003,7 +1025,7 @@ function createWatchOfConfigFile(
         watchOptionsToExtend,
         system,
         reportDiagnostic,
-        reportWatchStatus: createWatchStatusReporter(system, configParseResult.options)
+        reportWatchStatus: createWatchStatusReporterWorker(system, configParseResult.options)
     });
     updateWatchCompilationHost(system, cb, watchCompilerHost);
     watchCompilerHost.configFileParsingResult = configParseResult;
@@ -1025,7 +1047,7 @@ function createWatchOfFilesAndCompilerOptions(
         watchOptions,
         system,
         reportDiagnostic,
-        reportWatchStatus: createWatchStatusReporter(system, options)
+        reportWatchStatus: createWatchStatusReporterWorker(system, options)
     });
     updateWatchCompilationHost(system, cb, watchCompilerHost);
     return createWatchProgram(watchCompilerHost);
@@ -1039,7 +1061,7 @@ interface SolutionPerformance {
 
 function enableSolutionPerformance(system: System, options: BuildOptions) {
     if (system === sys && options.extendedDiagnostics) {
-        performance.enable();
+        performance.enable(sys);
         return createSolutionPerfomrance();
     }
 }
@@ -1097,7 +1119,7 @@ function reportSolutionBuilderTimes(
         if (isSolutionMarkOrMeasure(name)) statistics.push({ name: `${getNameFromSolutionBuilderMarkOrMeasure(name)} time`, value: duration, type: StatisticType.time });
     });
     performance.disable();
-    performance.enable();
+    performance.enable(sys);
     solutionPerformance.clear();
 
     reportAllStatistics(sys, statistics);

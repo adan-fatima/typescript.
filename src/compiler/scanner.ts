@@ -2,32 +2,39 @@ import {
     append,
     arraysEqual,
     binarySearch,
+    compareValues,
+    identity,
+    isLineBreak,
+    isWhiteSpaceLike,
+    isWhiteSpaceSingleLine,
+    padLeft,
+    trimStringStart,
+} from "./core";
+import * as Debug from "./debug";
+import { Diagnostics } from "./diagnosticInformationMap.generated";
+import { textToKeyword, textToToken } from "./scannerKeywords";
+import {
+    parsePseudoBigInt,
+    positionIsSynthesized,
+} from "./scannerUtilities";
+import {
     CharacterCodes,
     CommentDirective,
     CommentDirectiveType,
     CommentKind,
     CommentRange,
-    compareValues,
-    Debug,
     DiagnosticMessage,
-    Diagnostics,
-    identity,
     JSDocSyntaxKind,
     JsxTokenSyntaxKind,
     KeywordSyntaxKind,
     LanguageVariant,
     LineAndCharacter,
-    MapLike,
-    padLeft,
-    parsePseudoBigInt,
-    positionIsSynthesized,
     PunctuationOrKeywordSyntaxKind,
     ScriptTarget,
     SourceFileLike,
     SyntaxKind,
     TokenFlags,
-    trimStringStart,
-} from "./_namespaces/ts";
+} from "./types";
 
 export type ErrorCallback = (message: DiagnosticMessage, length: number, arg0?: any) => void;
 
@@ -117,159 +124,6 @@ export interface Scanner {
     // of invoking the callback is returned from this function.
     tryScan<T>(callback: () => T): T;
 }
-
-/** @internal */
-export const textToKeywordObj: MapLike<KeywordSyntaxKind> = {
-    abstract: SyntaxKind.AbstractKeyword,
-    accessor: SyntaxKind.AccessorKeyword,
-    any: SyntaxKind.AnyKeyword,
-    as: SyntaxKind.AsKeyword,
-    asserts: SyntaxKind.AssertsKeyword,
-    assert: SyntaxKind.AssertKeyword,
-    bigint: SyntaxKind.BigIntKeyword,
-    boolean: SyntaxKind.BooleanKeyword,
-    break: SyntaxKind.BreakKeyword,
-    case: SyntaxKind.CaseKeyword,
-    catch: SyntaxKind.CatchKeyword,
-    class: SyntaxKind.ClassKeyword,
-    continue: SyntaxKind.ContinueKeyword,
-    const: SyntaxKind.ConstKeyword,
-    ["" + "constructor"]: SyntaxKind.ConstructorKeyword,
-    debugger: SyntaxKind.DebuggerKeyword,
-    declare: SyntaxKind.DeclareKeyword,
-    default: SyntaxKind.DefaultKeyword,
-    delete: SyntaxKind.DeleteKeyword,
-    do: SyntaxKind.DoKeyword,
-    else: SyntaxKind.ElseKeyword,
-    enum: SyntaxKind.EnumKeyword,
-    export: SyntaxKind.ExportKeyword,
-    extends: SyntaxKind.ExtendsKeyword,
-    false: SyntaxKind.FalseKeyword,
-    finally: SyntaxKind.FinallyKeyword,
-    for: SyntaxKind.ForKeyword,
-    from: SyntaxKind.FromKeyword,
-    function: SyntaxKind.FunctionKeyword,
-    get: SyntaxKind.GetKeyword,
-    if: SyntaxKind.IfKeyword,
-    implements: SyntaxKind.ImplementsKeyword,
-    import: SyntaxKind.ImportKeyword,
-    in: SyntaxKind.InKeyword,
-    infer: SyntaxKind.InferKeyword,
-    instanceof: SyntaxKind.InstanceOfKeyword,
-    interface: SyntaxKind.InterfaceKeyword,
-    intrinsic: SyntaxKind.IntrinsicKeyword,
-    is: SyntaxKind.IsKeyword,
-    keyof: SyntaxKind.KeyOfKeyword,
-    let: SyntaxKind.LetKeyword,
-    module: SyntaxKind.ModuleKeyword,
-    namespace: SyntaxKind.NamespaceKeyword,
-    never: SyntaxKind.NeverKeyword,
-    new: SyntaxKind.NewKeyword,
-    null: SyntaxKind.NullKeyword,
-    number: SyntaxKind.NumberKeyword,
-    object: SyntaxKind.ObjectKeyword,
-    package: SyntaxKind.PackageKeyword,
-    private: SyntaxKind.PrivateKeyword,
-    protected: SyntaxKind.ProtectedKeyword,
-    public: SyntaxKind.PublicKeyword,
-    override: SyntaxKind.OverrideKeyword,
-    out: SyntaxKind.OutKeyword,
-    readonly: SyntaxKind.ReadonlyKeyword,
-    require: SyntaxKind.RequireKeyword,
-    global: SyntaxKind.GlobalKeyword,
-    return: SyntaxKind.ReturnKeyword,
-    satisfies: SyntaxKind.SatisfiesKeyword,
-    set: SyntaxKind.SetKeyword,
-    static: SyntaxKind.StaticKeyword,
-    string: SyntaxKind.StringKeyword,
-    super: SyntaxKind.SuperKeyword,
-    switch: SyntaxKind.SwitchKeyword,
-    symbol: SyntaxKind.SymbolKeyword,
-    this: SyntaxKind.ThisKeyword,
-    throw: SyntaxKind.ThrowKeyword,
-    true: SyntaxKind.TrueKeyword,
-    try: SyntaxKind.TryKeyword,
-    type: SyntaxKind.TypeKeyword,
-    typeof: SyntaxKind.TypeOfKeyword,
-    undefined: SyntaxKind.UndefinedKeyword,
-    unique: SyntaxKind.UniqueKeyword,
-    unknown: SyntaxKind.UnknownKeyword,
-    var: SyntaxKind.VarKeyword,
-    void: SyntaxKind.VoidKeyword,
-    while: SyntaxKind.WhileKeyword,
-    with: SyntaxKind.WithKeyword,
-    yield: SyntaxKind.YieldKeyword,
-    async: SyntaxKind.AsyncKeyword,
-    await: SyntaxKind.AwaitKeyword,
-    of: SyntaxKind.OfKeyword,
-};
-
-const textToKeyword = new Map(Object.entries(textToKeywordObj));
-
-const textToToken = new Map(Object.entries({
-    ...textToKeywordObj,
-    "{": SyntaxKind.OpenBraceToken,
-    "}": SyntaxKind.CloseBraceToken,
-    "(": SyntaxKind.OpenParenToken,
-    ")": SyntaxKind.CloseParenToken,
-    "[": SyntaxKind.OpenBracketToken,
-    "]": SyntaxKind.CloseBracketToken,
-    ".": SyntaxKind.DotToken,
-    "...": SyntaxKind.DotDotDotToken,
-    ";": SyntaxKind.SemicolonToken,
-    ",": SyntaxKind.CommaToken,
-    "<": SyntaxKind.LessThanToken,
-    ">": SyntaxKind.GreaterThanToken,
-    "<=": SyntaxKind.LessThanEqualsToken,
-    ">=": SyntaxKind.GreaterThanEqualsToken,
-    "==": SyntaxKind.EqualsEqualsToken,
-    "!=": SyntaxKind.ExclamationEqualsToken,
-    "===": SyntaxKind.EqualsEqualsEqualsToken,
-    "!==": SyntaxKind.ExclamationEqualsEqualsToken,
-    "=>": SyntaxKind.EqualsGreaterThanToken,
-    "+": SyntaxKind.PlusToken,
-    "-": SyntaxKind.MinusToken,
-    "**": SyntaxKind.AsteriskAsteriskToken,
-    "*": SyntaxKind.AsteriskToken,
-    "/": SyntaxKind.SlashToken,
-    "%": SyntaxKind.PercentToken,
-    "++": SyntaxKind.PlusPlusToken,
-    "--": SyntaxKind.MinusMinusToken,
-    "<<": SyntaxKind.LessThanLessThanToken,
-    "</": SyntaxKind.LessThanSlashToken,
-    ">>": SyntaxKind.GreaterThanGreaterThanToken,
-    ">>>": SyntaxKind.GreaterThanGreaterThanGreaterThanToken,
-    "&": SyntaxKind.AmpersandToken,
-    "|": SyntaxKind.BarToken,
-    "^": SyntaxKind.CaretToken,
-    "!": SyntaxKind.ExclamationToken,
-    "~": SyntaxKind.TildeToken,
-    "&&": SyntaxKind.AmpersandAmpersandToken,
-    "||": SyntaxKind.BarBarToken,
-    "?": SyntaxKind.QuestionToken,
-    "??": SyntaxKind.QuestionQuestionToken,
-    "?.": SyntaxKind.QuestionDotToken,
-    ":": SyntaxKind.ColonToken,
-    "=": SyntaxKind.EqualsToken,
-    "+=": SyntaxKind.PlusEqualsToken,
-    "-=": SyntaxKind.MinusEqualsToken,
-    "*=": SyntaxKind.AsteriskEqualsToken,
-    "**=": SyntaxKind.AsteriskAsteriskEqualsToken,
-    "/=": SyntaxKind.SlashEqualsToken,
-    "%=": SyntaxKind.PercentEqualsToken,
-    "<<=": SyntaxKind.LessThanLessThanEqualsToken,
-    ">>=": SyntaxKind.GreaterThanGreaterThanEqualsToken,
-    ">>>=": SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken,
-    "&=": SyntaxKind.AmpersandEqualsToken,
-    "|=": SyntaxKind.BarEqualsToken,
-    "^=": SyntaxKind.CaretEqualsToken,
-    "||=": SyntaxKind.BarBarEqualsToken,
-    "&&=": SyntaxKind.AmpersandAmpersandEqualsToken,
-    "??=": SyntaxKind.QuestionQuestionEqualsToken,
-    "@": SyntaxKind.AtToken,
-    "#": SyntaxKind.HashToken,
-    "`": SyntaxKind.BacktickToken,
-}));
 
 /*
     As per ECMAScript Language Specification 3th Edition, Section 7.6: Identifiers
@@ -519,46 +373,6 @@ export function getLinesBetweenPositions(sourceFile: SourceFileLike, pos1: numbe
 
 export function getLineAndCharacterOfPosition(sourceFile: SourceFileLike, position: number): LineAndCharacter {
     return computeLineAndCharacterOfPosition(getLineStarts(sourceFile), position);
-}
-
-export function isWhiteSpaceLike(ch: number): boolean {
-    return isWhiteSpaceSingleLine(ch) || isLineBreak(ch);
-}
-
-/** Does not include line breaks. For that, see isWhiteSpaceLike. */
-export function isWhiteSpaceSingleLine(ch: number): boolean {
-    // Note: nextLine is in the Zs space, and should be considered to be a whitespace.
-    // It is explicitly not a line-break as it isn't in the exact set specified by EcmaScript.
-    return ch === CharacterCodes.space ||
-        ch === CharacterCodes.tab ||
-        ch === CharacterCodes.verticalTab ||
-        ch === CharacterCodes.formFeed ||
-        ch === CharacterCodes.nonBreakingSpace ||
-        ch === CharacterCodes.nextLine ||
-        ch === CharacterCodes.ogham ||
-        ch >= CharacterCodes.enQuad && ch <= CharacterCodes.zeroWidthSpace ||
-        ch === CharacterCodes.narrowNoBreakSpace ||
-        ch === CharacterCodes.mathematicalSpace ||
-        ch === CharacterCodes.ideographicSpace ||
-        ch === CharacterCodes.byteOrderMark;
-}
-
-export function isLineBreak(ch: number): boolean {
-    // ES5 7.3:
-    // The ECMAScript line terminator characters are listed in Table 3.
-    //     Table 3: Line Terminator Characters
-    //     Code Unit Value     Name                    Formal Name
-    //     \u000A              Line Feed               <LF>
-    //     \u000D              Carriage Return         <CR>
-    //     \u2028              Line separator          <LS>
-    //     \u2029              Paragraph separator     <PS>
-    // Only the characters in Table 3 are treated as line terminators. Other new line or line
-    // breaking characters are treated as white space but not as line terminators.
-
-    return ch === CharacterCodes.lineFeed ||
-        ch === CharacterCodes.carriageReturn ||
-        ch === CharacterCodes.lineSeparator ||
-        ch === CharacterCodes.paragraphSeparator;
 }
 
 function isDigit(ch: number): boolean {
@@ -2823,7 +2637,6 @@ function charSize(ch: number) {
 // Derived from the 10.1.1 UTF16Encoding of the ES6 Spec.
 function utf16EncodeAsStringFallback(codePoint: number) {
     Debug.assert(0x0 <= codePoint && codePoint <= 0x10FFFF);
-
     if (codePoint <= 65535) {
         return String.fromCharCode(codePoint);
     }

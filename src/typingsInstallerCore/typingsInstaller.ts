@@ -1,36 +1,58 @@
 import {
-    combinePaths,
-    forEachKey,
-    getBaseFileName,
-    getDirectoryPath,
     getProperty,
     hasProperty,
-    JsTyping,
-    mangleScopedPackageName,
     mapDefined,
-    MapLike,
-    ModuleResolutionKind,
     noop,
-    Path,
-    resolveModuleName,
-    Version,
+} from "../compiler/core";
+import {
+    MapLike,
     version,
     versionMajorMinor,
-} from "./_namespaces/ts";
+} from "../compiler/corePublic";
+import {
+    mangleScopedPackageName,
+    resolveModuleName,
+} from "../compiler/moduleNameResolver";
+import {
+    combinePaths,
+    getBaseFileName,
+    getDirectoryPath,
+} from "../compiler/path";
+import { Version } from "../compiler/semver";
+import {
+    ModuleResolutionKind,
+    Path,
+} from "../compiler/types";
+import {
+    forEachKey,
+} from "../compiler/utilities";
+import {
+    CachedTyping,
+    discoverTypings,
+    isTypingUpToDate,
+    loadSafeList,
+    loadTypesMap,
+    NameValidationResult,
+    renderPackageNameValidationFailure,
+    SafeList,
+    validatePackageName,
+} from "../jsTyping/jsTyping";
 import {
     ActionSet,
     ActionWatchTypingLocations,
+    EventBeginInstallTypes,
+    EventEndInstallTypes,
+} from "../jsTyping/shared";
+import {
     BeginInstallTypes,
     CloseProject,
     DiscoverTypings,
     EndInstallTypes,
-    EventBeginInstallTypes,
-    EventEndInstallTypes,
     InstallTypingHost,
     InvalidateCachedTypings,
     SetTypings,
     WatchTypingLocations,
-} from "./_namespaces/ts.server";
+} from "../jsTyping/types";
 
 interface NpmConfig {
     devDependencies: MapLike<any>;
@@ -99,11 +121,11 @@ export interface PendingRequest {
 }
 
 export abstract class TypingsInstaller {
-    private readonly packageNameToTypingLocation = new Map<string, JsTyping.CachedTyping>();
+    private readonly packageNameToTypingLocation = new Map<string, CachedTyping>();
     private readonly missingTypingsSet = new Set<string>();
     private readonly knownCachesSet = new Set<string>();
     private readonly projectWatchers = new Map<string, Set<string>>();
-    private safeList: JsTyping.SafeList | undefined;
+    private safeList: SafeList | undefined;
     /** @internal */
     readonly pendingRunRequests: PendingRequest[] = [];
 
@@ -167,7 +189,7 @@ export abstract class TypingsInstaller {
         if (this.safeList === undefined) {
             this.initializeSafeList();
         }
-        const discoverTypingsResult = JsTyping.discoverTypings(
+        const discoverTypingsResult = discoverTypings(
             this.installTypingHost,
             this.log.isEnabled() ? (s => this.log.writeLine(s)) : undefined,
             req.fileNames,
@@ -201,7 +223,7 @@ export abstract class TypingsInstaller {
     private initializeSafeList() {
         // Prefer the safe list from the types map if it exists
         if (this.typesMapLocation) {
-            const safeListFromMap = JsTyping.loadTypesMap(this.installTypingHost, this.typesMapLocation);
+            const safeListFromMap = loadTypesMap(this.installTypingHost, this.typesMapLocation);
             if (safeListFromMap) {
                 this.log.writeLine(`Loaded safelist from types map file '${this.typesMapLocation}'`);
                 this.safeList = safeListFromMap;
@@ -209,7 +231,7 @@ export abstract class TypingsInstaller {
             }
             this.log.writeLine(`Failed to load safelist from types map file '${this.typesMapLocation}'`);
         }
-        this.safeList = JsTyping.loadSafeList(this.installTypingHost, this.safeListPath);
+        this.safeList = loadSafeList(this.installTypingHost, this.safeListPath);
     }
 
     private processCacheLocation(cacheLocation: string) {
@@ -269,7 +291,7 @@ export abstract class TypingsInstaller {
                         continue;
                     }
 
-                    const newTyping: JsTyping.CachedTyping = { typingLocation: typingFile, version: new Version(version) };
+                    const newTyping: CachedTyping = { typingLocation: typingFile, version: new Version(version) };
                     this.packageNameToTypingLocation.set(packageName, newTyping);
                 }
             }
@@ -287,18 +309,18 @@ export abstract class TypingsInstaller {
                 if (this.log.isEnabled()) this.log.writeLine(`'${typing}':: '${typingKey}' is in missingTypingsSet - skipping...`);
                 return undefined;
             }
-            const validationResult = JsTyping.validatePackageName(typing);
-            if (validationResult !== JsTyping.NameValidationResult.Ok) {
+            const validationResult = validatePackageName(typing);
+            if (validationResult !== NameValidationResult.Ok) {
                 // add typing name to missing set so we won't process it again
                 this.missingTypingsSet.add(typingKey);
-                if (this.log.isEnabled()) this.log.writeLine(JsTyping.renderPackageNameValidationFailure(validationResult, typing));
+                if (this.log.isEnabled()) this.log.writeLine(renderPackageNameValidationFailure(validationResult, typing));
                 return undefined;
             }
             if (!this.typesRegistry.has(typingKey)) {
                 if (this.log.isEnabled()) this.log.writeLine(`'${typing}':: Entry for package '${typingKey}' does not exist in local types registry - skipping...`);
                 return undefined;
             }
-            if (this.packageNameToTypingLocation.get(typingKey) && JsTyping.isTypingUpToDate(this.packageNameToTypingLocation.get(typingKey)!, this.typesRegistry.get(typingKey)!)) {
+            if (this.packageNameToTypingLocation.get(typingKey) && isTypingUpToDate(this.packageNameToTypingLocation.get(typingKey)!, this.typesRegistry.get(typingKey)!)) {
                 if (this.log.isEnabled()) this.log.writeLine(`'${typing}':: '${typingKey}' already has an up-to-date typing - skipping...`);
                 return undefined;
             }
@@ -374,7 +396,7 @@ export abstract class TypingsInstaller {
                     // packageName is guaranteed to exist in typesRegistry by filterTypings
                     const distTags = this.typesRegistry.get(packageName)!;
                     const newVersion = new Version(distTags[`ts${versionMajorMinor}`] || distTags[this.latestDistTag]);
-                    const newTyping: JsTyping.CachedTyping = { typingLocation: typingFile, version: newVersion };
+                    const newTyping: CachedTyping = { typingLocation: typingFile, version: newVersion };
                     this.packageNameToTypingLocation.set(packageName, newTyping);
                     installedTypingFiles.push(typingFile);
                 }

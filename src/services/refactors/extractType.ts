@@ -1,22 +1,81 @@
 import {
     addRange,
-    addToSeen,
     append,
-    ApplicableRefactorInfo,
     cast,
     concatenate,
-    createTextRangeFromSpan,
-    Debug,
-    Diagnostics,
-    EmitFlags,
     emptyArray,
-    factory,
-    findAncestor,
     forEach,
-    forEachChild,
-    getEffectiveConstraintOfTypeParameter,
+    pushIfUnique,
+} from "../../compiler/core";
+import * as Debug from "../../compiler/debug";
+import { Diagnostics } from "../../compiler/diagnosticInformationMap.generated";
+import {
+    ignoreSourceNewlines,
+    setEmitFlags,
+} from "../../compiler/factory/emitNode";
+import { factory } from "../../compiler/factory/nodeFactory";
+import {
+    isConditionalTypeNode,
+    isIdentifier,
+    isInferTypeNode,
+    isIntersectionTypeNode,
+    isJSDoc,
+    isJSDocTypeExpression,
+    isParenthesizedTypeNode,
+    isThisTypeNode,
+    isTupleTypeNode,
+    isTypeLiteralNode,
+    isTypeParameterDeclaration,
+    isTypePredicateNode,
+    isTypeQueryNode,
+    isTypeReferenceNode,
+} from "../../compiler/factory/nodeTests";
+import { setTextRange } from "../../compiler/factory/utilitiesPublic";
+import { forEachChild } from "../../compiler/parser";
+import {
     getLineAndCharacterOfPosition,
+    skipTrivia,
+} from "../../compiler/scanner";
+import {
+    EmitFlags,
+    JSDocTag,
+    JSDocTemplateTag,
+    Node,
+    SourceFile,
+    SymbolFlags,
+    TextRange,
+    TypeChecker,
+    TypeElement,
+    TypeNode,
+    TypeParameterDeclaration,
+} from "../../compiler/types";
+import {
+    addToSeen,
     getLocaleSpecificMessage,
+    isSourceFileJS,
+    isThisIdentifier,
+} from "../../compiler/utilities";
+import {
+    findAncestor,
+    getEffectiveConstraintOfTypeParameter,
+    isFunctionLike,
+    isStatement,
+    isTypeNode,
+} from "../../compiler/utilitiesPublic";
+import { registerRefactor } from "../refactorProvider";
+import {
+    ChangeTracker,
+    LeadingTriviaOption,
+    TrailingTriviaOption,
+} from "../textChanges";
+import {
+    ApplicableRefactorInfo,
+    RefactorContext,
+    RefactorEditInfo,
+    RefactorErrorInfo,
+} from "../types";
+import {
+    createTextRangeFromSpan,
     getNameFromPropertyName,
     getNewLineOrDefaultFromHost,
     getPrecedingNonSpaceCharacterPosition,
@@ -24,51 +83,10 @@ import {
     getRenameLocation,
     getTokenAtPosition,
     getUniqueName,
-    ignoreSourceNewlines,
-    isConditionalTypeNode,
-    isFunctionLike,
-    isIdentifier,
-    isInferTypeNode,
-    isIntersectionTypeNode,
-    isJSDoc,
-    isJSDocTypeExpression,
-    isParenthesizedTypeNode,
-    isSourceFileJS,
-    isStatement,
-    isThisIdentifier,
-    isThisTypeNode,
-    isTupleTypeNode,
-    isTypeLiteralNode,
-    isTypeNode,
-    isTypeParameterDeclaration,
-    isTypePredicateNode,
-    isTypeQueryNode,
-    isTypeReferenceNode,
-    JSDocTag,
-    JSDocTemplateTag,
-    Node,
     nodeOverlapsWithStartEnd,
-    pushIfUnique,
     rangeContainsStartEnd,
-    RefactorContext,
-    RefactorEditInfo,
-    setEmitFlags,
-    setTextRange,
-    skipTrivia,
-    SourceFile,
-    SymbolFlags,
-    textChanges,
-    TextRange,
-    TypeChecker,
-    TypeElement,
-    TypeNode,
-    TypeParameterDeclaration,
-} from "../_namespaces/ts";
-import {
-    isRefactorErrorInfo,
-    RefactorErrorInfo,
-    registerRefactor,
-} from "../_namespaces/ts.refactor";
+} from "../utilities";
+import { isRefactorErrorInfo } from "./helpers";
 
 const refactorName = "Extract type";
 
@@ -127,7 +145,7 @@ registerRefactor(refactorName, {
         Debug.assert(info && !isRefactorErrorInfo(info), "Expected to find a range to extract");
 
         const name = getUniqueName("NewType", file);
-        const edits = textChanges.ChangeTracker.with(context, changes => {
+        const edits = ChangeTracker.with(context, changes => {
             switch (actionName) {
                 case extractToTypeAliasAction.name:
                     Debug.assert(!info.isJS, "Invalid actionName/JS combo");
@@ -268,7 +286,7 @@ function collectTypeParameters(checker: TypeChecker, selection: TypeNode, enclos
     }
 }
 
-function doTypeAliasChange(changes: textChanges.ChangeTracker, file: SourceFile, name: string, info: TypeAliasInfo) {
+function doTypeAliasChange(changes: ChangeTracker, file: SourceFile, name: string, info: TypeAliasInfo) {
     const { enclosingNode, selection, typeParameters } = info;
 
     const newTypeNode = factory.createTypeAliasDeclaration(
@@ -278,10 +296,10 @@ function doTypeAliasChange(changes: textChanges.ChangeTracker, file: SourceFile,
         selection
     );
     changes.insertNodeBefore(file, enclosingNode, ignoreSourceNewlines(newTypeNode), /*blankLineBetween*/ true);
-    changes.replaceNode(file, selection, factory.createTypeReferenceNode(name, typeParameters.map(id => factory.createTypeReferenceNode(id.name, /*typeArguments*/ undefined))), { leadingTriviaOption: textChanges.LeadingTriviaOption.Exclude, trailingTriviaOption: textChanges.TrailingTriviaOption.ExcludeWhitespace });
+    changes.replaceNode(file, selection, factory.createTypeReferenceNode(name, typeParameters.map(id => factory.createTypeReferenceNode(id.name, /*typeArguments*/ undefined))), { leadingTriviaOption: LeadingTriviaOption.Exclude, trailingTriviaOption: TrailingTriviaOption.ExcludeWhitespace });
 }
 
-function doInterfaceChange(changes: textChanges.ChangeTracker, file: SourceFile, name: string, info: InterfaceInfo) {
+function doInterfaceChange(changes: ChangeTracker, file: SourceFile, name: string, info: InterfaceInfo) {
     const { enclosingNode, selection, typeParameters, typeElements } = info;
 
     const newTypeNode = factory.createInterfaceDeclaration(
@@ -293,10 +311,10 @@ function doInterfaceChange(changes: textChanges.ChangeTracker, file: SourceFile,
     );
     setTextRange(newTypeNode, typeElements[0]?.parent);
     changes.insertNodeBefore(file, enclosingNode, ignoreSourceNewlines(newTypeNode), /*blankLineBetween*/ true);
-    changes.replaceNode(file, selection, factory.createTypeReferenceNode(name, typeParameters.map(id => factory.createTypeReferenceNode(id.name, /*typeArguments*/ undefined))), { leadingTriviaOption: textChanges.LeadingTriviaOption.Exclude, trailingTriviaOption: textChanges.TrailingTriviaOption.ExcludeWhitespace });
+    changes.replaceNode(file, selection, factory.createTypeReferenceNode(name, typeParameters.map(id => factory.createTypeReferenceNode(id.name, /*typeArguments*/ undefined))), { leadingTriviaOption: LeadingTriviaOption.Exclude, trailingTriviaOption: TrailingTriviaOption.ExcludeWhitespace });
 }
 
-function doTypedefChange(changes: textChanges.ChangeTracker, context: RefactorContext, file: SourceFile, name: string, info: ExtractInfo) {
+function doTypedefChange(changes: ChangeTracker, context: RefactorContext, file: SourceFile, name: string, info: ExtractInfo) {
     const { enclosingNode, selection, typeParameters } = info;
 
     setEmitFlags(selection, EmitFlags.NoComments | EmitFlags.NoNestedComments);

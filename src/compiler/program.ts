@@ -1,36 +1,303 @@
+import { BuilderProgram } from "./builderPublic";
+import { createTypeChecker } from "./checker";
 import {
-    __String,
-    addInternalEmitFlags,
+    DiagnosticReporter,
+    inverseJsxOptionMap,
+    libMap,
+    libs,
+    ParseConfigFileHost,
+    parseJsonSourceFileConfigFileContent,
+    sourceFileAffectingCompilerOptions,
+    targetOptionDeclaration,
+} from "./commandLineParser";
+import {
     addRange,
-    addRelatedInfo,
     append,
     arrayFrom,
     arrayIsEqualTo,
-    AsExpression,
-    AssertClause,
-    BuilderProgram,
-    CancellationToken,
-    canHaveDecorators,
-    canHaveIllegalDecorators,
-    chainDiagnosticMessages,
-    changeExtension,
-    changesAffectingProgramStructure,
-    changesAffectModuleResolution,
-    combinePaths,
-    CommentDirective,
-    CommentDirectivesMap,
-    compareDataObjects,
-    comparePaths,
     compareValues,
-    Comparison,
-    CompilerHost,
-    CompilerOptions,
-    computeLineAndCharacterOfPosition,
     concatenate,
     contains,
-    containsIgnoredPath,
+    createGetCanonicalFileName,
+    createMultiMap,
+    emptyArray,
+    equateStringsCaseInsensitive,
+    equateStringsCaseSensitive,
+    filter,
+    find,
+    findIndex,
+    firstDefinedIterator,
+    flatMap,
+    flatten,
+    forEach,
+    GetCanonicalFileName,
+    getSpellingSuggestion,
+    hasProperty,
+    identity,
+    isArray,
+    isString,
+    length,
+    mapDefined,
+    mapDefinedIterator,
+    maybeBind,
+    memoize,
+    noop,
+    or,
+    padLeft,
+    removePrefix,
+    removeSuffix,
+    returnFalse,
+    returnUndefined,
+    some,
+    stableSort,
+    startsWith,
+    stringContains,
+    toFileNameLowerCase,
+    trimStringEnd,
+} from "./core";
+import {
+    Comparison,
+    SortedReadonlyArray,
+    versionMajorMinor,
+} from "./corePublic";
+import * as Debug from "./debug";
+import { Diagnostics } from "./diagnosticInformationMap.generated";
+import {
+    emitFiles,
+    forEachEmittedFile,
+    getCommonSourceDirectory,
+    getCommonSourceDirectoryOfConfig,
+    getOutputDeclarationFileName,
+    getOutputPathsForBundle,
+    getTsBuildInfoEmitOutputFilePath,
+    isBuildInfoFile,
+    notImplementedResolver,
+} from "./emitter";
+import {
+    changeExtension,
+    extensionFromPath,
+    getSupportedExtensions,
+    getSupportedExtensionsWithJsonIfResolveJsonModule,
+    hasJSFileExtension,
+    removeFileExtension,
+    resolutionExtensionIsTSOrJson,
+    supportedJSExtensionsFlat,
+} from "./extension";
+import { addInternalEmitFlags } from "./factory/emitNode";
+import {
+    createInputFilesWithFilePaths,
+    factory,
+} from "./factory/nodeFactory";
+import {
+    isArrayLiteralExpression,
+    isClassDeclaration,
+    isDecorator,
+    isDefaultModifier,
+    isExportDeclaration,
+    isExportModifier,
+    isImportDeclaration,
+    isImportEqualsDeclaration,
+    isImportSpecifier,
+    isImportTypeNode,
+    isJsxFragment,
+    isModuleDeclaration,
+    isObjectLiteralExpression,
+    isParameter,
+    isStringLiteral,
+} from "./factory/nodeTests";
+import { canHaveDecorators } from "./factory/utilitiesPublic";
+import {
+    createModeAwareCache,
+    createModeAwareCacheKey,
+    createModuleResolutionCache,
+    createTypeReferenceDirectiveResolutionCache,
+    getAutomaticTypeDirectiveNames,
+    getPackageScopeForPath,
+    getTemporaryModuleResolutionState,
+    isTraceEnabled,
+    ModeAwareCache,
+    ModeAwareCacheKey,
+    ModuleResolutionCache,
+    nodeModulesPathPart,
+    PackageJsonInfoCache,
+    resolveLibrary,
+    resolveModuleName,
+    resolveTypeReferenceDirective,
+    trace,
+    TypeReferenceDirectiveResolutionCache,
+    zipToModeAwareCache,
+} from "./moduleNameResolver";
+import {
+    createSourceFile,
+    CreateSourceFileOptions,
+    forEachChild,
+    forEachChildRecursively,
+    isDeclarationFileName,
+    isFileProbablyExternalModule,
+    parseIsolatedEntityName,
+    parseNodeFactory,
+} from "./parser";
+import {
+    setParent,
+    setParentRecursive,
+} from "./parserUtilities";
+import {
+    combinePaths,
+    comparePaths,
     containsPath,
     convertToRelativePath,
+    directorySeparator,
+    ensureTrailingDirectorySeparator,
+    fileExtensionIs,
+    fileExtensionIsOneOf,
+    forEachAncestorDirectory,
+    getBaseFileName,
+    getDirectoryPath,
+    getNormalizedAbsolutePath,
+    getNormalizedAbsolutePathWithoutRoot,
+    getNormalizedPathComponents,
+    getPathFromPathComponents,
+    getRootLength,
+    hasExtension,
+    isRootedDiskPath,
+    normalizePath,
+    pathIsAbsolute,
+    pathIsRelative,
+    toPath,
+} from "./path";
+import * as performance from "./performance";
+import {
+    changesAffectingProgramStructure,
+    changesAffectModuleResolution,
+    hasChangesInResolutions,
+    setResolvedModule,
+    setResolvedTypeReferenceDirective,
+} from "./programUtilities";
+import {
+    computeLineAndCharacterOfPosition,
+    getLineAndCharacterOfPosition,
+    getLineStarts,
+    getPositionOfLineAndCharacter,
+    isIdentifierText,
+    skipTrivia,
+    tokenToString,
+} from "./scanner";
+import { Version } from "./semver";
+import {
+    createSymlinkCache,
+    SymlinkCache,
+} from "./symlinkCache";
+import { sys } from "./sys";
+import { containsIgnoredPath } from "./sysUtilities";
+import { tracing } from "./tracing";
+import {
+    getTransformers,
+    noTransformers,
+} from "./transformer";
+import { getDeclarationDiagnostics } from "./transformers/declarations";
+import { resolveConfigFileProjectName } from "./tsbuild";
+import {
+    __String,
+    AsExpression,
+    AssertClause,
+    CancellationToken,
+    CommentDirective,
+    CommentDirectivesMap,
+    CompilerHost,
+    CompilerOptions,
+    CreateProgramOptions,
+    CustomTransformers,
+    DeclarationWithTypeParameterChildren,
+    Diagnostic,
+    DiagnosticArguments,
+    DiagnosticCategory,
+    diagnosticCategoryName,
+    DiagnosticMessage,
+    DiagnosticMessageChain,
+    DiagnosticWithLocation,
+    EmitHost,
+    EmitOnly,
+    EmitResult,
+    ExportAssignment,
+    ExportDeclaration,
+    Extension,
+    FileIncludeKind,
+    FileIncludeReason,
+    FilePreprocessingDiagnostics,
+    FilePreprocessingDiagnosticsKind,
+    FileReference,
+    FunctionLikeDeclaration,
+    HasChangedAutomaticTypeDirectiveNames,
+    HasInvalidatedLibResolutions,
+    HasInvalidatedResolutions,
+    HeritageClause,
+    Identifier,
+    ImportClause,
+    ImportDeclaration,
+    ImportOrExportSpecifier,
+    InputFiles,
+    InternalEmitFlags,
+    JsonSourceFile,
+    JsxEmit,
+    LibResolution,
+    MethodDeclaration,
+    ModifierFlags,
+    ModifierLike,
+    ModuleBlock,
+    ModuleDeclaration,
+    ModuleDetectionKind,
+    ModuleKind,
+    ModuleResolutionHost,
+    ModuleResolutionKind,
+    Mutable,
+    Node,
+    NodeArray,
+    NodeFlags,
+    NodeWithTypeArguments,
+    ObjectLiteralExpression,
+    OperationCanceledException,
+    PackageId,
+    ParameterDeclaration,
+    ParsedCommandLine,
+    Path,
+    Program,
+    ProjectReference,
+    ProjectReferenceFile,
+    PropertyAssignment,
+    PropertyDeclaration,
+    ReferencedFile,
+    ResolutionMode,
+    ResolutionNameAndModeGetter,
+    ResolvedConfigFileName,
+    ResolvedModuleFull,
+    ResolvedModuleWithFailedLookupLocations,
+    ResolvedProjectReference,
+    ResolvedTypeReferenceDirectiveWithFailedLookupLocations,
+    SatisfiesExpression,
+    ScriptKind,
+    ScriptTarget,
+    SourceFile,
+    SourceOfProjectReferenceRedirect,
+    Statement,
+    StringLiteral,
+    StringLiteralLike,
+    StructureIsReused,
+    SyntaxKind,
+    System,
+    TransformFlags,
+    TsConfigSourceFile,
+    TypeChecker,
+    UnparsedSource,
+    VariableDeclaration,
+    VariableStatement,
+    WriteFileCallback,
+    WriteFileCallbackData,
+} from "./types";
+import {
+    addRelatedInfo,
+    canHaveIllegalDecorators,
+    chainDiagnosticMessages,
+    compareDataObjects,
     createCommentDirectivesMap,
     createCompilerDiagnostic,
     createCompilerDiagnosticFromMessageChain,
@@ -40,83 +307,15 @@ import {
     createDiagnosticForRange,
     createFileDiagnostic,
     createFileDiagnosticFromMessageChain,
-    createGetCanonicalFileName,
-    createInputFilesWithFilePaths,
-    createModeAwareCache,
-    createModeAwareCacheKey,
-    createModuleResolutionCache,
-    createMultiMap,
-    CreateProgramOptions,
-    createSourceFile,
-    CreateSourceFileOptions,
-    createSymlinkCache,
-    createTypeChecker,
-    createTypeReferenceDirectiveResolutionCache,
-    CustomTransformers,
-    Debug,
-    DeclarationWithTypeParameterChildren,
-    Diagnostic,
-    DiagnosticArguments,
-    DiagnosticCategory,
-    diagnosticCategoryName,
-    DiagnosticMessage,
-    DiagnosticMessageChain,
-    DiagnosticReporter,
-    Diagnostics,
-    DiagnosticWithLocation,
-    directorySeparator,
-    DirectoryStructureHost,
-    emitFiles,
-    EmitHost,
     emitModuleKindIsNonNodeESM,
-    EmitOnly,
-    EmitResult,
-    emptyArray,
-    ensureTrailingDirectorySeparator,
-    equateStringsCaseInsensitive,
-    equateStringsCaseSensitive,
-    explainIfFileIsRedirectAndImpliedFormat,
-    ExportAssignment,
-    ExportDeclaration,
-    Extension,
-    extensionFromPath,
     externalHelpersModuleNameText,
-    factory,
-    fileExtensionIs,
-    fileExtensionIsOneOf,
-    FileIncludeKind,
-    FileIncludeReason,
-    fileIncludeReasonToDiagnostics,
-    FilePreprocessingDiagnostics,
-    FilePreprocessingDiagnosticsKind,
-    FileReference,
-    filter,
-    find,
-    findIndex,
-    firstDefinedIterator,
-    flatMap,
-    flatten,
-    forEach,
-    forEachAncestorDirectory,
-    forEachChild,
-    forEachChildRecursively,
-    forEachEmittedFile,
     forEachEntry,
     forEachKey,
     forEachPropertyAssignment,
-    forEachResolvedProjectReference as ts_forEachResolvedProjectReference,
     forEachTsConfigPropArray,
-    FunctionLikeDeclaration,
     getAllowJSCompilerOption,
-    getAutomaticTypeDirectiveNames,
-    getBaseFileName,
-    GetCanonicalFileName,
-    getCommonSourceDirectory as ts_getCommonSourceDirectory,
-    getCommonSourceDirectoryOfConfig,
-    getDeclarationDiagnostics as ts_getDeclarationDiagnostics,
-    getDefaultLibFileName,
-    getDirectoryPath,
     getEmitDeclarations,
+    getEmitModuleDetectionKind,
     getEmitModuleKind,
     getEmitModuleResolutionKind,
     getEmitScriptTarget,
@@ -125,216 +324,59 @@ import {
     getIsolatedModules,
     getJSXImplicitImportBase,
     getJSXRuntimeImport,
-    getLineAndCharacterOfPosition,
-    getLineStarts,
-    getMatchedFileSpec,
-    getMatchedIncludeSpec,
     getNewLineCharacter,
-    getNormalizedAbsolutePath,
-    getNormalizedAbsolutePathWithoutRoot,
-    getNormalizedPathComponents,
-    getOutputDeclarationFileName,
-    getOutputPathsForBundle,
-    getPackageScopeForPath,
-    getPathFromPathComponents,
-    getPositionOfLineAndCharacter,
     getPropertyArrayElementValue,
     getResolvedModule,
     getResolveJsonModule,
-    getRootLength,
-    getSetExternalModuleIndicator,
-    getSpellingSuggestion,
     getStrictOptionValue,
-    getSupportedExtensions,
-    getSupportedExtensionsWithJsonIfResolveJsonModule,
-    getTemporaryModuleResolutionState,
     getTextOfIdentifierOrLiteral,
-    getTransformers,
-    getTsBuildInfoEmitOutputFilePath,
     getTsConfigObjectLiteralExpression,
     getTsConfigPropArrayElementValue,
-    HasChangedAutomaticTypeDirectiveNames,
-    hasChangesInResolutions,
-    hasExtension,
-    HasInvalidatedLibResolutions,
-    HasInvalidatedResolutions,
-    hasJSDocNodes,
-    hasJSFileExtension,
     hasJsonModuleEmitEnabled,
-    hasProperty,
     hasSyntacticModifier,
     hasZeroOrOneAsteriskCharacter,
-    HeritageClause,
-    Identifier,
-    identity,
-    ImportClause,
-    ImportDeclaration,
-    ImportOrExportSpecifier,
-    InputFiles,
-    InternalEmitFlags,
-    inverseJsxOptionMap,
     isAmbientModule,
     isAnyImportOrReExport,
-    isArray,
-    isArrayLiteralExpression,
-    isBuildInfoFile,
     isCheckJsEnabledForFile,
-    isClassDeclaration,
-    isDeclarationFileName,
-    isDecorator,
-    isDefaultModifier,
-    isExportDeclaration,
-    isExportModifier,
     isExternalModule,
-    isExternalModuleNameRelative,
-    isIdentifierText,
     isImportCall,
-    isImportDeclaration,
-    isImportEqualsDeclaration,
-    isImportSpecifier,
-    isImportTypeNode,
     isIncrementalCompilation,
     isInJSFile,
     isLiteralImportTypeNode,
-    isModifier,
-    isModuleDeclaration,
-    isObjectLiteralExpression,
-    isParameter,
     isPlainJsFile,
     isRequireCall,
-    isRootedDiskPath,
     isSourceFileJS,
-    isString,
-    isStringLiteral,
-    isStringLiteralLike,
-    isTraceEnabled,
-    JsonSourceFile,
-    JsxEmit,
-    length,
-    libMap,
-    LibResolution,
-    libs,
-    mapDefined,
-    mapDefinedIterator,
-    maybeBind,
-    memoize,
-    MethodDeclaration,
-    ModeAwareCache,
-    ModeAwareCacheKey,
-    ModifierFlags,
-    ModifierLike,
-    ModuleBlock,
-    ModuleDeclaration,
-    ModuleKind,
-    ModuleResolutionCache,
-    ModuleResolutionHost,
     moduleResolutionIsEqualTo,
-    ModuleResolutionKind,
     moduleResolutionSupportsPackageJsonExportsAndImports,
-    Mutable,
-    Node,
-    NodeArray,
-    NodeFlags,
-    nodeModulesPathPart,
-    NodeWithTypeArguments,
-    noop,
-    normalizePath,
-    notImplementedResolver,
-    noTransformers,
-    ObjectLiteralExpression,
-    OperationCanceledException,
     optionsHaveChanges,
     outFile,
-    PackageId,
     packageIdToPackageName,
     packageIdToString,
-    PackageJsonInfoCache,
-    padLeft,
-    ParameterDeclaration,
-    ParseConfigFileHost,
-    ParsedCommandLine,
-    parseIsolatedEntityName,
-    parseJsonSourceFileConfigFileContent,
-    parseNodeFactory,
-    Path,
-    pathIsAbsolute,
-    pathIsRelative,
-    Program,
-    ProgramHost,
-    ProjectReference,
-    ProjectReferenceFile,
     projectReferenceIsEqualTo,
-    PropertyAssignment,
-    PropertyDeclaration,
-    ReferencedFile,
-    removeFileExtension,
-    removePrefix,
-    removeSuffix,
-    resolutionExtensionIsTSOrJson,
-    ResolutionMode,
-    resolveConfigFileProjectName,
-    ResolvedConfigFileName,
-    ResolvedModuleFull,
-    ResolvedModuleWithFailedLookupLocations,
-    ResolvedProjectReference,
-    ResolvedTypeReferenceDirectiveWithFailedLookupLocations,
-    resolveLibrary,
-    resolveModuleName,
-    resolveTypeReferenceDirective,
-    returnFalse,
-    returnUndefined,
-    SatisfiesExpression,
-    ScriptKind,
-    ScriptTarget,
-    setParent,
-    setParentRecursive,
-    setResolvedModule,
-    setResolvedTypeReferenceDirective,
     shouldResolveJsRequire,
-    skipTrivia,
     skipTypeChecking,
-    some,
-    sortAndDeduplicateDiagnostics,
-    SortedReadonlyArray,
-    SourceFile,
-    sourceFileAffectingCompilerOptions,
     sourceFileMayBeEmitted,
-    SourceOfProjectReferenceRedirect,
-    stableSort,
-    startsWith,
-    Statement,
-    stringContains,
-    StringLiteral,
-    StringLiteralLike,
-    StructureIsReused,
-    supportedJSExtensionsFlat,
-    SymlinkCache,
-    SyntaxKind,
-    sys,
-    System,
-    targetOptionDeclaration,
-    toFileNameLowerCase,
-    tokenToString,
-    toPath as ts_toPath,
-    trace,
-    tracing,
-    trimStringEnd,
-    TsConfigSourceFile,
-    TypeChecker,
     typeDirectiveIsEqualTo,
-    TypeReferenceDirectiveResolutionCache,
-    UnparsedSource,
-    VariableDeclaration,
-    VariableStatement,
-    Version,
-    versionMajorMinor,
     walkUpParenthesizedExpressions,
-    WriteFileCallback,
-    WriteFileCallbackData,
     writeFileEnsuringDirectories,
-    zipToModeAwareCache,
-} from "./_namespaces/ts";
-import * as performance from "./_namespaces/ts.performance";
+} from "./utilities";
+import {
+    getDefaultLibFileName,
+    hasJSDocNodes,
+    isExternalModuleNameRelative,
+    isJsxOpeningLikeElement,
+    isModifier,
+    isStringLiteralLike,
+    sortAndDeduplicateDiagnostics,
+} from "./utilitiesPublic";
+import {
+    explainIfFileIsRedirectAndImpliedFormat,
+    fileIncludeReasonToDiagnostics,
+    getMatchedFileSpec,
+    getMatchedIncludeSpec,
+} from "./watch";
+import { ProgramHost } from "./watchPublic";
+import { DirectoryStructureHost } from "./watchUtilities";
 
 export function findConfigFile(searchPath: string, fileExists: (fileName: string) => boolean, configName = "tsconfig.json"): string | undefined {
     return forEachAncestorDirectory(searchPath, ancestor => {
@@ -845,7 +887,7 @@ export interface SourceFileImportsList {
  * Calculates the resulting resolution mode for some reference in some file - this is generally the explicitly
  * provided resolution mode in the reference, unless one is not present, in which case it is the mode of the containing file.
  */
-export function getModeForFileReference(ref: FileReference | string, containingFileMode: ResolutionMode) {
+export function getModeForFileReference(ref: FileReference | string, containingFileMode: ResolutionMode): ResolutionMode {
     return (isString(ref) ? containingFileMode : ref.resolutionMode) || containingFileMode;
 }
 
@@ -887,7 +929,7 @@ export function isExclusivelyTypeOnlyImportOrExport(decl: ImportDeclaration | Ex
  * @param usage The module reference string
  * @returns The final resolution mode of the import
  */
-export function getModeForUsageLocation(file: { impliedNodeFormat?: ResolutionMode }, usage: StringLiteralLike) {
+export function getModeForUsageLocation(file: { impliedNodeFormat?: ResolutionMode }, usage: StringLiteralLike): ResolutionMode {
     if (file.impliedNodeFormat === undefined) return undefined;
     if ((isImportDeclaration(usage.parent) || isExportDeclaration(usage.parent))) {
         const isTypeOnly = isExclusivelyTypeOnlyImportOrExport(usage.parent);
@@ -939,12 +981,6 @@ const emptyResolution: ResolvedModuleWithFailedLookupLocations & ResolvedTypeRef
     resolvedModule: undefined,
     resolvedTypeReferenceDirective: undefined,
 };
-
-/** @internal */
-export interface ResolutionNameAndModeGetter<Entry, SourceFile> {
-    getName(entry: Entry): string;
-    getMode(entry: Entry, file: SourceFile): ResolutionMode;
-}
 
 
 /** @internal */
@@ -1054,6 +1090,13 @@ export function loadWithModeAwareCache<Entry, SourceFile, ResolutionCache, Resol
 
 /** @internal */
 export function forEachResolvedProjectReference<T>(
+    resolvedProjectReferences: readonly (ResolvedProjectReference | undefined)[] | undefined,
+    cb: (resolvedProjectReference: ResolvedProjectReference, parent: ResolvedProjectReference | undefined) => T | undefined
+): T | undefined {
+    return forEachResolvedProjectReferenceWorker(resolvedProjectReferences, cb);
+}
+
+function forEachResolvedProjectReferenceWorker<T>(
     resolvedProjectReferences: readonly (ResolvedProjectReference | undefined)[] | undefined,
     cb: (resolvedProjectReference: ResolvedProjectReference, parent: ResolvedProjectReference | undefined) => T | undefined
 ): T | undefined {
@@ -1673,7 +1716,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         compilerHost: host,
         getSymlinkCache,
         useSourceOfProjectReferenceRedirect,
-        toPath,
+        toPath: toPathWorker,
         getResolvedProjectReferences,
         getSourceOfProjectReferenceRedirect,
         forEachResolvedProjectReference
@@ -1810,7 +1853,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             (oldResolvedRef, parent, index) => {
                 const oldReference = parent?.commandLine.projectReferences![index] || oldProgram!.getProjectReferences()![index];
                 const oldRefPath = resolveProjectReferencePath(oldReference);
-                if (!projectReferenceRedirects?.has(toPath(oldRefPath))) {
+                if (!projectReferenceRedirects?.has(toPathWorker(oldRefPath))) {
                     host.onReleaseParsedCommandLine!(oldRefPath, oldResolvedRef, oldProgram!.getCompilerOptions());
                 }
             }
@@ -1836,12 +1879,12 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         getSemanticDiagnostics,
         getCachedSemanticDiagnostics,
         getSuggestionDiagnostics,
-        getDeclarationDiagnostics,
+        getDeclarationDiagnostics: getDeclarationDiagnosticsForFileWorker,
         getBindAndCheckDiagnostics,
         getProgramDiagnostics,
         getTypeChecker,
         getClassifiableNames,
-        getCommonSourceDirectory,
+        getCommonSourceDirectory: getCommonSourceDirectoryWorker,
         emit,
         getCurrentDirectory: () => currentDirectory,
         getNodeCount: () => getTypeChecker().getNodeCount(),
@@ -1973,7 +2016,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         // Note:: Currently we try the real path only if the
         // file is from node_modules to avoid having to run real path on all file paths
         if (!host.realpath || !options.preserveSymlinks || !stringContains(file.originalFileName, nodeModulesPathPart)) return undefined;
-        const realDeclarationPath = toPath(host.realpath(file.originalFileName));
+        const realDeclarationPath = toPathWorker(host.realpath(file.originalFileName));
         return realDeclarationPath === file.path ? undefined : getRedirectReferenceForResolutionFromSourceOfProject(realDeclarationPath);
     }
 
@@ -1985,7 +2028,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         return forEachResolvedProjectReference(resolvedRef => {
             const out = outFile(resolvedRef.commandLine.options);
             if (!out) return undefined;
-            return toPath(out) === filePath ? resolvedRef : undefined;
+            return toPathWorker(out) === filePath ? resolvedRef : undefined;
         });
     }
 
@@ -2004,14 +2047,14 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         return libs.length + 2;
     }
 
-    function toPath(fileName: string): Path {
-        return ts_toPath(fileName, currentDirectory, getCanonicalFileName);
+    function toPathWorker(fileName: string): Path {
+        return toPath(fileName, currentDirectory, getCanonicalFileName);
     }
 
-    function getCommonSourceDirectory() {
+    function getCommonSourceDirectoryWorker() {
         if (commonSourceDirectory === undefined) {
             const emittedFiles = filter(files, file => sourceFileMayBeEmitted(file, program));
-            commonSourceDirectory = ts_getCommonSourceDirectory(
+            commonSourceDirectory = getCommonSourceDirectory(
                 options,
                 () => mapDefined(emittedFiles, file => file.isDeclarationFile ? undefined : file.fileName),
                 currentDirectory,
@@ -2214,7 +2257,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         const containingSourceFile = !isString(containingFile) ? containingFile : undefined;
         const canReuseResolutions = !isString(containingFile) ?
             containingFile === oldSourceFile && !hasInvalidatedResolutions(oldSourceFile.path) :
-            !hasInvalidatedResolutions(toPath(containingFile));
+            !hasInvalidatedResolutions(toPathWorker(containingFile));
         for (let i = 0; i < typeDirectiveNames.length; i++) {
             const entry = typeDirectiveNames[i];
             if (canReuseResolutions) {
@@ -2561,7 +2604,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             readFile: f => host.readFile(f),
             fileExists: f => {
                 // Use local caches
-                const path = toPath(f);
+                const path = toPathWorker(f);
                 if (getSourceFileByPath(path)) return true;
                 if (contains(missingFilePaths, path)) return false;
                 // Before falling back to the host
@@ -2619,7 +2662,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             projectReferences,
             (_ref, index) => resolvedProjectReferences![index]?.commandLine,
             fileName => {
-                const path = toPath(fileName);
+                const path = toPathWorker(fileName);
                 const sourceFile = getSourceFileByPath(path);
                 return sourceFile ? sourceFile.text : filesByName.has(path) ? undefined : host.readFile(path);
             },
@@ -2667,7 +2710,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
     }
 
     function isEmitBlocked(emitFileName: string): boolean {
-        return hasEmitBlockingDiagnostics.has(toPath(emitFileName));
+        return hasEmitBlockingDiagnostics.has(toPathWorker(emitFileName));
     }
 
     function emitWorker(program: Program, sourceFile: SourceFile | undefined, writeFileCallback: WriteFileCallback | undefined, cancellationToken: CancellationToken | undefined, emitOnly?: boolean | EmitOnly, customTransformers?: CustomTransformers, forceDtsEmit?: boolean): EmitResult {
@@ -2704,7 +2747,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
     }
 
     function getSourceFile(fileName: string): SourceFile | undefined {
-        return getSourceFileByPath(toPath(fileName));
+        return getSourceFileByPath(toPathWorker(fileName));
     }
 
     function getSourceFileByPath(path: Path): SourceFile | undefined {
@@ -2757,7 +2800,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         return getDiagnosticsWithPrecedingDirectives(sourceFile, sourceFile.commentDirectives, programDiagnosticsInFile).diagnostics;
     }
 
-    function getDeclarationDiagnostics(sourceFile?: SourceFile, cancellationToken?: CancellationToken): readonly DiagnosticWithLocation[] {
+    function getDeclarationDiagnosticsForFileWorker(sourceFile?: SourceFile, cancellationToken?: CancellationToken): readonly DiagnosticWithLocation[] {
         const options = program.getCompilerOptions();
         // collect diagnostics from the program only once if either no source file was specified or out/outFile is set (bundled emit)
         if (!sourceFile || outFile(options)) {
@@ -3152,7 +3195,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         return runWithCancellationToken(() => {
             const resolver = getTypeChecker().getEmitResolver(sourceFile, cancellationToken);
             // Don't actually write any files since we're just getting diagnostics.
-            return ts_getDeclarationDiagnostics(getEmitHost(noop), resolver, sourceFile) || emptyArray;
+            return getDeclarationDiagnostics(getEmitHost(noop), resolver, sourceFile) || emptyArray;
         });
     }
 
@@ -3489,7 +3532,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
     }
 
     function findSourceFileWorker(fileName: string, isDefaultLib: boolean, ignoreNoDefaultLib: boolean, reason: FileIncludeReason, packageId: PackageId | undefined): SourceFile | undefined {
-        const path = toPath(fileName);
+        const path = toPathWorker(fileName);
         if (useSourceOfProjectReferenceRedirect) {
             let source = getSourceOfProjectReferenceRedirect(path);
             // If preserveSymlinks is true, module resolution wont jump the symlink
@@ -3501,7 +3544,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
                 options.preserveSymlinks &&
                 isDeclarationFileName(fileName) &&
                 stringContains(fileName, nodeModulesPathPart)) {
-                const realPath = toPath(host.realpath(fileName));
+                const realPath = toPathWorker(host.realpath(fileName));
                 if (realPath !== path) source = getSourceOfProjectReferenceRedirect(realPath);
             }
             if (source) {
@@ -3520,7 +3563,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             // NOTE: this only makes sense for case-insensitive file systems, and only on files which are not redirected
             if (file && !(options.forceConsistentCasingInFileNames === false)) {
                 const checkedName = file.fileName;
-                const isRedirect = toPath(checkedName) !== toPath(fileName);
+                const isRedirect = toPathWorker(checkedName) !== toPathWorker(fileName);
                 if (isRedirect) {
                     fileName = getProjectReferenceRedirect(fileName) || fileName;
                 }
@@ -3573,7 +3616,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
                 // end up trying to add it to the program *again* because we were tracking it via its
                 // original (un-redirected) name. So we have to map both the original path and the redirected path
                 // to the source file we're about to find/create
-                redirectedPath = toPath(redirect);
+                redirectedPath = toPathWorker(redirect);
             }
         }
 
@@ -3583,7 +3626,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             fileName,
             sourceFileOptions,
             hostErrorMessage => addFilePreprocessingFileExplainingDiagnostic(/*file*/ undefined, reason, Diagnostics.Cannot_read_file_0_Colon_1, [fileName, hostErrorMessage]),
-            shouldCreateNewSourceFile || (oldProgram?.getSourceFileByPath(toPath(fileName))?.impliedNodeFormat !== sourceFileOptions.impliedNodeFormat)
+            shouldCreateNewSourceFile || (oldProgram?.getSourceFileByPath(toPathWorker(fileName))?.impliedNodeFormat !== sourceFileOptions.impliedNodeFormat)
         );
 
         if (packageId) {
@@ -3592,7 +3635,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             if (fileFromPackageId) {
                 // Some other SourceFile already exists with this package name and version.
                 // Instead of creating a duplicate, just redirect to the existing one.
-                const dupFile = createRedirectedSourceFile(fileFromPackageId, file!, fileName, path, toPath(fileName), originalFileName, sourceFileOptions);
+                const dupFile = createRedirectedSourceFile(fileFromPackageId, file!, fileName, path, toPathWorker(fileName), originalFileName, sourceFileOptions);
                 redirectTargetsMap.add(fileFromPackageId.path, fileName);
                 addFileToFilesByName(dupFile, path, redirectedPath);
                 addFileIncludeReason(dupFile, reason);
@@ -3612,7 +3655,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             sourceFilesFoundSearchingNodeModules.set(path, currentNodeModulesDepth > 0);
             file.fileName = fileName; // Ensure that source file has same name as what we were looking for
             file.path = path;
-            file.resolvedPath = toPath(fileName);
+            file.resolvedPath = toPathWorker(fileName);
             file.originalFileName = originalFileName;
             file.packageJsonLocations = sourceFileOptions.packageJsonLocations?.length ? sourceFileOptions.packageJsonLocations : undefined;
             file.packageJsonScope = sourceFileOptions.packageJsonScope;
@@ -3700,21 +3743,21 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             mapFromFileToProjectReferenceRedirects = new Map();
             forEachResolvedProjectReference(referencedProject => {
                 // not input file from the referenced project, ignore
-                if (toPath(options.configFilePath!) !== referencedProject.sourceFile.path) {
+                if (toPathWorker(options.configFilePath!) !== referencedProject.sourceFile.path) {
                     referencedProject.commandLine.fileNames.forEach(f =>
-                        mapFromFileToProjectReferenceRedirects!.set(toPath(f), referencedProject.sourceFile.path));
+                        mapFromFileToProjectReferenceRedirects!.set(toPathWorker(f), referencedProject.sourceFile.path));
                 }
             });
         }
 
-        const referencedProjectPath = mapFromFileToProjectReferenceRedirects.get(toPath(fileName));
+        const referencedProjectPath = mapFromFileToProjectReferenceRedirects.get(toPathWorker(fileName));
         return referencedProjectPath && getResolvedProjectReferenceByPath(referencedProjectPath);
     }
 
     function forEachResolvedProjectReference<T>(
         cb: (resolvedProjectReference: ResolvedProjectReference) => T | undefined
     ): T | undefined {
-        return ts_forEachResolvedProjectReference(resolvedProjectReferences, cb);
+        return forEachResolvedProjectReferenceWorker(resolvedProjectReferences, cb);
     }
 
     function getSourceOfProjectReferenceRedirect(path: Path) {
@@ -3726,14 +3769,14 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
                 if (out) {
                     // Dont know which source file it means so return true?
                     const outputDts = changeExtension(out, Extension.Dts);
-                    mapFromToProjectReferenceRedirectSource!.set(toPath(outputDts), true);
+                    mapFromToProjectReferenceRedirectSource!.set(toPathWorker(outputDts), true);
                 }
                 else {
                     const getCommonSourceDirectory = memoize(() => getCommonSourceDirectoryOfConfig(resolvedRef.commandLine, !host.useCaseSensitiveFileNames()));
                     forEach(resolvedRef.commandLine.fileNames, fileName => {
                         if (!isDeclarationFileName(fileName) && !fileExtensionIs(fileName, Extension.Json)) {
                             const outputDts = getOutputDeclarationFileName(fileName, resolvedRef.commandLine, !host.useCaseSensitiveFileNames(), getCommonSourceDirectory);
-                            mapFromToProjectReferenceRedirectSource!.set(toPath(outputDts), fileName);
+                            mapFromToProjectReferenceRedirectSource!.set(toPathWorker(outputDts), fileName);
                         }
                     });
                 }
@@ -4036,7 +4079,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
 
         // The actual filename (i.e. add "/tsconfig.json" if necessary)
         const refPath = resolveProjectReferencePath(ref);
-        const sourceFilePath = toPath(refPath);
+        const sourceFilePath = toPathWorker(refPath);
         const fromCache = projectReferenceRedirects.get(sourceFilePath);
         if (fromCache !== undefined) {
             return fromCache || undefined;
@@ -4130,7 +4173,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
 
         // List of collected files is complete; validate exhautiveness if this is a project with a file list
         if (options.composite) {
-            const rootPaths = new Set(rootNames.map(toPath));
+            const rootPaths = new Set(rootNames.map(toPathWorker));
             for (const file of files) {
                 // Ignore file that is not emitted
                 if (sourceFileMayBeEmitted(file, program) && !rootPaths.has(file.path)) {
@@ -4264,7 +4307,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             options.mapRoot) { // there is --mapRoot specified
 
             // Precalculate and cache the common source directory
-            const dir = getCommonSourceDirectory();
+            const dir = getCommonSourceDirectoryWorker();
 
             // If we failed to find a good common directory, but outDir is specified and at least one of our files is on a windows drive/URL/other resource, add a failure
             if (options.outDir && dir === "" && files.some(file => getRootLength(file.fileName) > 1)) {
@@ -4385,7 +4428,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         // Verify that all the emit files are unique and don't overwrite input files
         function verifyEmitFilePath(emitFileName: string | undefined, emitFilesSeen: Set<string>) {
             if (emitFileName) {
-                const emitFilePath = toPath(emitFileName);
+                const emitFilePath = toPathWorker(emitFileName);
                 // Report error if the output overwrites input file
                 if (filesByName.has(emitFilePath)) {
                     let chain: DiagnosticMessageChain | undefined;
@@ -4685,7 +4728,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
             }
             if (!parent && buildInfoPath && buildInfoPath === getTsBuildInfoEmitOutputFilePath(options)) {
                 createDiagnosticForReference(parentFile, index, Diagnostics.Cannot_write_file_0_because_it_will_overwrite_tsbuildinfo_file_generated_by_referenced_project_1, buildInfoPath, ref.path);
-                hasEmitBlockingDiagnostics.set(toPath(buildInfoPath), true);
+                hasEmitBlockingDiagnostics.set(toPathWorker(buildInfoPath), true);
             }
         });
     }
@@ -4828,7 +4871,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
     }
 
     function blockEmittingOfFile(emitFileName: string, diag: Diagnostic) {
-        hasEmitBlockingDiagnostics.set(toPath(emitFileName), true);
+        hasEmitBlockingDiagnostics.set(toPathWorker(emitFileName), true);
         programDiagnostics.add(diag);
     }
 
@@ -4838,7 +4881,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         }
 
         // If this is source file, its not emitted file
-        const filePath = toPath(file);
+        const filePath = toPathWorker(file);
         if (getSourceFileByPath(filePath)) {
             return false;
         }
@@ -5234,4 +5277,60 @@ export function getModuleNameStringLiteralAt({ imports, moduleAugmentations }: S
         // Do nothing if it's an Identifier; we don't need to do module resolution for `declare global`.
     }
     Debug.fail("should never ask for module name at index higher than possible module name");
+}
+
+/** @internal */
+export function getSetExternalModuleIndicator(options: CompilerOptions): (file: SourceFile) => void {
+    // TODO: Should this callback be cached?
+    switch (getEmitModuleDetectionKind(options)) {
+        case ModuleDetectionKind.Force:
+            // All non-declaration files are modules, declaration files still do the usual isFileProbablyExternalModule
+            return (file: SourceFile) => {
+                file.externalModuleIndicator = isFileProbablyExternalModule(file) || !file.isDeclarationFile || undefined;
+            };
+        case ModuleDetectionKind.Legacy:
+            // Files are modules if they have imports, exports, or import.meta
+            return (file: SourceFile) => {
+                file.externalModuleIndicator = isFileProbablyExternalModule(file);
+            };
+        case ModuleDetectionKind.Auto:
+            // If module is nodenext or node16, all esm format files are modules
+            // If jsx is react-jsx or react-jsxdev then jsx tags force module-ness
+            // otherwise, the presence of import or export statments (or import.meta) implies module-ness
+            const checks: ((file: SourceFile) => Node | true | undefined)[] = [isFileProbablyExternalModule];
+            if (options.jsx === JsxEmit.ReactJSX || options.jsx === JsxEmit.ReactJSXDev) {
+                checks.push(isFileModuleFromUsingJSXTag);
+            }
+            checks.push(isFileForcedToBeModuleByFormat);
+            const combined = or(...checks);
+            const callback = (file: SourceFile) => void (file.externalModuleIndicator = combined(file));
+            return callback;
+    }
+}
+
+/**
+ * This is a somewhat unavoidable full tree walk to locate a JSX tag - `import.meta` requires the same,
+ * but we avoid that walk (or parts of it) if at all possible using the `PossiblyContainsImportMeta` node flag.
+ * Unfortunately, there's no `NodeFlag` space to do the same for JSX.
+ */
+function walkTreeForJSXTags(node: Node): Node | undefined {
+    if (!(node.transformFlags & TransformFlags.ContainsJsx)) return undefined;
+    return isJsxOpeningLikeElement(node) || isJsxFragment(node) ? node : forEachChild(node, walkTreeForJSXTags);
+}
+
+function isFileModuleFromUsingJSXTag(file: SourceFile): Node | undefined {
+    // Excludes declaration files - they still require an explicit `export {}` or the like
+    // for back compat purposes. (not that declaration files should contain JSX tags!)
+    return !file.isDeclarationFile ? walkTreeForJSXTags(file) : undefined;
+}
+
+/**
+ * Note that this requires file.impliedNodeFormat be set already; meaning it must be set very early on
+ * in SourceFile construction.
+ */
+function isFileForcedToBeModuleByFormat(file: SourceFile): true | undefined {
+    // Excludes declaration files - they still require an explicit `export {}` or the like
+    // for back compat purposes. The only non-declaration files _not_ forced to be a module are `.js` files
+    // that aren't esm-mode (meaning not in a `type: module` scope).
+    return (file.impliedNodeFormat === ModuleKind.ESNext || (fileExtensionIsOneOf(file.fileName, [Extension.Cjs, Extension.Cts, Extension.Mjs, Extension.Mts]))) && !file.isDeclarationFile ? true : undefined;
 }

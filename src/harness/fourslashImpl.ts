@@ -1,3 +1,5 @@
+import { regExpEscape } from "../compiler/fileMatcher";
+import { applyChanges } from "../services/textChanges";
 import * as fakes from "./_namespaces/fakes";
 import * as FourSlashInterface from "./_namespaces/FourSlashInterface";
 import * as Harness from "./_namespaces/Harness";
@@ -3285,7 +3287,7 @@ export class TestState {
             assert(changes.length === 1, "Affected 0 or more than 1 file, must use 'newFileContent' instead of 'newRangeContent'");
             const change = ts.first(changes);
             assert(change.fileName = this.activeFile.fileName);
-            const newText = ts.textChanges.applyChanges(this.getFileContent(this.activeFile.fileName), change.textChanges);
+            const newText = applyChanges(this.getFileContent(this.activeFile.fileName), change.textChanges);
             const newRange = updateTextRangeForTextChanges(this.getOnlyRange(), change.textChanges);
             const actualText = newText.slice(newRange.pos, newRange.end);
             this.verifyTextMatches(actualText, /*includeWhitespace*/ true, newRangeContent);
@@ -3299,7 +3301,7 @@ export class TestState {
                     ts.Debug.fail(`Did not expect a change in ${change.fileName}`);
                 }
                 const oldText = this.tryGetFileContent(change.fileName);
-                const newContent = change.isNewFile ? ts.first(change.textChanges).newText : ts.textChanges.applyChanges(oldText!, change.textChanges);
+                const newContent = change.isNewFile ? ts.first(change.textChanges).newText : applyChanges(oldText!, change.textChanges);
                 this.verifyTextMatches(newContent, /*includeWhitespace*/ true, expectedNewContent);
             }
             for (const newFileName in newFileContent) {
@@ -3932,7 +3934,7 @@ export class TestState {
 
             const fileContent = this.tryGetFileContent(fileName);
             if (fileContent !== undefined) {
-                const actualNewContent = ts.textChanges.applyChanges(fileContent, textChanges);
+                const actualNewContent = applyChanges(fileContent, textChanges);
                 assert.equal(actualNewContent, newContent, `new content for ${fileName}`);
             }
             else {
@@ -4855,7 +4857,7 @@ function displayExpectedAndActualString(expected: string, actual: string, quoted
 }
 
 function templateToRegExp(template: string) {
-    return new RegExp(`^${ts.regExpEscape(template).replace(/\\\{\d+\\\}/g, ".*?")}$`);
+    return new RegExp(`^${regExpEscape(template).replace(/\\\{\d+\\\}/g, ".*?")}$`);
 }
 
 function rangesOfDiffBetweenTwoStrings(source: string, target: string) {

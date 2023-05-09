@@ -1,38 +1,34 @@
 import {
+    startsWith,
+    trimString,
+    trimStringStart,
+} from "../compiler/core";
+import * as Debug from "../compiler/debug";
+import {
+    isArrayLiteralExpression,
+    isBinaryExpression,
+    isBindingElement,
+    isBlock,
+    isCallExpression,
+    isIfStatement,
+    isInterfaceDeclaration,
+    isJsxText,
+    isModuleBlock,
+    isParenthesizedExpression,
+    isPropertyAccessExpression,
+    isReturnStatement,
+    isTupleTypeNode,
+    isVariableStatement,
+} from "../compiler/factory/nodeTests";
+import { getLeadingCommentRanges } from "../compiler/scanner";
+import {
     ArrowFunction,
     AssertClause,
     Block,
     CallExpression,
     CancellationToken,
     CaseClause,
-    createTextSpanFromBounds,
-    createTextSpanFromNode,
-    createTextSpanFromRange,
-    Debug,
     DefaultClause,
-    findChildOfKind,
-    getLeadingCommentRanges,
-    isAnyImportSyntax,
-    isArrayLiteralExpression,
-    isBinaryExpression,
-    isBindingElement,
-    isBlock,
-    isCallExpression,
-    isCallOrNewExpression,
-    isClassLike,
-    isDeclaration,
-    isFunctionLike,
-    isIfStatement,
-    isInComment,
-    isInterfaceDeclaration,
-    isJsxText,
-    isModuleBlock,
-    isNodeArrayMultiLine,
-    isParenthesizedExpression,
-    isPropertyAccessExpression,
-    isReturnStatement,
-    isTupleTypeNode,
-    isVariableStatement,
     JsxAttributes,
     JsxElement,
     JsxFragment,
@@ -42,20 +38,36 @@ import {
     Node,
     NodeArray,
     NoSubstitutionTemplateLiteral,
-    OutliningSpan,
-    OutliningSpanKind,
     ParenthesizedExpression,
-    positionsAreOnSameLine,
     SignatureDeclaration,
     SourceFile,
-    startsWith,
     SyntaxKind,
     TemplateExpression,
     TextSpan,
-    trimString,
-    trimStringStart,
     TryStatement,
-} from "./_namespaces/ts";
+} from "../compiler/types";
+import {
+    isAnyImportSyntax,
+    isNodeArrayMultiLine,
+    positionsAreOnSameLine,
+} from "../compiler/utilities";
+import {
+    createTextSpanFromBounds,
+    isCallOrNewExpression,
+    isClassLike,
+    isDeclaration,
+    isFunctionLike,
+} from "../compiler/utilitiesPublic";
+import {
+    OutliningSpan,
+    OutliningSpanKind,
+} from "./types";
+import {
+    createTextSpanFromNode,
+    createTextSpanFromRange,
+    findChildOfKind,
+    isInComment,
+} from "./utilities";
 
 /** @internal */
 export function collectElements(sourceFile: SourceFile, cancellationToken: CancellationToken): OutliningSpan[] {

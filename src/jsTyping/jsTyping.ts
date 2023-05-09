@@ -1,35 +1,43 @@
+import { readConfigFile } from "../compiler/commandLineParser";
 import {
-    CharacterCodes,
-    combinePaths,
     compareStringsCaseSensitive,
-    CompilerOptions,
-    Debug,
     deduplicate,
     equateStringsCaseSensitive,
-    Extension,
-    fileExtensionIs,
     flatMap,
     forEach,
-    getBaseFileName,
-    getDirectoryPath,
-    getNormalizedAbsolutePath,
     getOwnKeys,
-    getPathComponents,
     getProperty,
-    hasJSFileExtension,
     mapDefined,
-    MapLike,
-    normalizePath,
-    Path,
-    readConfigFile,
-    removeFileExtension,
     removeMinAndVersionNumbers,
     some,
     toFileNameLowerCase,
-    TypeAcquisition,
-    Version,
+} from "../compiler/core";
+import {
+    MapLike,
     versionMajorMinor,
-} from "./_namespaces/ts";
+} from "../compiler/corePublic";
+import * as Debug from "../compiler/debug";
+import {
+    hasJSFileExtension,
+    removeFileExtension,
+} from "../compiler/extension";
+import {
+    combinePaths,
+    fileExtensionIs,
+    getBaseFileName,
+    getDirectoryPath,
+    getNormalizedAbsolutePath,
+    getPathComponents,
+    normalizePath,
+} from "../compiler/path";
+import { Version } from "../compiler/semver";
+import {
+    CharacterCodes,
+    CompilerOptions,
+    Extension,
+    Path,
+    TypeAcquisition,
+} from "../compiler/types";
 
 export interface TypingResolutionHost {
     directoryExists(path: string): boolean;

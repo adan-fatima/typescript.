@@ -1,98 +1,121 @@
+import { createBuilderProgramUsingProgramBuildInfo } from "./builder";
 import {
     BuilderProgram,
-    BuildInfo,
+    createEmitAndSemanticDiagnosticsBuilderProgram,
+    EmitAndSemanticDiagnosticsBuilderProgram,
+} from "./builderPublic";
+import {
     canJsonReportNoInputFiles,
+    ConfigFileDiagnosticsReporter,
+    DiagnosticReporter,
+    ExtendedConfigCacheEntry,
+    getFileNamesFromConfigSpecs,
+    getParsedCommandLineOfConfigFile,
+    updateErrorForNoInputFiles,
+} from "./commandLineParser";
+import {
+    createGetCanonicalFileName,
+    isArray,
+    maybeBind,
+    noop,
+    returnFalse,
+    returnTrue,
+} from "./core";
+import {
+    MapLike,
+    version,
+} from "./corePublic";
+import * as Debug from "./debug";
+import { Diagnostics } from "./diagnosticInformationMap.generated";
+import {
+    getBuildInfo,
+    getTsBuildInfoEmitOutputFilePath,
+} from "./emitter";
+import { ModuleResolutionCache } from "./moduleNameResolver";
+import { CreateSourceFileOptions } from "./parser";
+import {
+    getDirectoryPath,
+    getNormalizedAbsolutePath,
+    toPath,
+} from "./path";
+import { perfLogger } from "./perfLogger";
+import {
     changeCompilerHostLikeToUseCache,
-    changesAffectModuleResolution,
-    cleanExtendedConfigCache,
-    clearMap,
-    clearSharedExtendedConfigFileWatcher,
-    closeFileWatcher,
-    closeFileWatcherOf,
+    createCompilerHostWorker,
+    getConfigFileParsingDiagnostics,
+    isProgramUptoDate,
+    parseConfigHostFromCompilerHostLike,
+} from "./program";
+import { changesAffectModuleResolution } from "./programUtilities";
+import {
+    createResolutionCache,
+    ResolutionCacheHost,
+} from "./resolutionCache";
+import {
+    PollingInterval,
+    sys,
+} from "./sys";
+import {
+    BuildInfo,
     CompilerHost,
     CompilerOptions,
-    ConfigFileDiagnosticsReporter,
-    ConfigFileProgramReloadLevel,
-    createBuilderProgramUsingProgramBuildInfo,
-    createCachedDirectoryStructureHost,
-    createCompilerDiagnostic,
-    createCompilerHostFromProgramHost,
-    createCompilerHostWorker,
-    createEmitAndSemanticDiagnosticsBuilderProgram,
-    createGetCanonicalFileName,
-    createResolutionCache,
-    CreateSourceFileOptions,
-    createWatchCompilerHostOfConfigFile,
-    createWatchCompilerHostOfFilesAndCompilerOptions,
-    createWatchFactory,
-    Debug,
     Diagnostic,
     DiagnosticMessage,
-    DiagnosticReporter,
-    Diagnostics,
-    DirectoryStructureHost,
     DirectoryWatcherCallback,
-    EmitAndSemanticDiagnosticsBuilderProgram,
-    ExtendedConfigCacheEntry,
     FileExtensionInfo,
     FileReference,
     FileWatcher,
     FileWatcherCallback,
     FileWatcherEventKind,
-    getBuildInfo,
-    getConfigFileParsingDiagnostics,
-    getDirectoryPath,
-    getFileNamesFromConfigSpecs,
-    getNewLineCharacter,
-    getNormalizedAbsolutePath,
-    getParsedCommandLineOfConfigFile,
-    getSourceFileVersionAsHashFromText,
-    getTsBuildInfoEmitOutputFilePath,
     HasInvalidatedLibResolutions,
     HasInvalidatedResolutions,
-    isArray,
-    isIgnoredFileFromWildCardWatching,
-    isProgramUptoDate,
-    MapLike,
-    maybeBind,
-    ModuleResolutionCache,
-    noop,
-    noopFileWatcher,
-    parseConfigHostFromCompilerHostLike,
     ParsedCommandLine,
     Path,
-    perfLogger,
-    PollingInterval,
     ProjectReference,
-    ResolutionCacheHost,
     ResolutionMode,
     ResolvedModule,
     ResolvedModuleWithFailedLookupLocations,
     ResolvedProjectReference,
     ResolvedTypeReferenceDirective,
     ResolvedTypeReferenceDirectiveWithFailedLookupLocations,
-    returnFalse,
-    returnTrue,
     ScriptTarget,
-    setGetSourceFileAsHashVersioned,
-    SharedExtendedConfigFileWatcher,
     SourceFile,
     StringLiteralLike,
-    sys,
     System,
-    toPath,
-    toPath as ts_toPath,
-    updateErrorForNoInputFiles,
+    WatchDirectoryFlags,
+    WatchOptions,
+} from "./types";
+import {
+    clearMap,
+    closeFileWatcher,
+    createCompilerDiagnostic,
+    getNewLineCharacter,
+} from "./utilities";
+import {
+    createCompilerHostFromProgramHost,
+    createWatchCompilerHostOfConfigFile,
+    createWatchCompilerHostOfFilesAndCompilerOptions,
+    createWatchFactory,
+    getSourceFileVersionAsHashFromText,
+    noopFileWatcher,
+    setGetSourceFileAsHashVersioned,
+    WatchType,
+    WatchTypeRegistry,
+} from "./watch";
+import {
+    cleanExtendedConfigCache,
+    clearSharedExtendedConfigFileWatcher,
+    closeFileWatcherOf,
+    ConfigFileProgramReloadLevel,
+    createCachedDirectoryStructureHost,
+    DirectoryStructureHost,
+    isIgnoredFileFromWildCardWatching,
+    SharedExtendedConfigFileWatcher,
     updateMissingFilePathsWatch,
     updateSharedExtendedConfigFileWatcher,
     updateWatchingWildcardDirectories,
-    version,
-    WatchDirectoryFlags,
-    WatchOptions,
-    WatchType,
-    WatchTypeRegistry,
     WildcardDirectoryWatcher,
-} from "./_namespaces/ts";
+} from "./watchUtilities";
 
 export interface ReadBuildProgramHost {
     useCaseSensitiveFileNames(): boolean;
@@ -477,15 +500,15 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
     setGetSourceFileAsHashVersioned(compilerHost);
     // Members for CompilerHost
     const getNewSourceFile = compilerHost.getSourceFile;
-    compilerHost.getSourceFile = (fileName, ...args) => getVersionedSourceFileByPath(fileName, toPath(fileName), ...args);
+    compilerHost.getSourceFile = (fileName, ...args) => getVersionedSourceFileByPath(fileName, toPathWorker(fileName), ...args);
     compilerHost.getSourceFileByPath = getVersionedSourceFileByPath;
     compilerHost.getNewLine = () => newLine;
     compilerHost.fileExists = fileExists;
     compilerHost.onReleaseOldSourceFile = onReleaseOldSourceFile;
     compilerHost.onReleaseParsedCommandLine = onReleaseParsedCommandLine;
     // Members for ResolutionCacheHost
-    compilerHost.toPath = toPath;
-    compilerHost.getCompilationSettings = () => compilerOptions!;
+    compilerHost.toPath = toPathWorker;
+    compilerHost.getCompilationSettings = () => compilerOptions as CompilerOptions;
     compilerHost.useSourceOfProjectReferenceRedirect = maybeBind(host, host.useSourceOfProjectReferenceRedirect);
     compilerHost.watchDirectoryOfFailedLookupLocation = (dir, cb, flags) => watchDirectory(dir, cb, flags, watchOptions, WatchType.FailedLookupLocations);
     compilerHost.watchAffectingFileLocation = (file, cb) => watchFile(file, cb, PollingInterval.High, watchOptions, WatchType.AffectingFileLocation);
@@ -540,7 +563,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
     watchConfigFileWildCardDirectories();
 
     // Update extended config file watch
-    if (configFileName) updateExtendedConfigFilesWatches(toPath(configFileName), compilerOptions, watchOptions, WatchType.ExtendedConfigFile);
+    if (configFileName) updateExtendedConfigFilesWatches(toPathWorker(configFileName), compilerOptions, watchOptions, WatchType.ExtendedConfigFile);
 
     return configFileName ?
         { getCurrentProgram: getCurrentBuilderProgram, getProgram: updateProgram, close } :
@@ -613,7 +636,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
         const {
             originalReadFile, originalFileExists, originalDirectoryExists,
             originalCreateDirectory, originalWriteFile, readFileWithCache
-        } = changeCompilerHostLikeToUseCache(compilerHost, toPath);
+        } = changeCompilerHostLikeToUseCache(compilerHost, toPathWorker);
         if (isProgramUptoDate(getCurrentProgram(), rootFileNames, compilerOptions, path => getSourceVersion(path, readFileWithCache), fileName => compilerHost.fileExists(fileName), hasInvalidatedResolutions, hasInvalidatedLibResolutions, hasChangedAutomaticTypeDirectiveNames, getParsedCommandLine, projectReferences)) {
             if (hasChangedConfigFileParsingErrors) {
                 if (reportFileChangeDetectedOnCreateProgram) {
@@ -693,8 +716,8 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
         return getNewLineCharacter(compilerOptions || optionsToExtendForConfigFile);
     }
 
-    function toPath(fileName: string) {
-        return ts_toPath(fileName, currentDirectory, getCanonicalFileName);
+    function toPathWorker(fileName: string) {
+        return toPath(fileName, currentDirectory, getCanonicalFileName);
     }
 
     function isFileMissingOnHost(hostSourceFile: HostFileInfo | undefined): hostSourceFile is FileMissingOnHost {
@@ -706,7 +729,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
     }
 
     function fileExists(fileName: string) {
-        const path = toPath(fileName);
+        const path = toPathWorker(fileName);
         // If file is missing on host from cache, we can definitely say file doesnt exist
         // otherwise we need to ensure from the disk
         if (isFileMissingOnHost(sourceFilesCache.get(path))) {
@@ -913,7 +936,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
         watchConfigFileWildCardDirectories();
 
         // Update extended config file watch
-        updateExtendedConfigFilesWatches(toPath(configFileName), compilerOptions, watchOptions, WatchType.ExtendedConfigFile);
+        updateExtendedConfigFilesWatches(toPathWorker(configFileName), compilerOptions, watchOptions, WatchType.ExtendedConfigFile);
     }
 
     function parseConfigFile() {
@@ -940,7 +963,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
     }
 
     function getParsedCommandLine(configFileName: string): ParsedCommandLine | undefined {
-        const configPath = toPath(configFileName);
+        const configPath = toPathWorker(configFileName);
         let config = parsedConfigs?.get(configPath);
         if (config) {
             if (!config.reloadLevel) return config.parsedCommandLine;
@@ -991,7 +1014,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
     }
 
     function onReleaseParsedCommandLine(fileName: string) {
-        const path = toPath(fileName);
+        const path = toPathWorker(fileName);
         const config = parsedConfigs?.get(path);
         if (!config) return;
 
@@ -1073,7 +1096,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                 Debug.assert(configFileName);
                 Debug.assert(compilerOptions);
 
-                const fileOrDirectoryPath = toPath(fileOrDirectory);
+                const fileOrDirectoryPath = toPathWorker(fileOrDirectory);
 
                 // Since the file existence changed, update the sourceFiles cache
                 if (cachedDirectoryStructureHost) {
@@ -1082,7 +1105,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                 nextSourceFileVersion(fileOrDirectoryPath);
 
                 if (isIgnoredFileFromWildCardWatching({
-                    watchedDirPath: toPath(directory),
+                    watchedDirPath: toPathWorker(directory),
                     fileOrDirectory,
                     fileOrDirectoryPath,
                     configFileName,
@@ -1092,7 +1115,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                     currentDirectory,
                     useCaseSensitiveFileNames,
                     writeLog,
-                    toPath,
+                    toPath: toPathWorker,
                 })) return;
 
                 // Reload is pending, do the reload
@@ -1119,13 +1142,13 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                 (_fileName, eventKind) => {
                     updateCachedSystemWithFile(extendedConfigFileName, extendedConfigFilePath, eventKind);
                     // Update extended config cache
-                    if (extendedConfigCache) cleanExtendedConfigCache(extendedConfigCache, extendedConfigFilePath, toPath);
+                    if (extendedConfigCache) cleanExtendedConfigCache(extendedConfigCache, extendedConfigFilePath, toPathWorker);
                     // Update projects
                     const projects = sharedExtendedConfigFileWatchers.get(extendedConfigFilePath)?.projects;
                     // If there are no referenced projects this extended config file watcher depend on ignore
                     if (!projects?.size) return;
                     projects.forEach(projectPath => {
-                        if (configFileName && toPath(configFileName) === projectPath) {
+                        if (configFileName && toPathWorker(configFileName) === projectPath) {
                             // If this is the config file of the project, reload completely
                             reloadLevel = ConfigFileProgramReloadLevel.Full;
                         }
@@ -1142,7 +1165,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                 watchOptions,
                 watchType
             ),
-            toPath,
+            toPathWorker,
         );
     }
 
@@ -1169,7 +1192,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                 (directory, flags) => watchDirectory(
                     directory,
                     fileOrDirectory => {
-                        const fileOrDirectoryPath = toPath(fileOrDirectory);
+                        const fileOrDirectoryPath = toPathWorker(fileOrDirectory);
                         // Since the file existence changed, update the sourceFiles cache
                         if (cachedDirectoryStructureHost) {
                             cachedDirectoryStructureHost.addOrDeleteFileOrDirectory(fileOrDirectory, fileOrDirectoryPath);
@@ -1179,7 +1202,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                         const config = parsedConfigs?.get(configPath);
                         if (!config?.parsedCommandLine) return;
                         if (isIgnoredFileFromWildCardWatching({
-                            watchedDirPath: toPath(directory),
+                            watchedDirPath: toPathWorker(directory),
                             fileOrDirectory,
                             fileOrDirectoryPath,
                             configFileName,
@@ -1188,7 +1211,7 @@ export function createWatchProgram<T extends BuilderProgram>(host: WatchCompiler
                             currentDirectory,
                             useCaseSensitiveFileNames,
                             writeLog,
-                            toPath,
+                            toPath: toPathWorker,
                         })) return;
 
                         // Reload is pending, do the reload

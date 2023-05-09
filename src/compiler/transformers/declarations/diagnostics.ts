@@ -1,22 +1,6 @@
+import * as Debug from "../../debug";
+import { Diagnostics } from "../../diagnosticInformationMap.generated";
 import {
-    BinaryExpression,
-    BindingElement,
-    CallSignatureDeclaration,
-    ConstructorDeclaration,
-    ConstructSignatureDeclaration,
-    Debug,
-    Declaration,
-    DeclarationName,
-    DiagnosticMessage,
-    Diagnostics,
-    ElementAccessExpression,
-    ExpressionWithTypeArguments,
-    FunctionDeclaration,
-    GetAccessorDeclaration,
-    getNameOfDeclaration,
-    hasSyntacticModifier,
-    ImportEqualsDeclaration,
-    IndexSignatureDeclaration,
     isBinaryExpression,
     isBindingElement,
     isCallSignatureDeclaration,
@@ -26,23 +10,34 @@ import {
     isElementAccessExpression,
     isExpressionWithTypeArguments,
     isFunctionDeclaration,
-    isGetAccessor,
     isHeritageClause,
     isImportEqualsDeclaration,
     isIndexSignatureDeclaration,
-    isJSDocTypeAlias,
     isMethodDeclaration,
     isMethodSignature,
     isParameter,
-    isParameterPropertyDeclaration,
     isPropertyAccessExpression,
     isPropertyDeclaration,
     isPropertySignature,
-    isSetAccessor,
-    isStatic,
     isTypeAliasDeclaration,
     isTypeParameterDeclaration,
     isVariableDeclaration,
+} from "../../factory/nodeTests";
+import {
+    BinaryExpression,
+    BindingElement,
+    CallSignatureDeclaration,
+    ConstructorDeclaration,
+    ConstructSignatureDeclaration,
+    Declaration,
+    DeclarationName,
+    DiagnosticMessage,
+    ElementAccessExpression,
+    ExpressionWithTypeArguments,
+    FunctionDeclaration,
+    GetAccessorDeclaration,
+    ImportEqualsDeclaration,
+    IndexSignatureDeclaration,
     JSDocCallbackTag,
     JSDocEnumTag,
     JSDocTypedefTag,
@@ -63,7 +58,18 @@ import {
     TypeAliasDeclaration,
     TypeParameterDeclaration,
     VariableDeclaration,
-} from "../../_namespaces/ts";
+} from "../../types";
+import {
+    hasSyntacticModifier,
+    isJSDocTypeAlias,
+    isStatic,
+} from "../../utilities";
+import {
+    getNameOfDeclaration,
+    isGetAccessor,
+    isParameterPropertyDeclaration,
+    isSetAccessor,
+} from "../../utilitiesPublic";
 
 /** @internal */
 export type GetSymbolAccessibilityDiagnostic = (symbolAccessibilityResult: SymbolAccessibilityResult) => (SymbolAccessibilityDiagnostic | undefined);

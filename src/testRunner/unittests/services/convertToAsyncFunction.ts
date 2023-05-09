@@ -1,15 +1,10 @@
+import { getFormatContext } from "../../../services/formatting/formatting";
+import { applyChanges } from "../../../services/textChanges";
 import * as Harness from "../../_namespaces/Harness";
 import * as ts from "../../_namespaces/ts";
 import { createProjectService } from "../helpers/tsserver";
-import {
-    createServerHost,
-    File,
-} from "../helpers/virtualFileSystemWithWatch";
-import {
-    extractTest,
-    newLineCharacter,
-    notImplementedHost,
-} from "./extract/helpers";
+import { createServerHost, File } from "../helpers/virtualFileSystemWithWatch";
+import { extractTest, newLineCharacter, notImplementedHost } from "./extract/helpers";
 
 const libFile: File = {
     path: "/a/lib/lib.d.ts",
@@ -356,7 +351,7 @@ function testConvertToAsyncFunction(it: Mocha.PendingTestFunction, caption: stri
             cancellationToken: { throwIfCancellationRequested: ts.noop, isCancellationRequested: ts.returnFalse },
             preferences: ts.emptyOptions,
             host: notImplementedHost,
-            formatContext: ts.formatting.getFormatContext(ts.testFormatSettings, notImplementedHost)
+            formatContext: getFormatContext(ts.testFormatSettings, notImplementedHost)
         };
 
         const diagnostics = languageService.getSuggestionDiagnostics(f.path);
@@ -374,7 +369,7 @@ function testConvertToAsyncFunction(it: Mocha.PendingTestFunction, caption: stri
             assert.lengthOf(changes, 1);
 
             data.push(`// ==ASYNC FUNCTION::${action.description}==`);
-            const newText = ts.textChanges.applyChanges(sourceFile.text, changes[0].textChanges);
+            const newText = applyChanges(sourceFile.text, changes[0].textChanges);
             data.push(newText);
 
             const diagProgram = makeLanguageService({ path, content: newText }, includeLib, includeModule).getProgram()!;

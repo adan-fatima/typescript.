@@ -1,154 +1,146 @@
+import { readJson } from "../compiler/commandLineParserUtilities";
 import {
-    addToSeen,
-    altDirectorySeparator,
     arrayFrom,
-    CallLikeExpression,
-    CancellationToken,
-    CaseClause,
-    changeExtension,
-    CharacterCodes,
-    combinePaths,
-    comparePaths,
-    comparePatternKeys,
     compareStringsCaseSensitive,
     compareValues,
-    Comparison,
-    CompilerOptions,
-    CompletionEntry,
-    CompletionEntryDetails,
-    CompletionInfo,
     contains,
-    containsPath,
-    ContextFlags,
     createSortedArray,
-    createTextSpan,
-    createTextSpanFromStringLiteralLikeContent,
-    Debug,
     deduplicate,
-    directorySeparator,
-    ElementAccessExpression,
     emptyArray,
     endsWith,
-    ensureTrailingDirectorySeparator,
     equateStringsCaseSensitive,
-    Extension,
-    fileExtensionIsOneOf,
     filter,
     find,
-    findAncestor,
-    findPackageJson,
-    findPackageJsons,
     firstDefined,
     firstOrUndefined,
     flatMap,
     flatten,
-    forEachAncestorDirectory,
-    getBaseFileName,
-    getContextualTypeFromParent,
-    getDirectoryPath,
-    getEffectiveTypeRoots,
-    getEmitModuleResolutionKind,
-    getLeadingCommentRanges,
-    getModeForUsageLocation,
-    getModuleSpecifierEndingPreference,
     getOwnKeys,
-    getPackageJsonTypesVersionsPaths,
-    getPathComponents,
-    getPathsBasePath,
-    getReplacementSpanForContextToken,
-    getResolvePackageJsonExports,
+    hasProperty,
+    isArray,
+    isPatternMatch,
+    isString,
+    length,
+    mapDefined,
+    removePrefix,
+    singleElementArray,
+    startsWith,
+    stringContains,
+    tryRemovePrefix,
+} from "../compiler/core";
+import {
+    Comparison,
+    MapLike,
+} from "../compiler/corePublic";
+import * as Debug from "../compiler/debug";
+import {
+    changeExtension,
     getSupportedExtensions,
     getSupportedExtensionsWithJsonIfResolveJsonModule,
-    getTextOfJsxAttributeName,
-    getTokenAtPosition,
-    hasIndexSignature,
-    hasProperty,
-    hasTrailingDirectorySeparator,
-    hostGetCanonicalFileName,
-    IndexedAccessTypeNode,
-    isApplicableVersionedTypesKey,
-    isArray,
+    removeFileExtension,
+    supportedTSImplementationExtensions,
+    tryGetExtensionFromPath,
+} from "../compiler/extension";
+import {
     isCallExpression,
     isIdentifier,
-    isIdentifierText,
-    isImportCall,
-    isInReferenceComment,
-    isInString,
     isJsxAttribute,
-    isJsxOpeningLikeElement,
     isLiteralTypeNode,
     isObjectLiteralExpression,
-    isPatternMatch,
-    isPrivateIdentifierClassElementDeclaration,
-    isRootedDiskPath,
-    isString,
     isStringLiteral,
-    isStringLiteralLike,
+} from "../compiler/factory/nodeTests";
+import {
+    comparePatternKeys,
+    getEffectiveTypeRoots,
+    getPackageJsonTypesVersionsPaths,
+    isApplicableVersionedTypesKey,
+    unmangleScopedPackageName,
+} from "../compiler/moduleNameResolver";
+import { tryGetJSExtensionForFile, tryGetRealFileNameForNonJsDeclarationFileName } from "../compiler/moduleSpecifiers";
+import { getModuleSpecifierEndingPreference } from "../compiler/moduleSpecifiersUtilities";
+import {
+    altDirectorySeparator,
+    combinePaths,
+    comparePaths,
+    containsPath,
+    directorySeparator,
+    ensureTrailingDirectorySeparator,
+    fileExtensionIsOneOf,
+    forEachAncestorDirectory,
+    getBaseFileName,
+    getDirectoryPath,
+    getPathComponents,
+    hasTrailingDirectorySeparator,
+    isRootedDiskPath,
     isUrl,
-    JsxAttribute,
-    LanguageServiceHost,
-    length,
-    LiteralExpression,
-    LiteralTypeNode,
-    mapDefined,
-    MapLike,
-    ModuleKind,
-    moduleResolutionUsesNodeModules,
-    ModuleSpecifierEnding,
-    moduleSpecifiers,
-    newCaseClauseTracker,
-    Node,
     normalizePath,
     normalizeSlashes,
+    removeTrailingDirectorySeparator,
+    resolvePath,
+} from "../compiler/path";
+import { getModeForUsageLocation } from "../compiler/program";
+import {
+    getLeadingCommentRanges,
+    isIdentifierText,
+} from "../compiler/scanner";
+import {
+    CallLikeExpression,
+    CancellationToken,
+    CaseClause,
+    CharacterCodes,
+    CompilerOptions,
+    ContextFlags,
+    ElementAccessExpression,
+    Extension,
+    IndexedAccessTypeNode,
+    JsxAttribute,
+    LiteralExpression,
+    LiteralTypeNode,
+    ModuleKind,
+    Node,
     ObjectLiteralExpression,
     Path,
     Program,
     PropertyAssignment,
-    rangeContainsPosition,
-    readJson,
-    removeFileExtension,
-    removePrefix,
-    removeTrailingDirectorySeparator,
     ResolutionMode,
-    resolvePath,
-    ScriptElementKind,
-    ScriptElementKindModifier,
     ScriptTarget,
     Signature,
-    signatureHasRestParameter,
-    SignatureHelp,
-    singleElementArray,
-    skipConstraint,
-    skipParentheses,
     SourceFile,
-    startsWith,
-    stringContains,
     StringLiteralLike,
     StringLiteralType,
-    stripQuotes,
-    supportedTSImplementationExtensions,
     Symbol,
     SyntaxKind,
-    textPart,
     TextSpan,
-    tryAndIgnoreErrors,
-    tryDirectoryExists,
-    tryFileExists,
-    tryGetDirectories,
-    tryGetExtensionFromPath,
-    tryParsePattern,
-    tryReadDirectory,
-    tryRemoveDirectoryPrefix,
-    tryRemovePrefix,
     Type,
     TypeChecker,
     TypeFlags,
     UnionTypeNode,
-    unmangleScopedPackageName,
     UserPreferences,
+} from "../compiler/types";
+import {
+    addToSeen,
+    getEmitModuleResolutionKind,
+    getPathsBasePath,
+    getResolvePackageJsonExports,
+    getTextOfJsxAttributeName,
+    hostGetCanonicalFileName,
+    isImportCall,
+    ModuleSpecifierEnding,
+    signatureHasRestParameter,
+    skipParentheses,
+    stripQuotes,
+    tryParsePattern,
+    tryRemoveDirectoryPrefix,
     walkUpParenthesizedExpressions,
     walkUpParenthesizedTypes,
-} from "./_namespaces/ts";
+} from "../compiler/utilities";
+import {
+    createTextSpan,
+    findAncestor,
+    isJsxOpeningLikeElement,
+    isPrivateIdentifierClassElementDeclaration,
+    isStringLiteralLike,
+} from "../compiler/utilitiesPublic";
 import {
     CompletionKind,
     createCompletionDetails,
@@ -157,7 +149,40 @@ import {
     getPropertiesForObjectExpression,
     Log,
     SortText,
-} from "./_namespaces/ts.Completions";
+} from "./completions";
+import {
+    ArgumentInfoForCompletions,
+    getArgumentInfoForCompletions,
+} from "./signatureHelp";
+import {
+    CompletionEntry,
+    CompletionEntryDetails,
+    CompletionInfo,
+    LanguageServiceHost,
+    ScriptElementKind,
+    ScriptElementKindModifier,
+} from "./types";
+import {
+    createTextSpanFromStringLiteralLikeContent,
+    findPackageJson,
+    findPackageJsons,
+    getContextualTypeFromParent,
+    getReplacementSpanForContextToken,
+    getTokenAtPosition,
+    hasIndexSignature,
+    isInReferenceComment,
+    isInString,
+    moduleResolutionUsesNodeModules,
+    newCaseClauseTracker,
+    rangeContainsPosition,
+    skipConstraint,
+    textPart,
+    tryAndIgnoreErrors,
+    tryDirectoryExists,
+    tryFileExists,
+    tryGetDirectories,
+    tryReadDirectory,
+} from "./utilities";
 
 interface NameAndKindSet {
     add(value: NameAndKind): void;
@@ -383,7 +408,7 @@ function getStringLiteralCompletionEntries(sourceFile: SourceFile, node: StringL
         case SyntaxKind.NewExpression:
         case SyntaxKind.JsxAttribute:
             if (!isRequireCallArgument(node) && !isImportCall(parent)) {
-                const argumentInfo = SignatureHelp.getArgumentInfoForCompletions(parent.kind === SyntaxKind.JsxAttribute ? parent.parent : node, position, sourceFile);
+                const argumentInfo = getArgumentInfoForCompletions(parent.kind === SyntaxKind.JsxAttribute ? parent.parent : node, position, sourceFile);
                 // Get string literal completions from specialized signatures of the target
                 // i.e. declare function f(a: 'A');
                 // f("/*completion position*/")
@@ -478,7 +503,7 @@ function getAlreadyUsedTypesInStringLiteralUnion(union: UnionTypeNode, current: 
         type !== current && isLiteralTypeNode(type) && isStringLiteral(type.literal) ? type.literal.text : undefined);
 }
 
-function getStringLiteralCompletionsFromSignature(call: CallLikeExpression, arg: StringLiteralLike, argumentInfo: SignatureHelp.ArgumentInfoForCompletions, checker: TypeChecker): StringLiteralCompletionsFromTypes | undefined {
+function getStringLiteralCompletionsFromSignature(call: CallLikeExpression, arg: StringLiteralLike, argumentInfo: ArgumentInfoForCompletions, checker: TypeChecker): StringLiteralCompletionsFromTypes | undefined {
     let isNewIdentifier = false;
     const uniques = new Map<string, true>();
     const candidates: Signature[] = [];
@@ -737,7 +762,7 @@ function getCompletionEntriesForDirectoryFragment(
 }
 
 function getFilenameWithExtensionOption(name: string, compilerOptions: CompilerOptions, extensionOptions: ExtensionOptions): { name: string, extension: Extension | undefined } {
-    const nonJsResult = moduleSpecifiers.tryGetRealFileNameForNonJsDeclarationFileName(name);
+    const nonJsResult = tryGetRealFileNameForNonJsDeclarationFileName(name);
     if (nonJsResult) {
         return { name: nonJsResult, extension: tryGetExtensionFromPath(nonJsResult) };
     }
@@ -750,7 +775,7 @@ function getFilenameWithExtensionOption(name: string, compilerOptions: CompilerO
         if (fileExtensionIsOneOf(name, supportedTSImplementationExtensions)) {
             return { name, extension: tryGetExtensionFromPath(name) };
         }
-        const outputExtension = moduleSpecifiers.tryGetJSExtensionForFile(name, compilerOptions);
+        const outputExtension = tryGetJSExtensionForFile(name, compilerOptions);
         return outputExtension
             ? { name: changeExtension(name, outputExtension), extension: outputExtension }
             : { name, extension: tryGetExtensionFromPath(name) };
@@ -762,7 +787,7 @@ function getFilenameWithExtensionOption(name: string, compilerOptions: CompilerO
         return { name: removeFileExtension(name), extension: tryGetExtensionFromPath(name) };
     }
 
-    const outputExtension = moduleSpecifiers.tryGetJSExtensionForFile(name, compilerOptions);
+    const outputExtension = tryGetJSExtensionForFile(name, compilerOptions);
     return outputExtension
         ? { name: changeExtension(name, outputExtension), extension: outputExtension }
         : { name, extension: tryGetExtensionFromPath(name) };

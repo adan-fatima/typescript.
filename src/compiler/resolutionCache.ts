@@ -1,83 +1,99 @@
 import {
     arrayToMap,
-    CachedDirectoryStructureHost,
-    clearMap,
-    closeFileWatcher,
-    closeFileWatcherOf,
-    CompilerOptions,
-    createModeAwareCache,
-    createModuleResolutionCache,
     createMultiMap,
-    createTypeReferenceDirectiveResolutionCache,
-    createTypeReferenceResolutionLoader,
-    Debug,
-    Diagnostics,
-    directorySeparator,
-    DirectoryWatcherCallback,
     emptyArray,
     endsWith,
-    Extension,
+    firstDefinedIterator,
+    GetCanonicalFileName,
+    memoize,
+    removeSuffix,
+    returnTrue,
+    some,
+    startsWith,
+    stringContains,
+} from "./core";
+import * as Debug from "./debug";
+import { Diagnostics } from "./diagnosticInformationMap.generated";
+import {
     extensionIsTS,
+    resolutionExtensionIsTSOrJson,
+} from "./extension";
+import {
+    createModeAwareCache,
+    createModuleResolutionCache,
+    createTypeReferenceDirectiveResolutionCache,
+    getEffectiveTypeRoots,
+    getOptionsForLibraryResolution,
+    isTraceEnabled,
+    loadModuleFromGlobalCache,
+    ModeAwareCache,
+    ModuleResolutionCache,
+    parseNodeModuleFromPath,
+    resolveLibrary as ts_resolveLibrary,
+    resolveModuleName,
+    trace,
+    updateResolutionField,
+} from "./moduleNameResolver";
+import {
+    directorySeparator,
     fileExtensionIs,
+    getDirectoryPath,
+    getNormalizedAbsolutePath,
+    getPathComponents,
+    getPathFromPathComponents,
+    hasTrailingDirectorySeparator,
+    isDiskPathRoot,
+    isNodeModulesDirectory,
+    isRootedDiskPath,
+    normalizePath,
+    PathPathComponents,
+    removeTrailingDirectorySeparator,
+} from "./path";
+import {
+    createTypeReferenceResolutionLoader,
+    getInferredLibraryNameResolveFrom,
+    inferredTypesContainingFile,
+    moduleResolutionNameAndModeGetter,
+    ResolutionLoader,
+} from "./program";
+import { ignoredPaths } from "./sysUtilities";
+import {
+    CompilerOptions,
+    DirectoryWatcherCallback,
+    Extension,
     FileReference,
     FileWatcher,
     FileWatcherCallback,
-    firstDefinedIterator,
-    GetCanonicalFileName,
-    getDirectoryPath,
-    getEffectiveTypeRoots,
-    getInferredLibraryNameResolveFrom,
-    getNormalizedAbsolutePath,
-    getOptionsForLibraryResolution,
-    getPathComponents,
-    getPathFromPathComponents,
     HasInvalidatedLibResolutions,
     HasInvalidatedResolutions,
-    hasTrailingDirectorySeparator,
-    ignoredPaths,
-    inferredTypesContainingFile,
-    isDiskPathRoot,
-    isEmittedFileOfProgram,
-    isExternalModuleNameRelative,
-    isExternalOrCommonJsModule,
-    isNodeModulesDirectory,
-    isRootedDiskPath,
-    isTraceEnabled,
-    loadModuleFromGlobalCache,
-    memoize,
     MinimalResolutionCacheHost,
-    ModeAwareCache,
-    ModuleResolutionCache,
-    moduleResolutionNameAndModeGetter,
-    mutateMap,
-    noopFileWatcher,
-    normalizePath,
     PackageId,
-    packageIdToString,
-    parseNodeModuleFromPath,
     Path,
-    PathPathComponents,
     Program,
-    removeSuffix,
-    removeTrailingDirectorySeparator,
-    resolutionExtensionIsTSOrJson,
-    ResolutionLoader,
     ResolutionMode,
     ResolvedModuleWithFailedLookupLocations,
     ResolvedProjectReference,
     ResolvedTypeReferenceDirectiveWithFailedLookupLocations,
-    resolveLibrary as ts_resolveLibrary,
-    resolveModuleName as ts_resolveModuleName,
-    returnTrue,
-    some,
     SourceFile,
-    startsWith,
-    stringContains,
     StringLiteralLike,
-    trace,
-    updateResolutionField,
     WatchDirectoryFlags,
-} from "./_namespaces/ts";
+} from "./types";
+import {
+    clearMap,
+    closeFileWatcher,
+    isExternalOrCommonJsModule,
+    mutateMap,
+    packageIdToString,
+} from "./utilities";
+import {
+    isExternalModuleNameRelative,
+} from "./utilitiesPublic";
+import { noopFileWatcher } from "./watch";
+import {
+    CachedDirectoryStructureHost,
+    closeFileWatcherOf,
+    isEmittedFileOfProgram,
+} from "./watchUtilities";
 
 /** @internal */
 export interface HasInvalidatedFromResolutionCache {
@@ -644,9 +660,9 @@ export function createResolutionCache(resolutionHost: ResolutionCacheHost, rootD
         hasChangedAutomaticTypeDirectiveNames = false;
     }
 
-    function resolveModuleName(moduleName: string, containingFile: string, compilerOptions: CompilerOptions, redirectedReference?: ResolvedProjectReference, mode?: ResolutionMode): CachedResolvedModuleWithFailedLookupLocations {
+    function resolveModuleNameWorker(moduleName: string, containingFile: string, compilerOptions: CompilerOptions, redirectedReference?: ResolvedProjectReference, mode?: ResolutionMode): CachedResolvedModuleWithFailedLookupLocations {
         const host = resolutionHost.getCompilerHost?.() || resolutionHost;
-        const primaryResult = ts_resolveModuleName(moduleName, containingFile, compilerOptions, host, moduleResolutionCache, redirectedReference, mode);
+        const primaryResult = resolveModuleName(moduleName, containingFile, compilerOptions, host, moduleResolutionCache, redirectedReference, mode);
         // return result immediately only if global cache support is not enabled or if it is .ts, .tsx or .d.ts
         if (!resolutionHost.getGlobalCache) {
             return primaryResult;
@@ -686,7 +702,7 @@ export function createResolutionCache(resolutionHost: ResolutionCacheHost, rootD
     ): ResolutionLoader<StringLiteralLike, ResolvedModuleWithFailedLookupLocations, SourceFile> {
         return {
             nameAndMode: moduleResolutionNameAndModeGetter,
-            resolve: (moduleName, resoluionMode) => resolveModuleName(
+            resolve: (moduleName, resoluionMode) => resolveModuleNameWorker(
                 moduleName,
                 containingFile,
                 options,
@@ -918,7 +934,7 @@ export function createResolutionCache(resolutionHost: ResolutionCacheHost, rootD
         const resolutionsInFile = resolvedModuleNames.get(path);
         const resolution = resolutionsInFile?.get(moduleName, /*mode*/ undefined);
         if (resolution && !resolution.isInvalidated) return resolution;
-        return resolveModuleName(moduleName, containingFile, resolutionHost.getCompilationSettings());
+        return resolveModuleNameWorker(moduleName, containingFile, resolutionHost.getCompilationSettings());
     }
 
     function isNodeModulesAtTypesDirectory(dirPath: Path) {

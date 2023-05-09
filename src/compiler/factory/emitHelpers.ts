@@ -1,142 +1,57 @@
 import {
+    arrayToMap,
+    compareValues,
+    memoize,
+} from "../core";
+import { Comparison } from "../corePublic";
+import * as Debug from "../debug";
+import {
     __String,
     ArrayLiteralExpression,
-    arrayToMap,
     BindingOrAssignmentElement,
     Block,
-    compareValues,
-    Comparison,
-    createExpressionFromEntityName,
-    Debug,
     EmitFlags,
     EmitHelper,
+    EmitHelperFactory,
     EmitHelperUniqueNameCallback,
     EmitNode,
     EntityName,
+    ESDecorateClassContext,
+    ESDecorateClassElementAccess,
+    ESDecorateClassElementContext,
+    ESDecorateContext,
+    ESDecorateName,
     Expression,
     FunctionExpression,
     GeneratedIdentifierFlags,
-    getEmitFlags,
-    getEmitScriptTarget,
-    getPropertyNameOfBindingOrAssignmentElement,
     Identifier,
     InternalEmitFlags,
-    isCallExpression,
-    isComputedPropertyName,
-    isIdentifier,
-    memoize,
     ObjectLiteralElementLike,
-    PrivateIdentifier,
+    PrivateIdentifierKind,
     ScriptTarget,
-    setEmitFlags,
-    setInternalEmitFlags,
-    setTextRange,
     SyntaxKind,
     TextRange,
     TransformationContext,
     UnscopedEmitHelper,
-} from "../_namespaces/ts";
-
-/** @internal */
-export const enum PrivateIdentifierKind {
-    Field = "f",
-    Method = "m",
-    Accessor = "a"
-}
-
-/**
- * Describes the decorator context object passed to a native ECMAScript decorator for a class.
- *
- * @internal
- */
-export interface ESDecorateClassContext {
-    /**
-     * The kind of the decorated element.
-     */
-    kind: "class";
-
-    /**
-     * The name of the decorated element.
-     */
-    name: Expression;
-}
-
-/**
- * Describes the decorator context object passed to a native ECMAScript decorator for a class element.
- *
- * @internal
- */
-export interface ESDecorateClassElementContext {
-    /**
-     * The kind of the decorated element.
-     */
-    kind: "method" | "getter" | "setter" | "accessor" | "field";
-    name: ESDecorateName;
-    static: boolean;
-    private: boolean;
-    access: ESDecorateClassElementAccess;
-}
-
-/** @internal */
-export interface ESDecorateClassElementAccess {
-    get?: boolean;
-    set?: boolean;
-}
-
-/** @internal */
-export type ESDecorateName =
-    | { computed: true, name: Expression }
-    | { computed: false, name: Identifier | PrivateIdentifier }
-    ;
-
-/** @internal */
-export type ESDecorateContext =
-    | ESDecorateClassContext
-    | ESDecorateClassElementContext
-    ;
-
-/** @internal */
-export interface EmitHelperFactory {
-    getUnscopedHelperName(name: string): Identifier;
-    // TypeScript Helpers
-    createDecorateHelper(decoratorExpressions: readonly Expression[], target: Expression, memberName?: Expression, descriptor?: Expression): Expression;
-    createMetadataHelper(metadataKey: string, metadataValue: Expression): Expression;
-    createParamHelper(expression: Expression, parameterOffset: number): Expression;
-    // ES Decorators Helpers
-    createESDecorateHelper(ctor: Expression, descriptorIn: Expression, decorators: Expression, contextIn: ESDecorateContext, initializers: Expression, extraInitializers: Expression): Expression;
-    createRunInitializersHelper(thisArg: Expression, initializers: Expression, value?: Expression): Expression;
-    // ES2018 Helpers
-    createAssignHelper(attributesSegments: readonly Expression[]): Expression;
-    createAwaitHelper(expression: Expression): Expression;
-    createAsyncGeneratorHelper(generatorFunc: FunctionExpression, hasLexicalThis: boolean): Expression;
-    createAsyncDelegatorHelper(expression: Expression): Expression;
-    createAsyncValuesHelper(expression: Expression): Expression;
-    // ES2018 Destructuring Helpers
-    createRestHelper(value: Expression, elements: readonly BindingOrAssignmentElement[], computedTempVariables: readonly Expression[] | undefined, location: TextRange): Expression;
-    // ES2017 Helpers
-    createAwaiterHelper(hasLexicalThis: boolean, hasLexicalArguments: boolean, promiseConstructor: EntityName | Expression | undefined, body: Block): Expression;
-    // ES2015 Helpers
-    createExtendsHelper(name: Identifier): Expression;
-    createTemplateObjectHelper(cooked: ArrayLiteralExpression, raw: ArrayLiteralExpression): Expression;
-    createSpreadArrayHelper(to: Expression, from: Expression, packFrom: boolean): Expression;
-    createPropKeyHelper(expr: Expression): Expression;
-    createSetFunctionNameHelper(f: Expression, name: Expression, prefix?: string): Expression;
-    // ES2015 Destructuring Helpers
-    createValuesHelper(expression: Expression): Expression;
-    createReadHelper(iteratorRecord: Expression, count: number | undefined): Expression;
-    // ES2015 Generator Helpers
-    createGeneratorHelper(body: FunctionExpression): Expression;
-    // ES Module Helpers
-    createCreateBindingHelper(module: Expression, inputName: Expression, outputName: Expression | undefined): Expression;
-    createImportStarHelper(expression: Expression): Expression;
-    createImportStarCallbackHelper(): Expression;
-    createImportDefaultHelper(expression: Expression): Expression;
-    createExportStarHelper(moduleExpression: Expression, exportsExpression?: Expression): Expression;
-    // Class Fields Helpers
-    createClassPrivateFieldGetHelper(receiver: Expression, state: Identifier, kind: PrivateIdentifierKind, f: Identifier | undefined): Expression;
-    createClassPrivateFieldSetHelper(receiver: Expression, state: Identifier, value: Expression, kind: PrivateIdentifierKind, f: Identifier | undefined): Expression;
-    createClassPrivateFieldInHelper(state: Identifier, receiver: Expression): Expression;
-}
+} from "../types";
+import {
+    getEmitFlags,
+    getEmitScriptTarget,
+} from "../utilities";
+import {
+    setEmitFlags,
+    setInternalEmitFlags,
+} from "./emitNode";
+import {
+    isCallExpression,
+    isComputedPropertyName,
+    isIdentifier,
+} from "./nodeTests";
+import {
+    createExpressionFromEntityName,
+    getPropertyNameOfBindingOrAssignmentElement,
+} from "./utilities";
+import { setTextRange } from "./utilitiesPublic";
 
 /** @internal */
 export function createEmitHelperFactory(context: TransformationContext): EmitHelperFactory {

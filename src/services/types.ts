@@ -1,22 +1,23 @@
+import { EmitOutput } from "../compiler/builderStatePublic";
+import { ModuleResolutionCache } from "../compiler/moduleNameResolver";
+import { SymlinkCache } from "../compiler/symlinkCache";
 import {
+    __String,
     CancellationToken,
     CompilerHost,
     CompilerOptions,
     CustomTransformers,
     Diagnostic,
     DiagnosticWithLocation,
-    DocumentHighlights,
     DocumentPositionMapper,
-    EmitOutput,
-    ExportInfoMap,
     FileReference,
     GetEffectiveTypeRootsHost,
     HasChangedAutomaticTypeDirectiveNames,
     HasInvalidatedResolutions,
     LineAndCharacter,
     MinimalResolutionCacheHost,
-    ModuleResolutionCache,
     ModuleSpecifierCache,
+    Node,
     ParsedCommandLine,
     Path,
     Program,
@@ -30,16 +31,19 @@ import {
     ScriptKind,
     SourceFile,
     SourceFileLike,
-    SourceMapper,
     StringLiteralLike,
     Symbol,
-    SymlinkCache,
+    SymbolFlags,
+    SyntaxKind,
     TextChangeRange,
-    textChanges,
     TextRange,
     TextSpan,
+    TriviaSyntaxKind,
+    TypeChecker,
     UserPreferences,
-} from "./_namespaces/ts";
+} from "../compiler/types";
+import { RulesMap } from "./formatting/rulesMap";
+import { SourceMapper } from "./sourcemaps";
 
 declare module "../compiler/types" {
     // Module transform: converted from interface augmentation
@@ -281,11 +285,6 @@ export interface ProjectPackageJsonInfo {
 }
 
 /** @internal */
-export interface FormattingHost {
-    getNewLine?(): string;
-}
-
-/** @internal */
 export const enum PackageJsonAutoImportPreference {
     Off,
     On,
@@ -427,6 +426,39 @@ export interface LanguageServiceHost extends GetEffectiveTypeRootsHost, MinimalR
     getParsedCommandLine?(fileName: string): ParsedCommandLine | undefined;
     /** @internal */ onReleaseParsedCommandLine?(configFileName: string, oldResolvedRef: ResolvedProjectReference | undefined, optionOptions: CompilerOptions): void;
     /** @internal */ getIncompleteCompletionsCache?(): IncompleteCompletionsCache;
+}
+
+/** @internal */
+export interface ExportInfoMap {
+    isUsableByFile(importingFile: Path): boolean;
+    clear(): void;
+    add(importingFile: Path, symbol: Symbol, key: __String, moduleSymbol: Symbol, moduleFile: SourceFile | undefined, exportKind: ExportKind, isFromPackageJson: boolean, checker: TypeChecker): void;
+    get(importingFile: Path, key: string): readonly SymbolExportInfo[] | undefined;
+    search<T>(importingFile: Path, preferCapitalized: boolean, matches: (name: string, targetFlags: SymbolFlags) => boolean, action: (info: readonly SymbolExportInfo[], symbolName: string, isFromAmbientModule: boolean, key: string) => T | undefined): T | undefined;
+    releaseSymbols(): void;
+    isEmpty(): boolean;
+    /** @returns Whether the change resulted in the cache being cleared */
+    onFileChanged(oldSourceFile: SourceFile, newSourceFile: SourceFile, typeAcquisitionEnabled: boolean): boolean;
+}
+
+/** @internal */
+export const enum ExportKind {
+    Named,
+    Default,
+    ExportEquals,
+    UMD,
+}
+
+/** @internal */
+export interface SymbolExportInfo {
+    readonly symbol: Symbol;
+    readonly moduleSymbol: Symbol;
+    /** Set if `moduleSymbol` is an external module, not an ambient module */
+    moduleFileName: string | undefined;
+    exportKind: ExportKind;
+    targetFlags: SymbolFlags;
+    /** True if export was only found via the package.json AutoImportProvider (for telemetry). */
+    isFromPackageJson: boolean;
 }
 
 /** @internal */
@@ -1061,6 +1093,11 @@ export interface HighlightSpan {
     kind: HighlightSpanKind;
 }
 
+export interface DocumentHighlights {
+    fileName: string;
+    highlightSpans: HighlightSpan[];
+}
+
 export interface NavigateToItem {
     name: string;
     kind: ScriptElementKind;
@@ -1148,6 +1185,12 @@ export interface FormatCodeSettings extends EditorSettings {
     readonly semicolons?: SemicolonPreference;
     readonly indentSwitchCase?: boolean;
 }
+
+/** @internal */
+export interface FormattingHost {
+    getNewLine?(): string;
+}
+
 
 export function getDefaultFormatCodeSettings(newLineCharacter?: string): FormatCodeSettings {
     return {
@@ -1765,10 +1808,24 @@ export interface CodeFixRegistration {
 }
 
 /** @internal */
-export interface CodeFixContextBase extends textChanges.TextChangesContext {
+export interface CodeFixContextBase extends TextChangesContext {
     sourceFile: SourceFile;
     program: Program;
     cancellationToken: CancellationToken;
+    preferences: UserPreferences;
+}
+
+/** @internal */
+export interface FormatContext {
+    readonly options: FormatCodeSettings;
+    readonly host: FormattingHost;
+    readonly getRules: RulesMap;
+}
+
+/** @internal */
+export interface TextChangesContext {
+    host: LanguageServiceHost;
+    formatContext: FormatContext;
     preferences: UserPreferences;
 }
 
@@ -1797,7 +1854,7 @@ export interface Refactor {
 }
 
 /** @internal */
-export interface RefactorContext extends textChanges.TextChangesContext {
+export interface RefactorContext extends TextChangesContext {
     file: SourceFile;
     startPosition: number;
     endPosition?: number;
@@ -1815,4 +1872,63 @@ export interface InlayHintsContext {
     host: LanguageServiceHost;
     span: TextSpan;
     preferences: UserPreferences;
+}
+
+/**
+ * Returned by refactor functions when some error message needs to be surfaced to users.
+ * @internal
+ */
+export interface RefactorErrorInfo {
+    error: string;
+}
+
+/** @internal */
+export interface ContextWithStartAndEndNode {
+    start: Node;
+    end: Node;
+}
+
+/** @internal */
+export type ContextNode = Node | ContextWithStartAndEndNode;
+
+/** @internal */
+export type Entry = NodeEntry | SpanEntry;
+
+/** @internal */
+export interface NodeEntry {
+    readonly kind: NodeEntryKind;
+    readonly node: Node;
+    readonly context?: ContextNode;
+}
+
+/** @internal */
+export interface SpanEntry {
+    readonly kind: EntryKind.Span;
+    readonly fileName: string;
+    readonly textSpan: TextSpan;
+}
+
+/** @internal */
+export const enum EntryKind { Span, Node, StringLiteral, SearchedLocalFoundProperty, SearchedPropertyFoundLocal }
+
+/** @internal */
+export type NodeEntryKind =
+    | EntryKind.Node
+    | EntryKind.StringLiteral
+    | EntryKind.SearchedLocalFoundProperty
+    | EntryKind.SearchedPropertyFoundLocal;
+
+/** @internal */
+export interface TextRangeWithKind<T extends SyntaxKind = SyntaxKind> extends TextRange {
+    kind: T;
+}
+
+/** @internal */
+export type TextRangeWithTriviaKind = TextRangeWithKind<TriviaSyntaxKind>;
+
+/** @internal */
+export interface TokenInfo {
+    leadingTrivia: TextRangeWithTriviaKind[] | undefined;
+    token: TextRangeWithKind;
+    trailingTrivia: TextRangeWithTriviaKind[] | undefined;
 }

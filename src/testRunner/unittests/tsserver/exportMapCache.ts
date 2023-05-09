@@ -1,3 +1,4 @@
+import { getSymbolId } from "../../../compiler/utilities";
 import * as ts from "../../_namespaces/ts";
 import {
     baselineTsserverLogs,
@@ -108,7 +109,7 @@ describe("unittests:: tsserver:: exportMapCache", () => {
         });
         assert.ok(sigintPropBefore);
         assert.ok(sigintPropBefore![0].symbol.flags & ts.SymbolFlags.Transient);
-        const symbolIdBefore = ts.getSymbolId(sigintPropBefore![0].symbol);
+        const symbolIdBefore = getSymbolId(sigintPropBefore![0].symbol);
 
         // Update program without clearing cache
         session.executeCommandSeq<ts.server.protocol.UpdateOpenRequest>({
@@ -133,7 +134,7 @@ describe("unittests:: tsserver:: exportMapCache", () => {
             if (symbolName === "SIGINT") sigintPropAfter = info;
         });
         assert.ok(sigintPropAfter);
-        assert.notEqual(symbolIdBefore, ts.getSymbolId(sigintPropAfter![0].symbol));
+        assert.notEqual(symbolIdBefore, getSymbolId(sigintPropAfter![0].symbol));
         baselineTsserverLogs("exportMapCache", "does not store transient symbols through program updates", session);
     });
 

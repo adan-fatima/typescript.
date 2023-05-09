@@ -1,32 +1,41 @@
 import {
-    base64decode,
-    computeLineAndCharacterOfPosition,
-    createDocumentPositionMapper,
     createGetCanonicalFileName,
+    isString,
+} from "../compiler/core";
+import { getDeclarationEmitOutputFilePathWorker } from "../compiler/emitterUtilities";
+import { removeFileExtension } from "../compiler/extension";
+import { isDeclarationFileName } from "../compiler/parser";
+import {
+    getDirectoryPath,
+    getNormalizedAbsolutePath,
+    toPath,
+} from "../compiler/path";
+import {
+    computeLineAndCharacterOfPosition,
+    getLineStarts,
+} from "../compiler/scanner";
+import {
+    createDocumentPositionMapper,
+    getLineInfo,
+    identitySourceMapConsumer,
+    LineInfo,
+    tryGetSourceMappingURL,
+    tryParseRawSourceMap,
+} from "../compiler/sourcemap";
+import { sys } from "../compiler/sys";
+import {
     DocumentPosition,
     DocumentPositionMapper,
     DocumentPositionMapperHost,
     Extension,
-    getDeclarationEmitOutputFilePathWorker,
-    getDirectoryPath,
-    getDocumentPositionMapper as ts_getDocumentPositionMapper,
-    getLineInfo,
-    getLineStarts,
-    getNormalizedAbsolutePath,
-    identitySourceMapConsumer,
-    isDeclarationFileName,
-    isString,
     LineAndCharacter,
-    LineInfo,
-    outFile,
     Program,
-    removeFileExtension,
     SourceFileLike,
-    sys,
-    toPath as ts_toPath,
-    tryGetSourceMappingURL,
-    tryParseRawSourceMap,
-} from "./_namespaces/ts";
+} from "../compiler/types";
+import {
+    base64decode,
+    outFile,
+} from "../compiler/utilities";
 
 const base64UrlRegExp = /^data:(?:application\/json(?:;charset=[uU][tT][fF]-8);base64,([A-Za-z0-9+\/=]+)$)?/;
 
@@ -58,12 +67,12 @@ export function getSourceMapper(host: SourceMapperHost): SourceMapper {
     const documentPositionMappers = new Map<string, DocumentPositionMapper>();
     return { tryGetSourcePosition, tryGetGeneratedPosition, toLineColumnOffset, clearCache };
 
-    function toPath(fileName: string) {
-        return ts_toPath(fileName, currentDirectory, getCanonicalFileName);
+    function toPathWorker(fileName: string) {
+        return toPath(fileName, currentDirectory, getCanonicalFileName);
     }
 
-    function getDocumentPositionMapper(generatedFileName: string, sourceFileName?: string) {
-        const path = toPath(generatedFileName);
+    function getDocumentPositionMapperWorker(generatedFileName: string, sourceFileName?: string) {
+        const path = toPathWorker(generatedFileName);
         const value = documentPositionMappers.get(path);
         if (value) return value;
 
@@ -73,7 +82,7 @@ export function getSourceMapper(host: SourceMapperHost): SourceMapper {
         }
         else if (host.readFile) {
             const file = getSourceFileLike(generatedFileName);
-            mapper = file && ts_getDocumentPositionMapper(
+            mapper = file && getDocumentPositionMapper(
                 { getSourceFileLike, getCanonicalFileName, log: s => host.log(s) },
                 generatedFileName,
                 getLineInfo(file.text, getLineStarts(file)),
@@ -90,7 +99,7 @@ export function getSourceMapper(host: SourceMapperHost): SourceMapper {
         const file = getSourceFile(info.fileName);
         if (!file) return undefined;
 
-        const newLoc = getDocumentPositionMapper(info.fileName).getSourcePosition(info);
+        const newLoc = getDocumentPositionMapperWorker(info.fileName).getSourcePosition(info);
         return !newLoc || newLoc === info ? undefined : tryGetSourcePosition(newLoc) || newLoc;
     }
 
@@ -114,7 +123,7 @@ export function getSourceMapper(host: SourceMapperHost): SourceMapper {
             getDeclarationEmitOutputFilePathWorker(info.fileName, program.getCompilerOptions(), currentDirectory, program.getCommonSourceDirectory(), getCanonicalFileName);
         if (declarationPath === undefined) return undefined;
 
-        const newLoc = getDocumentPositionMapper(declarationPath, info.fileName).getGeneratedPosition(info);
+        const newLoc = getDocumentPositionMapperWorker(declarationPath, info.fileName).getGeneratedPosition(info);
         return newLoc === info ? undefined : newLoc;
     }
 
@@ -122,14 +131,14 @@ export function getSourceMapper(host: SourceMapperHost): SourceMapper {
         const program = host.getProgram();
         if (!program) return undefined;
 
-        const path = toPath(fileName);
+        const path = toPathWorker(fileName);
         // file returned here could be .d.ts when asked for .ts file if projectReferences and module resolution created this source file
         const file = program.getSourceFileByPath(path);
         return file && file.resolvedPath === path ? file : undefined;
     }
 
     function getOrCreateSourceFileLike(fileName: string): SourceFileLike | undefined {
-        const path = toPath(fileName);
+        const path = toPathWorker(fileName);
         const fileFromCache = sourceFileLike.get(path);
         if (fileFromCache !== undefined) return fileFromCache ? fileFromCache : undefined;
 

@@ -1,11 +1,13 @@
 import {
-    CompilerOptions,
-    JsTyping,
     MapLike,
-    Path,
     SortedReadonlyArray,
+} from "../compiler/corePublic";
+import {
+    CompilerOptions,
+    Path,
     TypeAcquisition,
-} from "./_namespaces/ts";
+} from "../compiler/types";
+import * as JsTyping from "./jsTyping";
 import {
     ActionInvalidate,
     ActionPackageInstalled,
@@ -15,7 +17,7 @@ import {
     EventEndInstallTypes,
     EventInitializationFailed,
     EventTypesRegistry,
-} from "./_namespaces/ts.server";
+} from "./shared";
 
 export interface TypingInstallerResponse {
     readonly kind: ActionSet | ActionInvalidate | EventTypesRegistry | ActionPackageInstalled | EventBeginInstallTypes | EventEndInstallTypes | EventInitializationFailed | ActionWatchTypingLocations;

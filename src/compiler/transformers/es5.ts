@@ -1,15 +1,15 @@
 import {
-    Bundle,
-    chainBundle,
-    EmitHint,
-    Expression,
-    getOriginalNodeId,
-    Identifier,
-    identifierToKeywordKind,
     isIdentifier,
     isPrivateIdentifier,
     isPropertyAccessExpression,
     isPropertyAssignment,
+} from "../factory/nodeTests";
+import { setTextRange } from "../factory/utilitiesPublic";
+import {
+    Bundle,
+    EmitHint,
+    Expression,
+    Identifier,
     JsxClosingElement,
     JsxEmit,
     JsxOpeningElement,
@@ -17,11 +17,15 @@ import {
     Node,
     PropertyAccessExpression,
     PropertyAssignment,
-    setTextRange,
     SourceFile,
     SyntaxKind,
     TransformationContext,
-} from "../_namespaces/ts";
+} from "../types";
+import { identifierToKeywordKind } from "../utilitiesPublic";
+import {
+    chainBundle,
+    getOriginalNodeId,
+} from "./utilities";
 
 /**
  * Transforms ES5 syntax into ES3 syntax.

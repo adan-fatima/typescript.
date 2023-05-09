@@ -1,32 +1,42 @@
 import {
-    CancellationToken,
     compareStringsCaseSensitiveUI,
     compareValues,
-    createPatternMatcher,
-    createTextSpanFromNode,
-    Declaration,
     emptyArray,
+} from "../compiler/core";
+import { isPropertyAccessExpression } from "../compiler/factory/nodeTests";
+import {
+    CancellationToken,
+    Declaration,
     Expression,
-    getContainerNode,
-    getNameOfDeclaration,
-    getNodeKind,
-    getNodeModifiers,
-    getTextOfIdentifierOrLiteral,
     Identifier,
     ImportClause,
     ImportEqualsDeclaration,
     ImportSpecifier,
-    isPropertyAccessExpression,
-    isPropertyNameLiteral,
-    NavigateToItem,
     Node,
-    PatternMatcher,
-    PatternMatchKind,
-    ScriptElementKind,
     SourceFile,
     SyntaxKind,
     TypeChecker,
-} from "./_namespaces/ts";
+} from "../compiler/types";
+import {
+    getTextOfIdentifierOrLiteral,
+    isPropertyNameLiteral,
+} from "../compiler/utilities";
+import { getNameOfDeclaration } from "../compiler/utilitiesPublic";
+import {
+    createPatternMatcher,
+    PatternMatcher,
+    PatternMatchKind,
+} from "./patternMatcher";
+import {
+    NavigateToItem,
+    ScriptElementKind,
+} from "./types";
+import {
+    createTextSpanFromNode,
+    getContainerNode,
+    getNodeKind,
+    getNodeModifiers,
+} from "./utilities";
 
 interface RawNavigateToItem {
     readonly name: string;

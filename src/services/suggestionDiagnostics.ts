@@ -1,65 +1,76 @@
 import {
     addRange,
-    AnyValidImportOrReExport,
-    ArrowFunction,
-    AssignmentDeclarationKind,
-    Block,
-    CallExpression,
-    CancellationToken,
-    codefix,
-    compilerOptionsIndicateEsModules,
-    createDiagnosticForNode,
-    Diagnostics,
-    DiagnosticWithLocation,
-    Expression,
-    ExpressionStatement,
-    Extension,
-    fileExtensionIsOneOf,
-    forEachReturnStatement,
-    FunctionDeclaration,
-    FunctionExpression,
-    FunctionFlags,
-    FunctionLikeDeclaration,
-    getAllowSyntheticDefaultImports,
-    getAssignmentDeclarationKind,
-    getFunctionFlags,
-    getModeForUsageLocation,
-    getResolvedModule,
-    hasInitializer,
-    hasPropertyAccessExpressionWithName,
-    Identifier,
-    importFromModuleSpecifier,
-    isAsyncFunction,
+    some,
+} from "../compiler/core";
+import { Diagnostics } from "../compiler/diagnosticInformationMap.generated";
+import {
     isBinaryExpression,
     isBlock,
     isCallExpression,
     isExportAssignment,
     isFunctionDeclaration,
     isFunctionExpression,
-    isFunctionLike,
     isIdentifier,
     isPropertyAccessExpression,
-    isRequireCall,
     isReturnStatement,
-    isSourceFileJS,
     isStringLiteral,
     isVariableDeclaration,
     isVariableStatement,
+} from "../compiler/factory/nodeTests";
+import { forEachReturnStatement } from "../compiler/parserUtilities";
+import { fileExtensionIsOneOf } from "../compiler/path";
+import { getModeForUsageLocation } from "../compiler/program";
+import {
+    AnyValidImportOrReExport,
+    ArrowFunction,
+    AssignmentDeclarationKind,
+    Block,
+    CallExpression,
+    CancellationToken,
+    DiagnosticWithLocation,
+    Expression,
+    ExpressionStatement,
+    Extension,
+    FunctionDeclaration,
+    FunctionExpression,
+    FunctionLikeDeclaration,
+    Identifier,
     MethodDeclaration,
     ModuleKind,
     Node,
     NodeFlags,
     Program,
-    programContainsEsModules,
     PropertyAccessExpression,
     ReturnStatement,
-    skipAlias,
-    some,
     SourceFile,
     SyntaxKind,
     TypeChecker,
     VariableStatement,
-} from "./_namespaces/ts";
+} from "../compiler/types";
+import {
+    createDiagnosticForNode,
+    FunctionFlags,
+    getAllowSyntheticDefaultImports,
+    getAssignmentDeclarationKind,
+    getFunctionFlags,
+    getResolvedModule,
+    importFromModuleSpecifier,
+    isAsyncFunction,
+    isRequireCall,
+    isSourceFileJS,
+    skipAlias,
+} from "../compiler/utilities";
+import {
+    hasInitializer,
+    isFunctionLike,
+} from "../compiler/utilitiesPublic";
+import {
+    compilerOptionsIndicateEsModules,
+    getJSDocTypedefNode,
+    hasPropertyAccessExpressionWithName,
+    parameterShouldGetTypeFromJSDoc,
+    programContainsEsModules,
+} from "./utilities";
 
 const visitedNestedConvertibleFunctions = new Map<string, true>();
 
@@ -116,12 +127,12 @@ export function computeSuggestionDiagnostics(sourceFile: SourceFile, program: Pr
                 }
             }
 
-            const jsdocTypedefNode = codefix.getJSDocTypedefNode(node);
+            const jsdocTypedefNode = getJSDocTypedefNode(node);
             if (jsdocTypedefNode) {
                 diags.push(createDiagnosticForNode(jsdocTypedefNode, Diagnostics.JSDoc_typedef_may_be_converted_to_TypeScript_type));
             }
 
-            if (codefix.parameterShouldGetTypeFromJSDoc(node)) {
+            if (parameterShouldGetTypeFromJSDoc(node)) {
                 diags.push(createDiagnosticForNode(node.name || node, Diagnostics.JSDoc_types_may_be_moved_to_TypeScript_types));
             }
         }

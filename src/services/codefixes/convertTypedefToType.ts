@@ -1,27 +1,35 @@
 import {
-    Diagnostics,
-    factory,
-    forEach,
-    getSynthesizedDeepClone,
-    getTokenAtPosition,
-    hasJSDocNodes,
-    InterfaceDeclaration,
+    mapDefined,
+    some,
+} from "../../compiler/core";
+import { Diagnostics } from "../../compiler/diagnosticInformationMap.generated";
+import { factory } from "../../compiler/factory/nodeFactory";
+import {
     isJSDocTypedefTag,
     isJSDocTypeLiteral,
+} from "../../compiler/factory/nodeTests";
+import {
+    InterfaceDeclaration,
     JSDocPropertyLikeTag,
     JSDocTypedefTag,
     JSDocTypeExpression,
     JSDocTypeLiteral,
-    mapDefined,
     Node,
     PropertySignature,
-    some,
     SourceFile,
     SyntaxKind,
-    textChanges,
     TypeAliasDeclaration,
-} from "../_namespaces/ts";
-import { codeFixAll, createCodeFixAction, registerCodeFix } from "../_namespaces/ts.codefix";
+} from "../../compiler/types";
+import {
+    codeFixAll,
+    createCodeFixAction,
+    registerCodeFix,
+} from "../codeFixProvider";
+import { ChangeTracker } from "../textChanges";
+import {
+    getSynthesizedDeepClone,
+    getTokenAtPosition,
+} from "../utilities";
 
 const fixId = "convertTypedefToType";
 const errorCodes = [Diagnostics.JSDoc_typedef_may_be_converted_to_TypeScript_type.code];
@@ -34,7 +42,7 @@ registerCodeFix({
             context.span.start
         );
         if (!node) return;
-        const changes = textChanges.ChangeTracker.with(context, t => doChange(t, node, context.sourceFile));
+        const changes = ChangeTracker.with(context, t => doChange(t, node, context.sourceFile));
 
         if (changes.length > 0) {
             return [
@@ -54,14 +62,14 @@ registerCodeFix({
     })
 });
 
-function doChange(changes: textChanges.ChangeTracker, node: Node, sourceFile: SourceFile) {
+function doChange(changes: ChangeTracker, node: Node, sourceFile: SourceFile) {
     if (isJSDocTypedefTag(node)) {
         fixSingleTypeDef(changes, node, sourceFile);
     }
 }
 
 function fixSingleTypeDef(
-    changes: textChanges.ChangeTracker,
+    changes: ChangeTracker,
     typeDefNode: JSDocTypedefTag | undefined,
     sourceFile: SourceFile,
 ) {
@@ -167,12 +175,4 @@ function createSignatureFromTypeLiteral(typeLiteral: JSDocTypeLiteral): Property
 
 function getPropertyName(tag: JSDocPropertyLikeTag): string | undefined {
     return tag.name.kind === SyntaxKind.Identifier ? tag.name.text : tag.name.right.text;
-}
-
-/** @internal */
-export function getJSDocTypedefNode(node: Node): JSDocTypedefTag | undefined {
-    if (hasJSDocNodes(node)) {
-        return forEach(node.jsDoc, (node) => node.tags?.find(isJSDocTypedefTag));
-    }
-    return undefined;
 }
