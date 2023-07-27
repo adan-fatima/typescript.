@@ -58,10 +58,10 @@ Output::
 
 [[90m12:00:27 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m  [91mError[0m TS6306
+| {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -141,10 +141,10 @@ Output::
 
 [[90m12:00:31 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m  [91mError[0m TS6306
+| {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -189,10 +189,10 @@ Output::
 
 [[90m12:00:41 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m  [91mError[0m TS6306
+| {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -262,10 +262,10 @@ Output::
 
 [[90m12:00:54 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m  [91mError[0m TS6306
+| {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -366,10 +366,10 @@ Output::
 
 [[90m12:00:58 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m  [91mError[0m TS6306
+| {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -409,10 +409,10 @@ Output::
 
 [[90m12:01:02 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m  [91mError[0m TS6306
+| {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -457,10 +457,10 @@ Output::
 
 [[90m12:01:16 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m82[0m  [91mError[0m TS6306
+| {"compilerOptions":{"declaration":true,"emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                 ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.

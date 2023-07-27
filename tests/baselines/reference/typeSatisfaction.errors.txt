@@ -26,7 +26,7 @@ typeSatisfaction.ts(24,23): error TS1360: Type '{ a: string; b: string; }' does 
                    ~~~~~~~~~
 !!! error TS1360: Type '{}' does not satisfy the expected type 'I1'.
 !!! error TS1360:   Property 'a' is missing in type '{}' but required in type 'I1'.
-!!! related TS2728 typeSatisfaction.ts:2:5: 'a' is declared here.
+!!! related TS2728 typeSatisfaction.ts:2:5: 'a' is declared here:
     
     const t4: T1 = { a: "a" } satisfies T1; // Ok
     const t5 = (m => m.substring(0)) satisfies T2; // Ok

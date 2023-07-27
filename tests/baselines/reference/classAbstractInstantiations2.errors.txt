@@ -45,7 +45,7 @@ classAbstractInstantiations2.ts(50,5): error TS1244: Abstract methods can only a
     var x : any = C;
                   ~
 !!! error TS2449: Class 'C' used before its declaration.
-!!! related TS2728 classAbstractInstantiations2.ts:26:7: 'C' is declared here.
+!!! related TS2728 classAbstractInstantiations2.ts:26:7: 'C' is declared here:
     new x; // okay -- undefined behavior at runtime
     
     class C extends B { } // error -- not declared abstract

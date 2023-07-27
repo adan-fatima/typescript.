@@ -182,7 +182,7 @@ CompilerOptions::
 FileNames::
 c:/dev/main.ts,c:/dev/supplemental.ts,c:/dev/tests/utils.ts,c:/dev/tests/baselines/first/output.ts,c:/dev/tests/unit/spec.ts
 Errors::
-[91merror[0m[90m TS18000: [0mCircularity detected while resolving configuration: c:/dev/circular.json -> c:/dev/circular2.json -> c:/dev/circular.json
+[91m● [0m [91mError[0m TS18000Circularity detected while resolving configuration: c:/dev/circular.json -> c:/dev/circular2.json -> c:/dev/circular.json
 
 
 can report missing configurations
@@ -195,7 +195,7 @@ CompilerOptions::
 FileNames::
 c:/dev/main.ts,c:/dev/supplemental.ts,c:/dev/tests/utils.ts,c:/dev/tests/baselines/first/output.ts,c:/dev/tests/unit/spec.ts
 Errors::
-[91merror[0m[90m TS6053: [0mFile './missing2' not found.
+[91m● [0m [91mError[0m TS6053File './missing2' not found.
 
 
 can report errors in extended configs
@@ -208,10 +208,10 @@ CompilerOptions::
 FileNames::
 c:/dev/main.ts,c:/dev/supplemental.ts,c:/dev/tests/utils.ts,c:/dev/tests/baselines/first/output.ts,c:/dev/tests/unit/spec.ts
 Errors::
-[96mfailure2.json[0m:[93m1[0m:[93m2[0m - [91merror[0m[90m TS6114: [0mUnknown option 'excludes'. Did you mean 'exclude'?
-
-[7m1[0m {"excludes":["*.js"]}
-[7m [0m [91m ~~~~~~~~~~[0m
+[91m● [0m[96mfailure2.json[0m:[93m1[0m:[93m2[0m  [91mError[0m TS6114
+| {"excludes":["*.js"]}
+  [91m ▔▔▔▔▔▔▔▔▔▔[0m
+Unknown option 'excludes'. Did you mean 'exclude'?
 
 
 can error when 'extends' is not a string or Array
@@ -223,7 +223,7 @@ CompilerOptions::
 FileNames::
 c:/dev/main.ts,c:/dev/supplemental.ts,c:/dev/tests/utils.ts,c:/dev/tests/baselines/first/output.ts,c:/dev/tests/unit/spec.ts
 Errors::
-[91merror[0m[90m TS5024: [0mCompiler option 'extends' requires a value of type string or Array.
+[91m● [0m [91mError[0m TS5024Compiler option 'extends' requires a value of type string or Array.
 
 
 can error when 'extends' is given an empty string
@@ -235,7 +235,7 @@ CompilerOptions::
 FileNames::
 c:/dev/main.ts,c:/dev/supplemental.ts,c:/dev/tests/utils.ts,c:/dev/tests/baselines/first/output.ts,c:/dev/tests/unit/spec.ts
 Errors::
-[91merror[0m[90m TS18051: [0mCompiler option 'extends' cannot be given an empty string.
+[91m● [0m [91mError[0m TS18051Compiler option 'extends' cannot be given an empty string.
 
 
 can error when 'extends' is given an empty string in an array
@@ -247,7 +247,7 @@ CompilerOptions::
 FileNames::
 c:/dev/main.ts,c:/dev/supplemental.ts,c:/dev/tests/utils.ts,c:/dev/tests/baselines/first/output.ts,c:/dev/tests/unit/spec.ts
 Errors::
-[91merror[0m[90m TS18051: [0mCompiler option 'extends' cannot be given an empty string.
+[91m● [0m [91mError[0m TS18051Compiler option 'extends' cannot be given an empty string.
 
 
 can overwrite compiler options using extended 'null'
@@ -427,7 +427,7 @@ CompilerOptions::
 FileNames::
 c:/dev/main.ts,c:/dev/supplemental.ts,c:/dev/tests/utils.ts,c:/dev/tests/baselines/first/output.ts,c:/dev/tests/unit/spec.ts
 Errors::
-[91merror[0m[90m TS6053: [0mFile './missingFile' not found.
+[91m● [0m [91mError[0m TS6053File './missingFile' not found.
 
 
 can error when 'extends' is not a string or Array2
@@ -439,5 +439,5 @@ CompilerOptions::
 FileNames::
 c:/dev/main.ts,c:/dev/supplemental.ts,c:/dev/tests/utils.ts,c:/dev/tests/baselines/first/output.ts,c:/dev/tests/unit/spec.ts
 Errors::
-[91merror[0m[90m TS5024: [0mCompiler option 'extends' requires a value of type string.
+[91m● [0m [91mError[0m TS5024Compiler option 'extends' requires a value of type string.
 

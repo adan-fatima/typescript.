@@ -326,7 +326,7 @@ File '/home/src/projects/project/node_modules/foo2/package.json' exists accordin
 File '/home/src/projects/project/node_modules/@types/bar2/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -629,7 +629,7 @@ File '/home/src/projects/project/node_modules/foo2/package.json' exists accordin
 File '/home/src/projects/project/node_modules/@types/bar2/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -852,7 +852,7 @@ File '/home/src/projects/project/node_modules/foo2/package.json' exists accordin
 File '/home/src/projects/project/node_modules/@types/bar2/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -1064,7 +1064,7 @@ File '/home/src/projects/project/node_modules/foo2/package.json' exists accordin
 File '/home/src/projects/project/node_modules/@types/bar2/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -1263,7 +1263,7 @@ File '/home/src/projects/project/node_modules/foo2/package.json' exists accordin
 File '/home/src/projects/project/node_modules/@types/bar2/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -1434,7 +1434,7 @@ File '/home/src/projects/project/node_modules/foo2/package.json' exists accordin
 File '/home/src/projects/project/node_modules/@types/bar2/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -1675,7 +1675,7 @@ File '/home/src/projects/project/node_modules/foo2/package.json' exists accordin
 File '/home/src/projects/project/node_modules/@types/bar2/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -1964,7 +1964,7 @@ File '/home/src/projects/project/node_modules/@types/bar/package.json' exists ac
 File '/home/src/projects/project/node_modules/foo2/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -2269,7 +2269,7 @@ File '/home/src/projects/project/node_modules/foo/package.json' exists according
 File '/home/src/projects/project/node_modules/@types/bar/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -2561,7 +2561,7 @@ File '/home/src/projects/project/node_modules/foo/package.json' exists according
 File '/home/src/projects/project/node_modules/@types/bar/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -2784,7 +2784,7 @@ File '/home/src/projects/project/node_modules/foo/package.json' exists according
 File '/home/src/projects/project/node_modules/@types/bar/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -2996,7 +2996,7 @@ File '/home/src/projects/project/node_modules/foo/package.json' exists according
 File '/home/src/projects/project/node_modules/@types/bar/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.
@@ -3195,7 +3195,7 @@ File '/home/src/projects/project/node_modules/foo/package.json' exists according
 File '/home/src/projects/project/node_modules/@types/bar/package.json' exists according to earlier cached lookups.
 File '/lib/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 
 Found 1 error.

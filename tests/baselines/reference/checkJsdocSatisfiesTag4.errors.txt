@@ -11,7 +11,7 @@
                         ~~~~~~~~~
 !!! error TS1360: Type '{}' does not satisfy the expected type 'Foo'.
 !!! error TS1360:   Property 'a' is missing in type '{}' but required in type 'Foo'.
-!!! related TS2728 /a.js:3:4: 'a' is declared here.
+!!! related TS2728 /a.js:3:4: 'a' is declared here:
     
 ==== /b.js (0 errors) ====
     /**

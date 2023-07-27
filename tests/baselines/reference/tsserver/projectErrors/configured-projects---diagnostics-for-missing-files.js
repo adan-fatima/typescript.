@@ -113,7 +113,7 @@ Info seq  [hh:mm:ss:mss] response:
                 },
                 "file": "/a/b/tsconfig.json"
               },
-              "message": "File is matched by 'files' list specified here.",
+              "message": "File is matched by 'files' list specified here:",
               "category": "message",
               "code": 1410
             }

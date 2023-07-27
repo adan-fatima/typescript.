@@ -20,5 +20,5 @@ configFileName:: tsconfig.json
 FileNames::
 /apath/foge.ts,/apath/test.ts
 Errors::
-[91merror[0m[90m TS6114: [0mUnknown option 'excludes'. Did you mean 'exclude'?
+[91m● [0m [91mError[0m TS6114Unknown option 'excludes'. Did you mean 'exclude'?
 

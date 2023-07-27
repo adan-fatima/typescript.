@@ -73,7 +73,7 @@ for-inStatementsInvalid.ts(62,15): error TS2407: The right-hand side of a 'for..
             for (var x in this) { }
                      ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'string', but here has type 'Extract<keyof this, string>'.
-!!! related TS6203 for-inStatementsInvalid.ts:29:18: 'x' was also declared here.
+!!! related TS6203 for-inStatementsInvalid.ts:29:18: 'x' was also declared here:
             return null;
         }
     
@@ -97,7 +97,7 @@ for-inStatementsInvalid.ts(62,15): error TS2407: The right-hand side of a 'for..
             for (var x in this) { }
                      ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'string', but here has type 'Extract<keyof this, string>'.
-!!! related TS6203 for-inStatementsInvalid.ts:46:18: 'x' was also declared here.
+!!! related TS6203 for-inStatementsInvalid.ts:46:18: 'x' was also declared here:
     
             for (var x in super.biz) { }
             for (var x in super.biz()) { }

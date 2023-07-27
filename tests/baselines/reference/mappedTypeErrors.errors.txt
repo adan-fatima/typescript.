@@ -121,15 +121,15 @@ mappedTypeErrors.ts(152,17): error TS2339: Property 'foo' does not exist on type
         var x: { [P in keyof T]?: T[P] };  // Error
             ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type '{ [P in keyof T]: T[P]; }', but here has type '{ [P in keyof T]?: T[P] | undefined; }'.
-!!! related TS6203 mappedTypeErrors.ts:58:9: 'x' was also declared here.
+!!! related TS6203 mappedTypeErrors.ts:58:9: 'x' was also declared here:
         var x: { readonly [P in keyof T]: T[P] };  // Error
             ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type '{ [P in keyof T]: T[P]; }', but here has type '{ readonly [P in keyof T]: T[P]; }'.
-!!! related TS6203 mappedTypeErrors.ts:58:9: 'x' was also declared here.
+!!! related TS6203 mappedTypeErrors.ts:58:9: 'x' was also declared here:
         var x: { readonly [P in keyof T]?: T[P] };  // Error
             ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type '{ [P in keyof T]: T[P]; }', but here has type '{ readonly [P in keyof T]?: T[P] | undefined; }'.
-!!! related TS6203 mappedTypeErrors.ts:58:9: 'x' was also declared here.
+!!! related TS6203 mappedTypeErrors.ts:58:9: 'x' was also declared here:
     }
     
     function f12<T>() {
@@ -137,7 +137,7 @@ mappedTypeErrors.ts(152,17): error TS2339: Property 'foo' does not exist on type
         var x: { [P in keyof T]: T[P][] };  // Error
             ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type '{ [P in keyof T]: T[P]; }', but here has type '{ [P in keyof T]: T[P][]; }'.
-!!! related TS6203 mappedTypeErrors.ts:65:9: 'x' was also declared here.
+!!! related TS6203 mappedTypeErrors.ts:65:9: 'x' was also declared here:
     }
     
     // Check that inferences to mapped types are secondary
@@ -150,7 +150,7 @@ mappedTypeErrors.ts(152,17): error TS2339: Property 'foo' does not exist on type
                                                 ~~~~~~~~
 !!! error TS2345: Argument of type '{ x: number; }' is not assignable to parameter of type 'Readonly<{ x: number; y: number; }>'.
 !!! error TS2345:   Property 'y' is missing in type '{ x: number; }' but required in type 'Readonly<{ x: number; y: number; }>'.
-!!! related TS2728 mappedTypeErrors.ts:75:37: 'y' is declared here.
+!!! related TS2728 mappedTypeErrors.ts:75:37: 'y' is declared here:
         let x2 = objAndReadonly({ x: 0, y: 0 }, { x: 1, y: 1 });
         let x3 = objAndReadonly({ x: 0, y: 0 }, { x: 1, y: 1, z: 1 });  // Error
                                                               ~

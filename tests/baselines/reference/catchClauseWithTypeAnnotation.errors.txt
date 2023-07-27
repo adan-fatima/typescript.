@@ -53,7 +53,7 @@ catchClauseWithTypeAnnotation.ts(39,27): error TS1196: Catch clause variable typ
         try { } catch (x) { var x: string; }
                                 ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'x' must be of type 'boolean', but here has type 'string'.
-!!! related TS6203 catchClauseWithTypeAnnotation.ts:4:13: 'x' was also declared here.
+!!! related TS6203 catchClauseWithTypeAnnotation.ts:4:13: 'x' was also declared here:
         try { } catch (x) { var x: boolean; }
     
         try { } catch ({ x }) { } // should be OK

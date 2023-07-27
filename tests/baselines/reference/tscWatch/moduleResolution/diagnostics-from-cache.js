@@ -52,9 +52,9 @@ File '/user/username/projects/myproject/package.json' exists according to earlie
 File '/a/lib/package.json' does not exist.
 File '/a/package.json' does not exist.
 File '/package.json' does not exist.
-[91merror[0m[90m TS2209: [0mThe project root is ambiguous, but is required to resolve export map entry '.' in file '/user/username/projects/myproject/package.json'. Supply the `rootDir` compiler option to disambiguate.
+[91m● [0m [91mError[0m TS2209The project root is ambiguous, but is required to resolve export map entry '.' in file '/user/username/projects/myproject/package.json'. Supply the `rootDir` compiler option to disambiguate.
 
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'NodeNext' when option 'moduleResolution' is set to 'NodeNext'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'NodeNext' when option 'moduleResolution' is set to 'NodeNext'.
 
 [[90m12:00:40 AM[0m] Found 2 errors. Watching for file changes.
 
@@ -159,9 +159,9 @@ File '/user/username/projects/myproject/index.ts' exists - use it as a name reso
 File '/a/lib/package.json' does not exist according to earlier cached lookups.
 File '/a/package.json' does not exist according to earlier cached lookups.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS2209: [0mThe project root is ambiguous, but is required to resolve export map entry '.' in file '/user/username/projects/myproject/package.json'. Supply the `rootDir` compiler option to disambiguate.
+[91m● [0m [91mError[0m TS2209The project root is ambiguous, but is required to resolve export map entry '.' in file '/user/username/projects/myproject/package.json'. Supply the `rootDir` compiler option to disambiguate.
 
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'NodeNext' when option 'moduleResolution' is set to 'NodeNext'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'NodeNext' when option 'moduleResolution' is set to 'NodeNext'.
 
 [[90m12:00:50 AM[0m] Found 2 errors. Watching for file changes.
 

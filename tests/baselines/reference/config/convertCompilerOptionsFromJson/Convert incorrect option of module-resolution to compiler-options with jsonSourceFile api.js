@@ -23,8 +23,8 @@ CompilerOptions::
  "configFilePath": "tsconfig.json"
 }
 Errors::
-[96mtsconfig.json[0m:[93m3[0m:[93m23[0m - [91merror[0m[90m TS6046: [0mArgument for '--moduleResolution' option must be: 'node10', 'classic', 'node16', 'nodenext', 'bundler'.
-
-[7m3[0m   "moduleResolution": "",
-[7m [0m [91m                      ~~[0m
+[91m● [0m[96mtsconfig.json[0m:[93m3[0m:[93m23[0m  [91mError[0m TS6046
+| "moduleResolution": "",
+  [91m                    ▔▔[0m
+Argument for '--moduleResolution' option must be: 'node10', 'classic', 'node16', 'nodenext', 'bundler'.
 

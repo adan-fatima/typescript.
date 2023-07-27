@@ -217,10 +217,10 @@ Input::
 
 Output::
 /lib/tsc --p src/project
-[96msrc/project/src/noChangeFileWithEmitSpecificError.ts[0m:[93m1[0m:[93m19[0m - [91merror[0m[90m TS2396: [0mDuplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.
-
-[7m1[0m function someFunc(arguments: boolean, ...rest: any[]) {
-[7m [0m [91m                  ~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project/src/noChangeFileWithEmitSpecificError.ts[0m:[93m1[0m:[93m19[0m  [91mError[0m TS2396
+| function someFunc(arguments: boolean, ...rest: any[]) {
+  [91m                  ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Duplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.
 
 
 Found 1 error in src/project/src/noChangeFileWithEmitSpecificError.ts[90m:1[0m
@@ -475,30 +475,28 @@ export class classC {
 
 Output::
 /lib/tsc --p src/project
-[96msrc/project/src/directUse.ts[0m:[93m2[0m:[93m28[0m - [91merror[0m[90m TS2551: [0mProperty 'prop' does not exist on type 'classC'. Did you mean 'prop1'?
+[91m● [0m[96msrc/project/src/directUse.ts[0m:[93m2[0m:[93m28[0m  [91mError[0m TS2551
+| new indirectClass().classC.prop;
+  [91m                           ▔▔▔▔[0m
+Property 'prop' does not exist on type 'classC'. Did you mean 'prop1'?
 
-[7m2[0m new indirectClass().classC.prop;
-[7m [0m [91m                           ~~~~[0m
+'prop1' is declared here: [96msrc/project/src/class.ts[0m:[93m2[0m:[93m5[0m
 
-  [96msrc/project/src/class.ts[0m:[93m2[0m:[93m5[0m
-    [7m2[0m     prop1 = 1;
-    [7m [0m [96m    ~~~~~[0m
-    'prop1' is declared here.
+  | prop1 = 1;
+    [96m▔▔▔▔▔[0m
+[91m● [0m[96msrc/project/src/indirectUse.ts[0m:[93m2[0m:[93m28[0m  [91mError[0m TS2551
+| new indirectClass().classC.prop;
+  [91m                           ▔▔▔▔[0m
+Property 'prop' does not exist on type 'classC'. Did you mean 'prop1'?
 
-[96msrc/project/src/indirectUse.ts[0m:[93m2[0m:[93m28[0m - [91merror[0m[90m TS2551: [0mProperty 'prop' does not exist on type 'classC'. Did you mean 'prop1'?
+'prop1' is declared here: [96msrc/project/src/class.ts[0m:[93m2[0m:[93m5[0m
 
-[7m2[0m new indirectClass().classC.prop;
-[7m [0m [91m                           ~~~~[0m
-
-  [96msrc/project/src/class.ts[0m:[93m2[0m:[93m5[0m
-    [7m2[0m     prop1 = 1;
-    [7m [0m [96m    ~~~~~[0m
-    'prop1' is declared here.
-
-[96msrc/project/src/noChangeFileWithEmitSpecificError.ts[0m:[93m1[0m:[93m19[0m - [91merror[0m[90m TS2396: [0mDuplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.
-
-[7m1[0m function someFunc(arguments: boolean, ...rest: any[]) {
-[7m [0m [91m                  ~~~~~~~~~~~~~~~~~~[0m
+  | prop1 = 1;
+    [96m▔▔▔▔▔[0m
+[91m● [0m[96msrc/project/src/noChangeFileWithEmitSpecificError.ts[0m:[93m1[0m:[93m19[0m  [91mError[0m TS2396
+| function someFunc(arguments: boolean, ...rest: any[]) {
+  [91m                  ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Duplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.
 
 
 Found 3 errors in 3 files.
@@ -534,7 +532,7 @@ exports.classC = classC;
 //// [/src/project/src/indirectClass.js] file written with same contents
 //// [/src/project/src/indirectUse.d.ts] file written with same contents
 //// [/src/project/tsconfig.tsbuildinfo]
-{"program":{"fileNames":["../../lib/lib.d.ts","./src/class.ts","./src/indirectclass.ts","./src/directuse.ts","./src/indirectuse.ts","./src/nochangefile.ts","./src/nochangefilewithemitspecificerror.ts"],"fileInfos":[{"version":"3858781397-/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };","affectsGlobalScope":true},{"version":"1786859709-export class classC {\n    prop1 = 1;\n}","signature":"-12157283604-export declare class classC {\n    prop1: number;\n}\n"},{"version":"6324910780-import { classC } from './class';\nexport class indirectClass {\n    classC = new classC();\n}","signature":"9337978648-import { classC } from './class';\nexport declare class indirectClass {\n    classC: classC;\n}\n"},{"version":"-8953710208-import { indirectClass } from './indirectClass';\nnew indirectClass().classC.prop;","signature":"-3531856636-export {};\n"},{"version":"-8953710208-import { indirectClass } from './indirectClass';\nnew indirectClass().classC.prop;","signature":"-3531856636-export {};\n"},{"version":"6714567633-export function writeLog(s: string) {\n}","signature":"8055010000-export declare function writeLog(s: string): void;\n"},{"version":"-19339541508-function someFunc(arguments: boolean, ...rest: any[]) {\n}","signature":"-5615417221-declare function someFunc(arguments: boolean, ...rest: any[]): void;\n","affectsGlobalScope":true}],"root":[[2,7]],"options":{"declaration":true},"fileIdsList":[[3],[2]],"referencedMap":[[4,1],[3,2],[5,1]],"exportedModulesMap":[[3,2]],"semanticDiagnosticsPerFile":[1,2,[4,[{"file":"./src/directuse.ts","start":76,"length":4,"code":2551,"category":1,"messageText":"Property 'prop' does not exist on type 'classC'. Did you mean 'prop1'?","relatedInformation":[{"file":"./src/class.ts","start":26,"length":5,"messageText":"'prop1' is declared here.","category":3,"code":2728}]}]],3,[5,[{"file":"./src/indirectuse.ts","start":76,"length":4,"code":2551,"category":1,"messageText":"Property 'prop' does not exist on type 'classC'. Did you mean 'prop1'?","relatedInformation":[{"file":"./src/class.ts","start":26,"length":5,"messageText":"'prop1' is declared here.","category":3,"code":2728}]}]],6,[7,[{"file":"./src/nochangefilewithemitspecificerror.ts","start":18,"length":18,"messageText":"Duplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.","category":1,"code":2396,"skippedOn":"noEmit"}]]]},"version":"FakeTSVersion"}
+{"program":{"fileNames":["../../lib/lib.d.ts","./src/class.ts","./src/indirectclass.ts","./src/directuse.ts","./src/indirectuse.ts","./src/nochangefile.ts","./src/nochangefilewithemitspecificerror.ts"],"fileInfos":[{"version":"3858781397-/// <reference no-default-lib=\"true\"/>\ninterface Boolean {}\ninterface Function {}\ninterface CallableFunction {}\ninterface NewableFunction {}\ninterface IArguments {}\ninterface Number { toExponential: any; }\ninterface Object {}\ninterface RegExp {}\ninterface String { charAt: any; }\ninterface Array<T> { length: number; [n: number]: T; }\ninterface ReadonlyArray<T> {}\ndeclare const console: { log(msg: any): void; };","affectsGlobalScope":true},{"version":"1786859709-export class classC {\n    prop1 = 1;\n}","signature":"-12157283604-export declare class classC {\n    prop1: number;\n}\n"},{"version":"6324910780-import { classC } from './class';\nexport class indirectClass {\n    classC = new classC();\n}","signature":"9337978648-import { classC } from './class';\nexport declare class indirectClass {\n    classC: classC;\n}\n"},{"version":"-8953710208-import { indirectClass } from './indirectClass';\nnew indirectClass().classC.prop;","signature":"-3531856636-export {};\n"},{"version":"-8953710208-import { indirectClass } from './indirectClass';\nnew indirectClass().classC.prop;","signature":"-3531856636-export {};\n"},{"version":"6714567633-export function writeLog(s: string) {\n}","signature":"8055010000-export declare function writeLog(s: string): void;\n"},{"version":"-19339541508-function someFunc(arguments: boolean, ...rest: any[]) {\n}","signature":"-5615417221-declare function someFunc(arguments: boolean, ...rest: any[]): void;\n","affectsGlobalScope":true}],"root":[[2,7]],"options":{"declaration":true},"fileIdsList":[[3],[2]],"referencedMap":[[4,1],[3,2],[5,1]],"exportedModulesMap":[[3,2]],"semanticDiagnosticsPerFile":[1,2,[4,[{"file":"./src/directuse.ts","start":76,"length":4,"code":2551,"category":1,"messageText":"Property 'prop' does not exist on type 'classC'. Did you mean 'prop1'?","relatedInformation":[{"file":"./src/class.ts","start":26,"length":5,"messageText":"'prop1' is declared here:","category":3,"code":2728}]}]],3,[5,[{"file":"./src/indirectuse.ts","start":76,"length":4,"code":2551,"category":1,"messageText":"Property 'prop' does not exist on type 'classC'. Did you mean 'prop1'?","relatedInformation":[{"file":"./src/class.ts","start":26,"length":5,"messageText":"'prop1' is declared here:","category":3,"code":2728}]}]],6,[7,[{"file":"./src/nochangefilewithemitspecificerror.ts","start":18,"length":18,"messageText":"Duplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.","category":1,"code":2396,"skippedOn":"noEmit"}]]]},"version":"FakeTSVersion"}
 
 //// [/src/project/tsconfig.tsbuildinfo.readable.baseline.txt]
 {
@@ -670,7 +668,7 @@ exports.classC = classC;
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -694,7 +692,7 @@ exports.classC = classC;
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -913,10 +911,10 @@ Input::
 
 Output::
 /lib/tsc --p src/project
-[96msrc/project/src/noChangeFileWithEmitSpecificError.ts[0m:[93m1[0m:[93m19[0m - [91merror[0m[90m TS2396: [0mDuplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.
-
-[7m1[0m function someFunc(arguments: boolean, ...rest: any[]) {
-[7m [0m [91m                  ~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project/src/noChangeFileWithEmitSpecificError.ts[0m:[93m1[0m:[93m19[0m  [91mError[0m TS2396
+| function someFunc(arguments: boolean, ...rest: any[]) {
+  [91m                  ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Duplicate identifier 'arguments'. Compiler uses 'arguments' to initialize rest parameters.
 
 
 Found 1 error in src/project/src/noChangeFileWithEmitSpecificError.ts[90m:1[0m

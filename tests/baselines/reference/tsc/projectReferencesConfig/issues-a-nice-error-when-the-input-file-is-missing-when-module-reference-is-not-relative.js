@@ -53,10 +53,10 @@ declare const console: { log(msg: any): void; };
 
 Output::
 /lib/tsc --p /beta/tsconfig.json
-[96mbeta/b.ts[0m:[93m1[0m:[93m19[0m - [91merror[0m[90m TS6305: [0mOutput file '/alpha/bin/a.d.ts' has not been built from source file '/alpha/a.ts'.
-
-[7m1[0m import { m } from '@alpha/a'
-[7m [0m [91m                  ~~~~~~~~~~[0m
+[91m● [0m[96mbeta/b.ts[0m:[93m1[0m:[93m19[0m  [91mError[0m TS6305
+| import { m } from '@alpha/a'
+  [91m                  ▔▔▔▔▔▔▔▔▔▔[0m
+Output file '/alpha/bin/a.d.ts' has not been built from source file '/alpha/a.ts'.
 
 
 Found 1 error in beta/b.ts[90m:1[0m

@@ -43,10 +43,10 @@ export { }
 
 Output::
 /lib/tsc --b /src/tsconfig.json --incremental
-[96msrc/src/main.ts[0m:[93m4[0m:[93m1[0m - [91merror[0m[90m TS1005: [0m',' expected.
-
-[7m4[0m ;
-[7m [0m [91m~[0m
+[91m● [0m[96msrc/src/main.ts[0m:[93m4[0m:[93m1[0m  [91mError[0m TS1005
+| ;
+  [91m▔[0m
+',' expected.
 
 
 Found 1 error.
@@ -157,10 +157,10 @@ Input::
 
 Output::
 /lib/tsc --b /src/tsconfig.json --incremental
-[96msrc/src/main.ts[0m:[93m4[0m:[93m1[0m - [91merror[0m[90m TS1005: [0m',' expected.
-
-[7m4[0m ;
-[7m [0m [91m~[0m
+[91m● [0m[96msrc/src/main.ts[0m:[93m4[0m:[93m1[0m  [91mError[0m TS1005
+| ;
+  [91m▔[0m
+',' expected.
 
 
 Found 1 error.

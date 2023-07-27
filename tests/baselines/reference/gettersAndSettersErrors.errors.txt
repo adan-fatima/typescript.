@@ -16,7 +16,7 @@ gettersAndSettersErrors.ts(12,16): error TS2808: A get accessor must be at least
 !!! error TS2300: Duplicate identifier 'Foo'.
                ~~~
 !!! error TS2717: Subsequent property declarations must have the same type.  Property 'Foo' must be of type 'string', but here has type 'number'.
-!!! related TS6203 gettersAndSettersErrors.ts:2:16: 'Foo' was also declared here.
+!!! related TS6203 gettersAndSettersErrors.ts:2:16: 'Foo' was also declared here:
         public get Goo(v:string):string {return null;} // error - getters must not have a parameter
                    ~~~
 !!! error TS1054: A 'get' accessor cannot have parameters.

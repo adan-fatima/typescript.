@@ -12,7 +12,7 @@ parserSkippedTokens16.ts(8,14): error TS1109: Expression expected.
     foo(): Bar { }
     ~~~
 !!! error TS2552: Cannot find name 'foo'. Did you mean 'Foo'?
-!!! related TS2728 parserSkippedTokens16.ts:2:10: 'Foo' is declared here.
+!!! related TS2728 parserSkippedTokens16.ts:2:10: 'Foo' is declared here:
          ~
 !!! error TS1005: ';' expected.
            ~~~

@@ -308,10 +308,10 @@ Output::
 
 [[90m12:00:26 AM[0m] Building project '/src/tsconfig.json'...
 
-[96msrc/lazyIndex.ts[0m:[93m4[0m:[93m5[0m - [91merror[0m[90m TS2554: [0mExpected 0 arguments, but got 1.
-
-[7m4[0m bar("hello");
-[7m [0m [91m    ~~~~~~~[0m
+[91m● [0m[96msrc/lazyIndex.ts[0m:[93m4[0m:[93m5[0m  [91mError[0m TS2554
+| bar("hello");
+  [91m    ▔▔▔▔▔▔▔[0m
+Expected 0 arguments, but got 1.
 
 
 Found 1 error.
@@ -652,10 +652,10 @@ Output::
 
 [[90m12:00:44 AM[0m] Building project '/src/tsconfig.json'...
 
-[96msrc/lazyIndex.ts[0m:[93m4[0m:[93m5[0m - [91merror[0m[90m TS2554: [0mExpected 0 arguments, but got 1.
-
-[7m4[0m bar("hello");
-[7m [0m [91m    ~~~~~~~[0m
+[91m● [0m[96msrc/lazyIndex.ts[0m:[93m4[0m:[93m5[0m  [91mError[0m TS2554
+| bar("hello");
+  [91m    ▔▔▔▔▔▔▔[0m
+Expected 0 arguments, but got 1.
 
 
 Found 1 error.

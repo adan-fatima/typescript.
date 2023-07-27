@@ -13,5 +13,5 @@ configFileName:: /apath/tsconfig.json
 FileNames::
 
 Errors::
-[91merror[0m[90m TS18002: [0mThe 'files' list in config file '/apath/tsconfig.json' is empty.
+[91m● [0m [91mError[0m TS18002The 'files' list in config file '/apath/tsconfig.json' is empty.
 

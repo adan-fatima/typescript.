@@ -109,8 +109,8 @@ Result
  "compileOnSave": false
 }
 Errors::
-[96mtsconfig.json[0m:[93m6[0m:[93m3[0m - [91merror[0m[90m TS5065: [0mFile specification cannot contain a parent directory ('..') that appears after a recursive directory wildcard ('**'): '**/y/..'.
-
-[7m6[0m   "**/y/.."
-[7m [0m [91m  ~~~~~~~~~[0m
+[91m● [0m[96mtsconfig.json[0m:[93m6[0m:[93m3[0m  [91mError[0m TS5065
+| "**/y/.."
+  [91m▔▔▔▔▔▔▔▔▔[0m
+File specification cannot contain a parent directory ('..') that appears after a recursive directory wildcard ('**'): '**/y/..'.
 

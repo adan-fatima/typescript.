@@ -168,15 +168,15 @@ export default MessageablePerson;
 
 Output::
 /lib/tsc -p src/project --incremental
-[96msrc/project/main.ts[0m:[93m3[0m:[93m25[0m - [91merror[0m[90m TS2445: [0mProperty 'message' is protected and only accessible within class 'MessageableClass' and its subclasses.
+[91m● [0m[96msrc/project/main.ts[0m:[93m3[0m:[93m25[0m  [91mError[0m TS2445
+| console.log( person.message );
+  [91m                    ▔▔▔▔▔▔▔[0m
+Property 'message' is protected and only accessible within class 'MessageableClass' and its subclasses.
 
-[7m3[0m     console.log( person.message );
-[7m [0m [91m                        ~~~~~~~[0m
-
-[96msrc/project/MessageablePerson.ts[0m:[93m6[0m:[93m7[0m - [91merror[0m[90m TS4094: [0mProperty 'message' of exported class expression may not be private or protected.
-
-[7m6[0m const wrapper = () => Messageable();
-[7m [0m [91m      ~~~~~~~[0m
+[91m● [0m[96msrc/project/MessageablePerson.ts[0m:[93m6[0m:[93m7[0m  [91mError[0m TS4094
+| const wrapper = () => Messageable();
+  [91m      ▔▔▔▔▔▔▔[0m
+Property 'message' of exported class expression may not be private or protected.
 
 
 Found 2 errors in 2 files.

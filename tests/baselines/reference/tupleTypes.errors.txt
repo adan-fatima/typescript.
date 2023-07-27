@@ -46,7 +46,7 @@ tupleTypes.ts(63,4): error TS2540: Cannot assign to 'length' because it is a rea
     var t2: number|string;
         ~~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 't2' must be of type 'undefined', but here has type 'string | number'.
-!!! related TS6203 tupleTypes.ts:11:5: 't2' was also declared here.
+!!! related TS6203 tupleTypes.ts:11:5: 't2' was also declared here:
     
     t = [];               // Error
     ~
@@ -88,7 +88,7 @@ tupleTypes.ts(63,4): error TS2540: Cannot assign to 'length' because it is a rea
     var tt2: number | string;
         ~~~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'tt2' must be of type 'undefined', but here has type 'string | number'.
-!!! related TS6203 tupleTypes.ts:35:5: 'tt2' was also declared here.
+!!! related TS6203 tupleTypes.ts:35:5: 'tt2' was also declared here:
     
     tt = tuple2(1, undefined);
     tt = [1, undefined];

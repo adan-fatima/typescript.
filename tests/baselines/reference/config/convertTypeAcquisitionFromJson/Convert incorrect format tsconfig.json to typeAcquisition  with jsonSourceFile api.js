@@ -21,8 +21,8 @@ TypeAcquisition::
  "exclude": []
 }
 Errors::
-[96mtsconfig.json[0m:[93m3[0m:[93m3[0m - [91merror[0m[90m TS17010: [0mUnknown type acquisition option 'enableAutoDiscovy'.
-
-[7m3[0m   "enableAutoDiscovy": true
-[7m [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96mtsconfig.json[0m:[93m3[0m:[93m3[0m   [91mError[0m TS17010
+| "enableAutoDiscovy": true
+  [91m▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Unknown type acquisition option 'enableAutoDiscovy'.
 

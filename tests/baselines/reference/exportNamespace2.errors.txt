@@ -16,5 +16,5 @@ d.ts(2,5): error TS1361: 'a' cannot be used as a value because it was imported u
     new a.A(); // Error
         ~
 !!! error TS1361: 'a' cannot be used as a value because it was imported using 'import type'.
-!!! related TS1376 c.ts:1:15: 'a' was imported here.
+!!! related TS1376 c.ts:1:15: 'a' was imported here:
     

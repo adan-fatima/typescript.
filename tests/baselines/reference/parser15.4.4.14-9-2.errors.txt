@@ -44,5 +44,5 @@ parser15.4.4.14-9-2.ts(25,1): error TS2552: Cannot find name 'runTestCase'. Did 
     runTestCase(testcase);
     ~~~~~~~~~~~
 !!! error TS2552: Cannot find name 'runTestCase'. Did you mean 'testcase'?
-!!! related TS2728 parser15.4.4.14-9-2.ts:12:10: 'testcase' is declared here.
+!!! related TS2728 parser15.4.4.14-9-2.ts:12:10: 'testcase' is declared here:
     

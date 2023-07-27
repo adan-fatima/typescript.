@@ -37,15 +37,15 @@ function main() { }
 
 Output::
 /lib/tsc --p src/project
-[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
+[91m● [0m[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
-[7m2[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
-
-[96msrc/project/src/main.ts[0m:[93m2[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
-
-[7m2[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project/src/main.ts[0m:[93m2[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
 
 Found 2 errors in 2 files.
@@ -213,15 +213,15 @@ Input::
 
 Output::
 /lib/tsc --p src/project
-[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
+[91m● [0m[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
-[7m2[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
-
-[96msrc/project/src/main.ts[0m:[93m2[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
-
-[7m2[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project/src/main.ts[0m:[93m2[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
 
 Found 2 errors in 2 files.
@@ -258,15 +258,15 @@ something();
 
 Output::
 /lib/tsc --p src/project
-[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
+[91m● [0m[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
-[7m2[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
-
-[96msrc/project/src/main.ts[0m:[93m2[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
-
-[7m2[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project/src/main.ts[0m:[93m2[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
 
 Found 2 errors in 2 files.
@@ -411,15 +411,15 @@ something();something();
 
 Output::
 /lib/tsc --p src/project
-[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
+[91m● [0m[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
-[7m2[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
-
-[96msrc/project/src/main.ts[0m:[93m2[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
-
-[7m2[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project/src/main.ts[0m:[93m2[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
 
 Found 2 errors in 2 files.
@@ -569,15 +569,15 @@ function foo() { return 20; }
 
 Output::
 /lib/tsc --p src/project
-[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
+[91m● [0m[96msrc/project/src/anotherFileWithSameReferenes.ts[0m:[93m2[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
-[7m2[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
-
-[96msrc/project/src/main.ts[0m:[93m3[0m:[93m22[0m - [91merror[0m[90m TS6053: [0mFile '/src/project/src/fileNotFound.ts' not found.
-
-[7m3[0m /// <reference path="./fileNotFound.ts"/>
-[7m [0m [91m                     ~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project/src/main.ts[0m:[93m3[0m:[93m22[0m  [91mError[0m TS6053
+| /// <reference path="./fileNotFound.ts"/>
+  [91m                     ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/src/project/src/fileNotFound.ts' not found.
 
 
 Found 2 errors in 2 files.

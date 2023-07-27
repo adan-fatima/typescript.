@@ -6,7 +6,7 @@ multipleExportDefault1.ts(5,1): error TS2528: A module cannot have multiple defa
     export default function Foo (){
                             ~~~
 !!! error TS2528: A module cannot have multiple default exports.
-!!! related TS2753 multipleExportDefault1.ts:5:1: Another export default is here.
+!!! related TS2753 multipleExportDefault1.ts:5:1: Another export default is here:
         
     }
     
@@ -17,5 +17,5 @@ multipleExportDefault1.ts(5,1): error TS2528: A module cannot have multiple defa
     };
     ~~
 !!! error TS2528: A module cannot have multiple default exports.
-!!! related TS2752 multipleExportDefault1.ts:1:25: The first export default is here.
+!!! related TS2752 multipleExportDefault1.ts:1:25: The first export default is here:
     

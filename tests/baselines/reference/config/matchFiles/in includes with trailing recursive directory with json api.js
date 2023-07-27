@@ -97,6 +97,6 @@ Result
  "compileOnSave": false
 }
 Errors::
-[91merror[0m[90m TS5010: [0mFile specification cannot end in a recursive directory wildcard ('**'): '**'.
-[91merror[0m[90m TS18003: [0mNo inputs were found in config file 'c:/dev/tsconfig.json'. Specified 'include' paths were '["**"]' and 'exclude' paths were '[]'.
+[91m● [0m [91mError[0m TS5010File specification cannot end in a recursive directory wildcard ('**'): '**'.
+[91m● [0m [91mError[0m TS18003No inputs were found in config file 'c:/dev/tsconfig.json'. Specified 'include' paths were '["**"]' and 'exclude' paths were '[]'.
 

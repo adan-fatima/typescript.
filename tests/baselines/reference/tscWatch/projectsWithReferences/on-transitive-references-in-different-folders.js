@@ -1027,10 +1027,10 @@ File '/user/username/projects/transitiveReferences/refs/a.ts' does not exist.
 File '/user/username/projects/transitiveReferences/refs/a.tsx' does not exist.
 File '/user/username/projects/transitiveReferences/refs/a.d.ts' exists - use it as a name resolution result.
 ======== Module name '@ref/a' was successfully resolved to '/user/username/projects/transitiveReferences/refs/a.d.ts'. ========
-[96mc/tsconfig.json[0m:[93m1[0m:[93m105[0m - [91merror[0m[90m TS6053: [0mFile '/user/username/projects/transitiveReferences/b' not found.
-
-[7m1[0m {"compilerOptions":{"baseUrl":"./","paths":{"@ref/*":["../refs/*"]}},"files":["index.ts"],"references":[{"path":"../b"}]}
-[7m [0m [91m                                                                                                        ~~~~~~~~~~~~~~~[0m
+[91m● [0m[96mc/tsconfig.json[0m:[93m1[0m:[93m105[0m  [91mError[0m TS6053
+| {"compilerOptions":{"baseUrl":"./","paths":{"@ref/*":["../refs/*"]}},"files":["index.ts"],"references":[{"path":"../b"}]}
+  [91m                                                                                                        ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/user/username/projects/transitiveReferences/b' not found.
 
 ../../../../a/lib/lib.d.ts
   Default library for target 'es5'
@@ -1256,10 +1256,10 @@ Output::
 Reusing resolution of module '../b' from '/user/username/projects/transitiveReferences/c/index.ts' of old program, it was successfully resolved to '/user/username/projects/transitiveReferences/b/index.ts'.
 Reusing resolution of module '@ref/a' from '/user/username/projects/transitiveReferences/c/index.ts' of old program, it was successfully resolved to '/user/username/projects/transitiveReferences/refs/a.d.ts'.
 Reusing resolution of module '@ref/a' from '/user/username/projects/transitiveReferences/b/index.ts' of old program, it was successfully resolved to '/user/username/projects/transitiveReferences/a/index.ts'.
-[96mb/tsconfig.json[0m:[93m1[0m:[93m117[0m - [91merror[0m[90m TS6053: [0mFile '/user/username/projects/transitiveReferences/a' not found.
-
-[7m1[0m {"compilerOptions":{"composite":true,"baseUrl":"./","paths":{"@ref/*":["../*"]}},"files":["index.ts"],"references":[{"path":"../a"}]}
-[7m [0m [91m                                                                                                                    ~~~~~~~~~~~~~~~[0m
+[91m● [0m[96mb/tsconfig.json[0m:[93m1[0m:[93m117[0m  [91mError[0m TS6053
+| {"compilerOptions":{"composite":true,"baseUrl":"./","paths":{"@ref/*":["../*"]}},"files":["index.ts"],"references":[{"path":"../a"}]}
+  [91m                                                                                                                    ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+File '/user/username/projects/transitiveReferences/a' not found.
 
 ../../../../a/lib/lib.d.ts
   Default library for target 'es5'

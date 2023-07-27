@@ -9,7 +9,7 @@ file1.ts(1,1): error TS2448: Block-scoped variable 'l' used before its declarati
     l;
     ~
 !!! error TS2448: Block-scoped variable 'l' used before its declaration.
-!!! related TS2728 file2.ts:1:7: 'l' is declared here.
+!!! related TS2728 file2.ts:1:7: 'l' is declared here:
     
 ==== file2.ts (0 errors) ====
     const l = 0;

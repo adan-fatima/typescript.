@@ -35,7 +35,7 @@
                     ~~~~~~~~~
 !!! error TS1360: Type '{}' does not satisfy the expected type 'T1'.
 !!! error TS1360:   Property 'a' is missing in type '{}' but required in type 'T1'.
-!!! related TS2728 /a.js:3:4: 'a' is declared here.
+!!! related TS2728 /a.js:3:4: 'a' is declared here:
     
     /** @type {T2} */
     const t4 = /** @satisfies {T2} */ ({ a: "a" });

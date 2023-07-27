@@ -2815,6 +2815,14 @@ export function takeWhile<T, U extends T>(array: readonly T[] | undefined, predi
         }
         return array.slice(0, index) as U[];
     }
+
+}
+
+export function startWhitespaceCount(s: string) {
+    for (let i = 0; i < s.length; i++) {
+        if (!isWhiteSpaceLike(s.charCodeAt(i))) return i;
+    }
+    return s.length;
 }
 
 /** @internal */

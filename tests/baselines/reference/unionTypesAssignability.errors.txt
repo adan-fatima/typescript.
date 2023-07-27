@@ -48,7 +48,7 @@ unionTypesAssignability.ts(71,5): error TS2322: Type 'T | U' is not assignable t
     d = e;
     ~
 !!! error TS2741: Property 'foo1' is missing in type 'E' but required in type 'D'.
-!!! related TS2728 unionTypesAssignability.ts:3:21: 'foo1' is declared here.
+!!! related TS2728 unionTypesAssignability.ts:3:21: 'foo1' is declared here:
     d = unionDE; // error e is not assignable to d
     ~
 !!! error TS2322: Type 'D | E' is not assignable to type 'D'.
@@ -56,7 +56,7 @@ unionTypesAssignability.ts(71,5): error TS2322: Type 'T | U' is not assignable t
     e = d;
     ~
 !!! error TS2741: Property 'foo2' is missing in type 'D' but required in type 'E'.
-!!! related TS2728 unionTypesAssignability.ts:4:21: 'foo2' is declared here.
+!!! related TS2728 unionTypesAssignability.ts:4:21: 'foo2' is declared here:
     e = e;
     e = unionDE; // error d is not assignable to e
     ~
@@ -83,11 +83,11 @@ unionTypesAssignability.ts(71,5): error TS2322: Type 'T | U' is not assignable t
     d = c;
     ~
 !!! error TS2741: Property 'foo1' is missing in type 'C' but required in type 'D'.
-!!! related TS2728 unionTypesAssignability.ts:3:21: 'foo1' is declared here.
+!!! related TS2728 unionTypesAssignability.ts:3:21: 'foo1' is declared here:
     e = c;
     ~
 !!! error TS2741: Property 'foo2' is missing in type 'C' but required in type 'E'.
-!!! related TS2728 unionTypesAssignability.ts:4:21: 'foo2' is declared here.
+!!! related TS2728 unionTypesAssignability.ts:4:21: 'foo2' is declared here:
     unionDE = c; // error since C is not assinable to either D or E
     ~~~~~~~
 !!! error TS2322: Type 'C' is not assignable to type 'D | E'.

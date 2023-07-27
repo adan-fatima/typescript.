@@ -44,7 +44,7 @@ subtypingWithNumericIndexer4.ts(24,11): error TS2415: Class 'B3<T>' incorrectly 
                           ~~~~
 !!! error TS2344: Type 'Base' does not satisfy the constraint 'Derived'.
 !!! error TS2344:   Property 'bar' is missing in type 'Base' but required in type 'Derived'.
-!!! related TS2728 subtypingWithNumericIndexer4.ts:4:34: 'bar' is declared here.
+!!! related TS2728 subtypingWithNumericIndexer4.ts:4:34: 'bar' is declared here:
             [x: number]: string; // error
         }
     

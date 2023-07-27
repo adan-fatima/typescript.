@@ -41,7 +41,7 @@ covariantCallbacks.ts(69,5): error TS2322: Type 'AList4' is not assignable to ty
         ~
 !!! error TS2322: Type 'P<A>' is not assignable to type 'P<B>'.
 !!! error TS2322:   Property 'b' is missing in type 'A' but required in type 'B'.
-!!! related TS2728 covariantCallbacks.ts:8:25: 'b' is declared here.
+!!! related TS2728 covariantCallbacks.ts:8:25: 'b' is declared here:
     }
     
     function f2(a: Promise<A>, b: Promise<B>) {

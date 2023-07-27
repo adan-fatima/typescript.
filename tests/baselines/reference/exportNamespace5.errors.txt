@@ -16,11 +16,11 @@
     let _: A = new A();   // Error
                    ~
 !!! error TS1362: 'A' cannot be used as a value because it was exported using 'export type'.
-!!! related TS1377 /b.ts:1:1: 'A' was exported here.
+!!! related TS1377 /b.ts:1:1: 'A' was exported here:
     let __: C = new C();  // Error
                     ~
 !!! error TS1362: 'C' cannot be used as a value because it was exported using 'export type'.
-!!! related TS1377 /b.ts:1:1: 'C' was exported here.
+!!! related TS1377 /b.ts:1:1: 'C' was exported here:
     let ___: X = new X(); // Ok
     
 ==== /d.ts (0 errors) ====

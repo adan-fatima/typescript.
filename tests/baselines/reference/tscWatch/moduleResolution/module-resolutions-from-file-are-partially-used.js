@@ -131,7 +131,7 @@ File '/user/username/projects/myproject/node_modules/pkg/package.json' exists ac
 File '/a/lib/package.json' does not exist.
 File '/a/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 [[90m12:00:44 AM[0m] Found 1 error. Watching for file changes.
 
@@ -275,7 +275,7 @@ Reusing resolution of module 'pkg1' from '/user/username/projects/myproject/inde
 File '/a/lib/package.json' does not exist according to earlier cached lookups.
 File '/a/package.json' does not exist according to earlier cached lookups.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'Node16' when option 'moduleResolution' is set to 'Node16'.
 
 [[90m12:00:54 AM[0m] Found 1 error. Watching for file changes.
 

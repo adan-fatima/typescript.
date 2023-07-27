@@ -40,7 +40,7 @@ subtypingWithObjectMembers3.ts(69,15): error TS2430: Interface 'B3' incorrectly 
 !!! error TS2430: Interface 'B' incorrectly extends interface 'A'.
 !!! error TS2430:   Types of property 'bar' are incompatible.
 !!! error TS2430:     Property 'bar' is missing in type 'Base' but required in type 'Derived'.
-!!! related TS2728 subtypingWithObjectMembers3.ts:6:5: 'bar' is declared here.
+!!! related TS2728 subtypingWithObjectMembers3.ts:6:5: 'bar' is declared here:
             foo: Derived; // ok
             bar: Base; // error
         }

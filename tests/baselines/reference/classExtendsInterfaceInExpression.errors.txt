@@ -1,4 +1,4 @@
-classExtendsInterfaceInExpression.ts(7,25): error TS2693: 'A' only refers to a type, but is being used as a value here.
+classExtendsInterfaceInExpression.ts(7,25): error TS2693: 'A' only refers to a type, but is being used as a value here:
 
 
 ==== classExtendsInterfaceInExpression.ts (1 errors) ====
@@ -10,5 +10,5 @@ classExtendsInterfaceInExpression.ts(7,25): error TS2693: 'A' only refers to a t
     
     class C extends factory(A) {}
                             ~
-!!! error TS2693: 'A' only refers to a type, but is being used as a value here.
+!!! error TS2693: 'A' only refers to a type, but is being used as a value here:
     

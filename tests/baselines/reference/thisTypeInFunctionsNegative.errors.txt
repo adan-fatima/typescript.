@@ -86,7 +86,7 @@ thisTypeInFunctionsNegative.ts(172,38): error TS1109: Expression expected.
 thisTypeInFunctionsNegative.ts(172,39): error TS1005: ';' expected.
 thisTypeInFunctionsNegative.ts(172,40): error TS1128: Declaration or statement expected.
 thisTypeInFunctionsNegative.ts(172,42): error TS1434: Unexpected keyword or identifier.
-thisTypeInFunctionsNegative.ts(172,42): error TS2693: 'number' only refers to a type, but is being used as a value here.
+thisTypeInFunctionsNegative.ts(172,42): error TS2693: 'number' only refers to a type, but is being used as a value here:
 thisTypeInFunctionsNegative.ts(175,23): error TS2730: An arrow function cannot have a 'this' parameter.
 thisTypeInFunctionsNegative.ts(176,16): error TS2730: An arrow function cannot have a 'this' parameter.
 thisTypeInFunctionsNegative.ts(177,19): error TS2730: An arrow function cannot have a 'this' parameter.
@@ -198,7 +198,7 @@ thisTypeInFunctionsNegative.ts(178,22): error TS2730: An arrow function cannot h
     ~~~~~~~~~~~~~~~~~
 !!! error TS2684: The 'this' context of type '{ wrongName: number; f: (this: { y: number; }, x: number) => number; }' is not assignable to method's 'this' of type '{ y: number; }'.
 !!! error TS2684:   Property 'y' is missing in type '{ wrongName: number; f: (this: { y: number; }, x: number) => number; }' but required in type '{ y: number; }'.
-!!! related TS2728 thisTypeInFunctionsNegative.ts:63:56: 'y' is declared here.
+!!! related TS2728 thisTypeInFunctionsNegative.ts:63:56: 'y' is declared here:
     
     let c = new C();
     c.explicitC(); // not enough arguments
@@ -278,7 +278,7 @@ thisTypeInFunctionsNegative.ts(178,22): error TS2730: An arrow function cannot h
 !!! error TS2322: Type '(this: { x: number; }, m: number) => number' is not assignable to type '(this: { n: number; }, m: number) => number'.
 !!! error TS2322:   The 'this' types of each signature are incompatible.
 !!! error TS2322:     Property 'x' is missing in type '{ n: number; }' but required in type '{ x: number; }'.
-!!! related TS2728 thisTypeInFunctionsNegative.ts:104:33: 'x' is declared here.
+!!! related TS2728 thisTypeInFunctionsNegative.ts:104:33: 'x' is declared here:
     
     c.explicitC = d.explicitD;
     ~~~~~~~~~~~
@@ -352,7 +352,7 @@ thisTypeInFunctionsNegative.ts(178,22): error TS2730: An arrow function cannot h
 !!! error TS2322: Type '(this: Base2) => number' is not assignable to type '(this: Base1) => number'.
 !!! error TS2322:   The 'this' types of each signature are incompatible.
 !!! error TS2322:     Property 'y' is missing in type 'Base1' but required in type 'Base2'.
-!!! related TS2728 thisTypeInFunctionsNegative.ts:131:5: 'y' is declared here.
+!!! related TS2728 thisTypeInFunctionsNegative.ts:131:5: 'y' is declared here:
     b1.explicit = b2.polymorphic // error, 'y' not in Base1: { x }
     ~~~~~~~~~~~
 !!! error TS2322: Type '(this: Base2) => number' is not assignable to type '(this: Base1) => number'.
@@ -421,7 +421,7 @@ thisTypeInFunctionsNegative.ts(178,22): error TS2730: An arrow function cannot h
                                              ~~~~~~
 !!! error TS1434: Unexpected keyword or identifier.
                                              ~~~~~~
-!!! error TS2693: 'number' only refers to a type, but is being used as a value here.
+!!! error TS2693: 'number' only refers to a type, but is being used as a value here:
     
     // can't name parameters 'this' in a lambda.
     c.explicitProperty = (this, m) => m + this.n;

@@ -77,7 +77,7 @@ jsxElementType.tsx(111,19): error TS2322: Type '{ a: string; b: string; }' is no
     <RenderElement />;
      ~~~~~~~~~~~~~
 !!! error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
-!!! related TS2728 jsxElementType.tsx:32:37: 'title' is declared here.
+!!! related TS2728 jsxElementType.tsx:32:37: 'title' is declared here:
     <RenderElement title="react" />;
     <RenderElement excessProp />;
                    ~~~~~~~~~~
@@ -89,7 +89,7 @@ jsxElementType.tsx(111,19): error TS2322: Type '{ a: string; b: string; }' is no
     <RenderString />;
      ~~~~~~~~~~~~
 !!! error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
-!!! related TS2728 jsxElementType.tsx:38:36: 'title' is declared here.
+!!! related TS2728 jsxElementType.tsx:38:36: 'title' is declared here:
     <RenderString title="react" />;
     <RenderString excessProp />;
                   ~~~~~~~~~~
@@ -101,7 +101,7 @@ jsxElementType.tsx(111,19): error TS2322: Type '{ a: string; b: string; }' is no
     <RenderNumber />;
      ~~~~~~~~~~~~
 !!! error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
-!!! related TS2728 jsxElementType.tsx:44:36: 'title' is declared here.
+!!! related TS2728 jsxElementType.tsx:44:36: 'title' is declared here:
     <RenderNumber title="react" />;
     <RenderNumber excessProp />;
                   ~~~~~~~~~~
@@ -113,7 +113,7 @@ jsxElementType.tsx(111,19): error TS2322: Type '{ a: string; b: string; }' is no
     <RenderArray />;
      ~~~~~~~~~~~
 !!! error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
-!!! related TS2728 jsxElementType.tsx:50:35: 'title' is declared here.
+!!! related TS2728 jsxElementType.tsx:50:35: 'title' is declared here:
     <RenderArray title="react" />;
     <RenderArray excessProp />;
                  ~~~~~~~~~~
@@ -126,7 +126,7 @@ jsxElementType.tsx(111,19): error TS2322: Type '{ a: string; b: string; }' is no
     <RenderPromise />;
      ~~~~~~~~~~~~~
 !!! error TS2741: Property 'title' is missing in type '{}' but required in type '{ title: string; }'.
-!!! related TS2728 jsxElementType.tsx:57:43: 'title' is declared here.
+!!! related TS2728 jsxElementType.tsx:57:43: 'title' is declared here:
     <RenderPromise title="react" />;
     <RenderPromise excessProp />;
                    ~~~~~~~~~~
@@ -147,8 +147,8 @@ jsxElementType.tsx(111,19): error TS2322: Type '{ a: string; b: string; }' is no
 !!! error TS2769:     Property 'title' is missing in type '{}' but required in type 'Readonly<{ title: string; }>'.
 !!! error TS2769:   Overload 2 of 2, '(props: { title: string; }, context?: any): RenderStringClass', gave the following error.
 !!! error TS2769:     Property 'title' is missing in type '{}' but required in type 'Readonly<{ title: string; }>'.
-!!! related TS2728 jsxElementType.tsx:64:51: 'title' is declared here.
-!!! related TS2728 jsxElementType.tsx:64:51: 'title' is declared here.
+!!! related TS2728 jsxElementType.tsx:64:51: 'title' is declared here:
+!!! related TS2728 jsxElementType.tsx:64:51: 'title' is declared here:
     <RenderStringClass title="react" />;
     <RenderStringClass excessProp />;
                        ~~~~~~~~~~

@@ -10,7 +10,7 @@ intersectionsOfLargeUnions2.ts(31,15): error TS2536: Type 'P' cannot be used to 
         interface ElementTagNameMap {
                   ~~~~~~~~~~~~~~~~~
 !!! error TS2300: Duplicate identifier 'ElementTagNameMap'.
-!!! related TS6203 lib.dom.d.ts:--:--: 'ElementTagNameMap' was also declared here.
+!!! related TS6203 lib.dom.d.ts:--:--: 'ElementTagNameMap' was also declared here:
             [index: number]: HTMLElement
         }
     

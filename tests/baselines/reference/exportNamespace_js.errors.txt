@@ -15,5 +15,5 @@ c.js(2,1): error TS1362: 'A' cannot be used as a value because it was exported u
     A;
     ~
 !!! error TS1362: 'A' cannot be used as a value because it was exported using 'export type'.
-!!! related TS1377 b.js:1:1: 'A' was exported here.
+!!! related TS1377 b.js:1:1: 'A' was exported here:
     

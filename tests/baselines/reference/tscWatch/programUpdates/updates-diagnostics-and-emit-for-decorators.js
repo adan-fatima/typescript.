@@ -32,11 +32,11 @@ Output::
 >> Screen clear
 [[90m12:00:15 AM[0m] Starting compilation in watch mode...
 
-[96mtsconfig.json[0m:[93m1[0m:[93m36[0m - [91merror[0m[90m TS5101: [0mOption 'importsNotUsedAsValues' is deprecated and will stop functioning in TypeScript 5.5. Specify compilerOption '"ignoreDeprecations": "5.0"' to silence this error.
+[91m● [0m[96mtsconfig.json[0m:[93m1[0m:[93m36[0m  [91mError[0m TS5101
+| {"compilerOptions":{"target":"es6","importsNotUsedAsValues":"error"}}
+  [91m                                   ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Option 'importsNotUsedAsValues' is deprecated and will stop functioning in TypeScript 5.5. Specify compilerOption '"ignoreDeprecations": "5.0"' to silence this error.
   Use 'verbatimModuleSyntax' instead.
-
-[7m1[0m {"compilerOptions":{"target":"es6","importsNotUsedAsValues":"error"}}
-[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~~~~~~~~[0m
 
 [[90m12:00:20 AM[0m] Found 1 error. Watching for file changes.
 
@@ -154,11 +154,11 @@ Output::
 >> Screen clear
 [[90m12:00:23 AM[0m] File change detected. Starting incremental compilation...
 
-[96mtsconfig.json[0m:[93m1[0m:[93m36[0m - [91merror[0m[90m TS5101: [0mOption 'importsNotUsedAsValues' is deprecated and will stop functioning in TypeScript 5.5. Specify compilerOption '"ignoreDeprecations": "5.0"' to silence this error.
+[91m● [0m[96mtsconfig.json[0m:[93m1[0m:[93m36[0m  [91mError[0m TS5101
+| {"compilerOptions":{"target":"es6","importsNotUsedAsValues":"error","experimentalDecorators":true}}
+  [91m                                   ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Option 'importsNotUsedAsValues' is deprecated and will stop functioning in TypeScript 5.5. Specify compilerOption '"ignoreDeprecations": "5.0"' to silence this error.
   Use 'verbatimModuleSyntax' instead.
-
-[7m1[0m {"compilerOptions":{"target":"es6","importsNotUsedAsValues":"error","experimentalDecorators":true}}
-[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~~~~~~~~[0m
 
 [[90m12:00:30 AM[0m] Found 1 error. Watching for file changes.
 
@@ -211,11 +211,11 @@ Output::
 >> Screen clear
 [[90m12:00:33 AM[0m] File change detected. Starting incremental compilation...
 
-[96mtsconfig.json[0m:[93m1[0m:[93m36[0m - [91merror[0m[90m TS5101: [0mOption 'importsNotUsedAsValues' is deprecated and will stop functioning in TypeScript 5.5. Specify compilerOption '"ignoreDeprecations": "5.0"' to silence this error.
+[91m● [0m[96mtsconfig.json[0m:[93m1[0m:[93m36[0m  [91mError[0m TS5101
+| {"compilerOptions":{"target":"es6","importsNotUsedAsValues":"error","experimentalDecorators":true,"emitDecoratorMetadata":true}}
+  [91m                                   ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Option 'importsNotUsedAsValues' is deprecated and will stop functioning in TypeScript 5.5. Specify compilerOption '"ignoreDeprecations": "5.0"' to silence this error.
   Use 'verbatimModuleSyntax' instead.
-
-[7m1[0m {"compilerOptions":{"target":"es6","importsNotUsedAsValues":"error","experimentalDecorators":true,"emitDecoratorMetadata":true}}
-[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~~~~~~~~[0m
 
 [[90m12:00:40 AM[0m] Found 1 error. Watching for file changes.
 

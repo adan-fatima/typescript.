@@ -58,10 +58,10 @@ Output::
 
 [[90m12:00:28 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m  [91mError[0m TS6306
+| {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                                                                             ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -213,10 +213,10 @@ Output::
 
 [[90m12:00:32 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m  [91mError[0m TS6306
+| {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                                                                             ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -260,10 +260,10 @@ Output::
 
 [[90m12:00:43 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m  [91mError[0m TS6306
+| {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                                                                             ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -384,10 +384,10 @@ Output::
 
 [[90m12:00:53 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m  [91mError[0m TS6306
+| {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                                                                             ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -597,10 +597,10 @@ Output::
 
 [[90m12:00:57 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m  [91mError[0m TS6306
+| {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                                                                             ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -639,10 +639,10 @@ Output::
 
 [[90m12:01:01 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m  [91mError[0m TS6306
+| {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                                                                             ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.
@@ -686,10 +686,10 @@ Output::
 
 [[90m12:01:13 AM[0m] Building project '/src/project2/src/tsconfig.json'...
 
-[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m - [91merror[0m[90m TS6306: [0mReferenced project '/src/project1/src' must have setting "composite": true.
-
-[7m1[0m {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
-[7m [0m [91m                                                                                                                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project2/src/tsconfig.json[0m:[93m1[0m:[93m142[0m  [91mError[0m TS6306
+| {"compilerOptions":{"incremental":true,"declaration":true,"outFile":"../outFile.js","module":"amd","emitDeclarationOnly":true},"references":[{"path":"../../project1/src"}]}
+  [91m                                                                                                                                             ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Referenced project '/src/project1/src' must have setting "composite": true.
 
 
 Found 1 error.

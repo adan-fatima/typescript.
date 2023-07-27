@@ -287,7 +287,7 @@ Info seq  [hh:mm:ss:mss] response:
                 },
                 "file": "/a/b/file2.d.ts"
               },
-              "message": "'name' was also declared here.",
+              "message": "'name' was also declared here:",
               "category": "message",
               "code": 6203
             }

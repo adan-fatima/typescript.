@@ -150,10 +150,10 @@ export default MessageablePerson;
 
 Output::
 /lib/tsc -p src/project --incremental
-[96msrc/project/main.ts[0m:[93m3[0m:[93m25[0m - [91merror[0m[90m TS2445: [0mProperty 'message' is protected and only accessible within class 'MessageableClass' and its subclasses.
-
-[7m3[0m     console.log( person.message );
-[7m [0m [91m                        ~~~~~~~[0m
+[91m● [0m[96msrc/project/main.ts[0m:[93m3[0m:[93m25[0m  [91mError[0m TS2445
+| console.log( person.message );
+  [91m                    ▔▔▔▔▔▔▔[0m
+Property 'message' is protected and only accessible within class 'MessageableClass' and its subclasses.
 
 
 Found 1 error in src/project/main.ts[90m:3[0m

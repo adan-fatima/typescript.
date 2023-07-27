@@ -295,10 +295,10 @@ File '/src/child/child2.js' does not exist.
 File '/src/child/child2.jsx' does not exist.
 Directory '/src/child/child2' does not exist, skipping all lookups in it.
 ======== Module name '../child/child2' was not resolved. ========
-[96msrc/child/child.ts[0m:[93m1[0m:[93m24[0m - [91merror[0m[90m TS2307: [0mCannot find module '../child/child2' or its corresponding type declarations.
-
-[7m1[0m import { child2 } from "../child/child2";
-[7m [0m [91m                       ~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/child/child.ts[0m:[93m1[0m:[93m24[0m  [91mError[0m TS2307
+| import { child2 } from "../child/child2";
+  [91m                       ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Cannot find module '../child/child2' or its corresponding type declarations.
 
 lib/lib.d.ts
   Default library for target 'es5'

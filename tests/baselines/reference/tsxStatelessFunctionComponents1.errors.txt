@@ -57,7 +57,7 @@ file.tsx(45,11): error TS2559: Type '{ prop1: boolean; }' has no properties in c
     let h = <MeetAndGreet extra-prop-name="World" />;
              ~~~~~~~~~~~~
 !!! error TS2741: Property '"prop-name"' is missing in type '{ "extra-prop-name": string; }' but required in type '{ "prop-name": string; }'.
-!!! related TS2728 file.tsx:11:27: '"prop-name"' is declared here.
+!!! related TS2728 file.tsx:11:27: '"prop-name"' is declared here:
     
     // Error
     let i = <EmptyPropSFC prop1 />

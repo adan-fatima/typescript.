@@ -10,5 +10,5 @@ configFileName:: /apath/tsconfig.json
 FileNames::
 /apath/a.ts
 Errors::
-[91merror[0m[90m TS6266: [0mOption 'help' can only be specified on command line.
+[91m● [0m [91mError[0m TS6266Option 'help' can only be specified on command line.
 

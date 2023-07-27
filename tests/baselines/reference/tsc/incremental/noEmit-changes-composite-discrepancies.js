@@ -436,7 +436,7 @@ CleanBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -460,7 +460,7 @@ CleanBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -571,7 +571,7 @@ IncrementalBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -595,7 +595,7 @@ IncrementalBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -1075,7 +1075,7 @@ CleanBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -1099,7 +1099,7 @@ CleanBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -1210,7 +1210,7 @@ IncrementalBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -1234,7 +1234,7 @@ IncrementalBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -1342,7 +1342,7 @@ CleanBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -1366,7 +1366,7 @@ CleanBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -1477,7 +1477,7 @@ IncrementalBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }
@@ -1501,7 +1501,7 @@ IncrementalBuild:
                 "file": "./src/class.ts",
                 "start": 26,
                 "length": 5,
-                "messageText": "'prop1' is declared here.",
+                "messageText": "'prop1' is declared here:",
                 "category": 3,
                 "code": 2728
               }

@@ -28,5 +28,5 @@ c.ts(11,1): error TS2741: Property 'foo1' is missing in type 'import("b").F' but
     a = b
     ~
 !!! error TS2741: Property 'foo1' is missing in type 'import("b").F' but required in type 'import("a").F'.
-!!! related TS2728 a.ts:2:5: 'foo1' is declared here.
+!!! related TS2728 a.ts:2:5: 'foo1' is declared here:
     

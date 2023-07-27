@@ -329,7 +329,7 @@ parserRealSource7.ts(828,13): error TS2304: Cannot find name 'popTypeCollectionS
                     baseTypeLinks = new TypeLink[];
                                         ~~~~~~~~
 !!! error TS2552: Cannot find name 'TypeLink'. Did you mean 'typeLink'?
-!!! related TS2728 parserRealSource7.ts:21:21: 'typeLink' is declared here.
+!!! related TS2728 parserRealSource7.ts:21:21: 'typeLink' is declared here:
                                                  
 !!! error TS1011: An element access expression should take an argument.
                 }
@@ -339,7 +339,7 @@ parserRealSource7.ts(828,13): error TS2304: Cannot find name 'popTypeCollectionS
                     var typeLink = new TypeLink();
                                        ~~~~~~~~
 !!! error TS2552: Cannot find name 'TypeLink'. Did you mean 'typeLink'?
-!!! related TS2728 parserRealSource7.ts:21:21: 'typeLink' is declared here.
+!!! related TS2728 parserRealSource7.ts:21:21: 'typeLink' is declared here:
                     typeLink.ast = name;
                     baseTypeLinks[baseTypeLinks.length] = typeLink;
                 }
@@ -352,7 +352,7 @@ parserRealSource7.ts(828,13): error TS2304: Cannot find name 'popTypeCollectionS
 !!! error TS2304: Cannot find name 'Type'.
                                                 ~~~~~~~~~~~~~~~
 !!! error TS2552: Cannot find name 'TypeDeclaration'. Did you mean 'CSSStyleDeclaration'?
-!!! related TS2728 lib.dom.d.ts:--:--: 'CSSStyleDeclaration' is declared here.
+!!! related TS2728 lib.dom.d.ts:--:--: 'CSSStyleDeclaration' is declared here:
             type.extendsTypeLinks = getBaseTypeLinks(typeDecl.extendsList, type.extendsTypeLinks);
             type.implementsTypeLinks = getBaseTypeLinks(typeDecl.implementsList, type.implementsTypeLinks);
         }

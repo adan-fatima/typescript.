@@ -358,10 +358,10 @@ File '/src/child/child2.d.ts' does not exist.
 File '/src/child/child2.js' does not exist.
 File '/src/child/child2.jsx' does not exist.
 ======== Module name '../child/child2' was not resolved. ========
-[96msrc/child/child.ts[0m:[93m1[0m:[93m24[0m - [91merror[0m[90m TS2792: [0mCannot find module '../child/child2'. Did you mean to set the 'moduleResolution' option to 'nodenext', or to add aliases to the 'paths' option?
-
-[7m1[0m import { child2 } from "../child/child2";
-[7m [0m [91m                       ~~~~~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/child/child.ts[0m:[93m1[0m:[93m24[0m  [91mError[0m TS2792
+| import { child2 } from "../child/child2";
+  [91m                       ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Cannot find module '../child/child2'. Did you mean to set the 'moduleResolution' option to 'nodenext', or to add aliases to the 'paths' option?
 
 lib/lib.d.ts
   Default library for target 'es5'

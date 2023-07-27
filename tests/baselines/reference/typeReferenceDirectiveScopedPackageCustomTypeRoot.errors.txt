@@ -30,7 +30,7 @@ error TS2688: Cannot find type definition file for '@scoped/attypescache'.
     atTypesCache;
     ~~~~~~~~~~~~
 !!! error TS2552: Cannot find name 'atTypesCache'. Did you mean 'typesCache'?
-!!! related TS2728 /types/@scoped/typescache/index.d.ts:1:15: 'typesCache' is declared here.
+!!! related TS2728 /types/@scoped/typescache/index.d.ts:1:15: 'typesCache' is declared here:
     mangledAtTypesCache;
 ==== /types/@scoped/typescache/index.d.ts (0 errors) ====
     declare const typesCache: number;

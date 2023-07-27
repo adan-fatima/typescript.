@@ -6,7 +6,7 @@ blockScopedEnumVariablesUseBeforeDef.ts(2,12): error TS2450: Enum 'E' used befor
         return E.A
                ~
 !!! error TS2450: Enum 'E' used before its declaration.
-!!! related TS2728 blockScopedEnumVariablesUseBeforeDef.ts:3:10: 'E' is declared here.
+!!! related TS2728 blockScopedEnumVariablesUseBeforeDef.ts:3:10: 'E' is declared here:
         enum E { A }
     }
     

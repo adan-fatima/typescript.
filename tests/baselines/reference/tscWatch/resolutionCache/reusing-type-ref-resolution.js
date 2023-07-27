@@ -122,20 +122,20 @@ DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/project/node_modu
 Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/project/node_modules/@types 1 undefined Type roots
 DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/node_modules/@types 1 undefined Type roots
 Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /users/username/projects/node_modules/@types 1 undefined Type roots
-[96mfileWithImports.ts[0m:[93m2[0m:[93m30[0m - [91merror[0m[90m TS2307: [0mCannot find module 'pkg1' or its corresponding type declarations.
+[91m● [0m[96mfileWithImports.ts[0m:[93m2[0m:[93m30[0m  [91mError[0m TS2307
+| import type { Import1 } from "pkg1";
+  [91m                             ▔▔▔▔▔▔[0m
+Cannot find module 'pkg1' or its corresponding type declarations.
 
-[7m2[0m import type { Import1 } from "pkg1";
-[7m [0m [91m                             ~~~~~~[0m
+[91m● [0m[96mfileWithTypeRefs.ts[0m:[93m2[0m:[93m23[0m  [91mError[0m TS2688
+| /// <reference types="pkg3"/>
+  [91m                      ▔▔▔▔[0m
+Cannot find type definition file for 'pkg3'.
 
-[96mfileWithTypeRefs.ts[0m:[93m2[0m:[93m23[0m - [91merror[0m[90m TS2688: [0mCannot find type definition file for 'pkg3'.
-
-[7m2[0m /// <reference types="pkg3"/>
-[7m [0m [91m                      ~~~~[0m
-
-[96mfileWithTypeRefs.ts[0m:[93m3[0m:[93m43[0m - [91merror[0m[90m TS2552: [0mCannot find name 'Import3'. Did you mean 'Import2'?
-
-[7m3[0m interface LocalInterface extends Import2, Import3 {}
-[7m [0m [91m                                          ~~~~~~~[0m
+[91m● [0m[96mfileWithTypeRefs.ts[0m:[93m3[0m:[93m43[0m  [91mError[0m TS2552
+| interface LocalInterface extends Import2, Import3 {}
+  [91m                                          ▔▔▔▔▔▔▔[0m
+Cannot find name 'Import3'. Did you mean 'Import2'?
 
 ../../../../a/lib/lib.d.ts
   Default library for target 'es5'
@@ -402,15 +402,15 @@ Resolving real path for '/users/username/projects/project/node_modules/pkg1/inde
 FileWatcher:: Added:: WatchInfo: /users/username/projects/project/node_modules/pkg1/index.d.ts 250 undefined Source file
 Reusing resolution of type reference directive 'pkg2' from '/users/username/projects/project/fileWithTypeRefs.ts' of old program, it was successfully resolved to '/users/username/projects/project/node_modules/pkg2/index.d.ts'.
 Reusing resolution of type reference directive 'pkg3' from '/users/username/projects/project/fileWithTypeRefs.ts' of old program, it was not resolved.
-[96mfileWithTypeRefs.ts[0m:[93m2[0m:[93m23[0m - [91merror[0m[90m TS2688: [0mCannot find type definition file for 'pkg3'.
+[91m● [0m[96mfileWithTypeRefs.ts[0m:[93m2[0m:[93m23[0m  [91mError[0m TS2688
+| /// <reference types="pkg3"/>
+  [91m                      ▔▔▔▔[0m
+Cannot find type definition file for 'pkg3'.
 
-[7m2[0m /// <reference types="pkg3"/>
-[7m [0m [91m                      ~~~~[0m
-
-[96mfileWithTypeRefs.ts[0m:[93m3[0m:[93m43[0m - [91merror[0m[90m TS2552: [0mCannot find name 'Import3'. Did you mean 'Import2'?
-
-[7m3[0m interface LocalInterface extends Import2, Import3 {}
-[7m [0m [91m                                          ~~~~~~~[0m
+[91m● [0m[96mfileWithTypeRefs.ts[0m:[93m3[0m:[93m43[0m  [91mError[0m TS2552
+| interface LocalInterface extends Import2, Import3 {}
+  [91m                                          ▔▔▔▔▔▔▔[0m
+Cannot find name 'Import3'. Did you mean 'Import2'?
 
 ../../../../a/lib/lib.d.ts
   Default library for target 'es5'
@@ -652,10 +652,10 @@ File '/users/username/projects/project/node_modules/pkg3/index.d.ts' exists - us
 Resolving real path for '/users/username/projects/project/node_modules/pkg3/index.d.ts', result '/users/username/projects/project/node_modules/pkg3/index.d.ts'.
 ======== Type reference directive 'pkg3' was successfully resolved to '/users/username/projects/project/node_modules/pkg3/index.d.ts', primary: false. ========
 FileWatcher:: Added:: WatchInfo: /users/username/projects/project/node_modules/pkg3/index.d.ts 250 undefined Source file
-[96mfileWithTypeRefs.ts[0m:[93m3[0m:[93m43[0m - [91merror[0m[90m TS2552: [0mCannot find name 'Import3'. Did you mean 'Import2'?
-
-[7m3[0m interface LocalInterface extends Import2, Import3 {}
-[7m [0m [91m                                          ~~~~~~~[0m
+[91m● [0m[96mfileWithTypeRefs.ts[0m:[93m3[0m:[93m43[0m  [91mError[0m TS2552
+| interface LocalInterface extends Import2, Import3 {}
+  [91m                                          ▔▔▔▔▔▔▔[0m
+Cannot find name 'Import3'. Did you mean 'Import2'?
 
 ../../../../a/lib/lib.d.ts
   Default library for target 'es5'

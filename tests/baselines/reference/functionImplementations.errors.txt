@@ -90,7 +90,7 @@ functionImplementations.ts(90,1): error TS2839: This condition will always retur
     var a = function f() {
         ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'a' must be of type 'any', but here has type 'Base'.
-!!! related TS6203 functionImplementations.ts:5:5: 'a' was also declared here.
+!!! related TS6203 functionImplementations.ts:5:5: 'a' was also declared here:
         return new Base(); return new Derived(); return f(); // ?
     } ();
     

@@ -136,10 +136,10 @@ const x: 20 = 10;
 
 Output::
 /lib/tsc --p /src/project --declarationMap
-[96msrc/project/a.ts[0m:[93m1[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType '10' is not assignable to type '20'.
-
-[7m1[0m const x: 20 = 10;
-[7m [0m [91m      ~[0m
+[91m● [0m[96msrc/project/a.ts[0m:[93m1[0m:[93m7[0m  [91mError[0m TS2322
+| const x: 20 = 10;
+  [91m      ▔[0m
+Type '10' is not assignable to type '20'.
 
 
 Found 1 error in src/project/a.ts[90m:1[0m

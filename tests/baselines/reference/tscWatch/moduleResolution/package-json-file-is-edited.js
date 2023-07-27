@@ -74,10 +74,10 @@ DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/myproject/node_mod
 Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/myproject/node_modules/@types 1 undefined Type roots
 DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/node_modules/@types 1 undefined Type roots
 Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/node_modules/@types 1 undefined Type roots
-[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m - [91merror[0m[90m TS2307: [0mCannot find module './fileB.mjs' or its corresponding type declarations.
-
-[7m1[0m import { foo } from "./fileB.mjs";
-[7m [0m [91m                    ~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m  [91mError[0m TS2307
+| import { foo } from "./fileB.mjs";
+  [91m                    ▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Cannot find module './fileB.mjs' or its corresponding type declarations.
 
 ../../../../a/lib/lib.es2016.full.d.ts
   Default library for target 'es2016'
@@ -190,10 +190,10 @@ File '/a/package.json' does not exist according to earlier cached lookups.
 File '/package.json' does not exist according to earlier cached lookups.
 DirectoryWatcher:: Close:: WatchInfo: /user/username/projects/myproject/src/fileB.mjs 1 undefined Failed Lookup Locations
 Elapsed:: *ms DirectoryWatcher:: Close:: WatchInfo: /user/username/projects/myproject/src/fileB.mjs 1 undefined Failed Lookup Locations
-[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m - [91merror[0m[90m TS2307: [0mCannot find module './fileB.mjs' or its corresponding type declarations.
-
-[7m1[0m import { foo } from "./fileB.mjs";
-[7m [0m [91m                    ~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m  [91mError[0m TS2307
+| import { foo } from "./fileB.mjs";
+  [91m                    ▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Cannot find module './fileB.mjs' or its corresponding type declarations.
 
 ../../../../a/lib/lib.es2016.full.d.ts
   Default library for target 'es2016'
@@ -307,10 +307,10 @@ Elapsed:: *ms DirectoryWatcher:: Added:: WatchInfo: /user/username/projects/mypr
 File '/a/lib/package.json' does not exist according to earlier cached lookups.
 File '/a/package.json' does not exist according to earlier cached lookups.
 File '/package.json' does not exist according to earlier cached lookups.
-[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m - [91merror[0m[90m TS2307: [0mCannot find module './fileB.mjs' or its corresponding type declarations.
-
-[7m1[0m import { foo } from "./fileB.mjs";
-[7m [0m [91m                    ~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m  [91mError[0m TS2307
+| import { foo } from "./fileB.mjs";
+  [91m                    ▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Cannot find module './fileB.mjs' or its corresponding type declarations.
 
 ../../../../a/lib/lib.es2016.full.d.ts
   Default library for target 'es2016'
@@ -415,10 +415,10 @@ File '/a/lib/package.json' does not exist according to earlier cached lookups.
 File '/a/package.json' does not exist according to earlier cached lookups.
 File '/package.json' does not exist according to earlier cached lookups.
 FileWatcher:: Added:: WatchInfo: /user/username/projects/package.json 2000 undefined File location affecting resolution
-[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m - [91merror[0m[90m TS2307: [0mCannot find module './fileB.mjs' or its corresponding type declarations.
-
-[7m1[0m import { foo } from "./fileB.mjs";
-[7m [0m [91m                    ~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m  [91mError[0m TS2307
+| import { foo } from "./fileB.mjs";
+  [91m                    ▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Cannot find module './fileB.mjs' or its corresponding type declarations.
 
 ../../../../a/lib/lib.es2016.full.d.ts
   Default library for target 'es2016'
@@ -521,10 +521,10 @@ File '/package.json' does not exist according to earlier cached lookups.
 DirectoryWatcher:: Close:: WatchInfo: /user/username/projects/myproject/src/fileB.mjs 1 undefined Failed Lookup Locations
 Elapsed:: *ms DirectoryWatcher:: Close:: WatchInfo: /user/username/projects/myproject/src/fileB.mjs 1 undefined Failed Lookup Locations
 FileWatcher:: Close:: WatchInfo: /user/username/projects/package.json 2000 undefined File location affecting resolution
-[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m - [91merror[0m[90m TS2307: [0mCannot find module './fileB.mjs' or its corresponding type declarations.
-
-[7m1[0m import { foo } from "./fileB.mjs";
-[7m [0m [91m                    ~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m  [91mError[0m TS2307
+| import { foo } from "./fileB.mjs";
+  [91m                    ▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Cannot find module './fileB.mjs' or its corresponding type declarations.
 
 ../../../../a/lib/lib.es2016.full.d.ts
   Default library for target 'es2016'
@@ -647,10 +647,10 @@ File '/a/lib/package.json' does not exist according to earlier cached lookups.
 File '/a/package.json' does not exist according to earlier cached lookups.
 File '/package.json' does not exist according to earlier cached lookups.
 FileWatcher:: Added:: WatchInfo: /user/username/projects/package.json 2000 undefined File location affecting resolution
-[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m - [91merror[0m[90m TS2307: [0mCannot find module './fileB.mjs' or its corresponding type declarations.
-
-[7m1[0m import { foo } from "./fileB.mjs";
-[7m [0m [91m                    ~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/fileA.ts[0m:[93m1[0m:[93m21[0m  [91mError[0m TS2307
+| import { foo } from "./fileB.mjs";
+  [91m                    ▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Cannot find module './fileB.mjs' or its corresponding type declarations.
 
 ../../../../a/lib/lib.es2016.full.d.ts
   Default library for target 'es2016'

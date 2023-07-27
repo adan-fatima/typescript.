@@ -19,11 +19,11 @@
     let _: A = new A();  // Error
                    ~
 !!! error TS1362: 'A' cannot be used as a value because it was exported using 'export type'.
-!!! related TS1377 /b.ts:1:1: 'A' was exported here.
+!!! related TS1377 /b.ts:1:1: 'A' was exported here:
     let __: B = new B(); // Error
                     ~
 !!! error TS1362: 'B' cannot be used as a value because it was exported using 'export type'.
-!!! related TS1377 /b.ts:1:1: 'B' was exported here.
+!!! related TS1377 /b.ts:1:1: 'B' was exported here:
     let ___: C = new C(); // Ok
     
 ==== /d.ts (0 errors) ====
@@ -34,13 +34,13 @@
     let _: A = new A();   // Error
                    ~
 !!! error TS1362: 'A' cannot be used as a value because it was exported using 'export type'.
-!!! related TS1377 /d.ts:1:1: 'A' was exported here.
+!!! related TS1377 /d.ts:1:1: 'A' was exported here:
     let __: B = new B();  // Error
                     ~
 !!! error TS1362: 'B' cannot be used as a value because it was exported using 'export type'.
-!!! related TS1377 /d.ts:1:1: 'B' was exported here.
+!!! related TS1377 /d.ts:1:1: 'B' was exported here:
     let ___: C = new C(); // Error
                      ~
 !!! error TS1362: 'C' cannot be used as a value because it was exported using 'export type'.
-!!! related TS1377 /d.ts:1:1: 'C' was exported here.
+!!! related TS1377 /d.ts:1:1: 'C' was exported here:
     

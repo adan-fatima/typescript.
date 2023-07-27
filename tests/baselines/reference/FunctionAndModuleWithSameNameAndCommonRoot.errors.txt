@@ -24,7 +24,7 @@ test.ts(2,5): error TS2403: Subsequent variable declarations must have the same 
     var fn = A.Point;
         ~~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'fn' must be of type '() => { x: number; y: number; }', but here has type 'typeof Point'.
-!!! related TS6203 test.ts:1:5: 'fn' was also declared here.
+!!! related TS6203 test.ts:1:5: 'fn' was also declared here:
     
     var cl: { x: number; y: number; }
     var cl = A.Point();
@@ -47,7 +47,7 @@ test.ts(2,5): error TS2403: Subsequent variable declarations must have the same 
     var fn = B.Point;  // not expected to be an error. bug 840000: [corelang] Function of fundule not assignalbe as expected
         ~~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'fn' must be of type '() => { x: number; y: number; }', but here has type 'typeof Point'.
-!!! related TS6203 test.ts:1:5: 'fn' was also declared here.
+!!! related TS6203 test.ts:1:5: 'fn' was also declared here:
     
     var cl: { x: number; y: number; }
     var cl = B.Point();

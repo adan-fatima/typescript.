@@ -9,7 +9,7 @@ exportVars.ts(3,16): error TS2454: Variable 'y' is used before being assigned.
     export default x;
                    ~
 !!! error TS2448: Block-scoped variable 'x' used before its declaration.
-!!! related TS2728 exportConsts.ts:5:7: 'x' is declared here.
+!!! related TS2728 exportConsts.ts:5:7: 'x' is declared here:
                    ~
 !!! error TS2454: Variable 'x' is used before being assigned.
     

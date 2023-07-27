@@ -88,7 +88,7 @@ unspecializedConstraints.ts(84,44): error TS2552: Cannot find name 'TypeParamete
             constructor(public typeParameters: TypeParameter[], public parameters: Parameter[], public returnType: Type) {
                                                ~~~~~~~~~~~~~
 !!! error TS2552: Cannot find name 'TypeParameter'. Did you mean 'Parameter'?
-!!! related TS2728 unspecializedConstraints.ts:99:11: 'Parameter' is declared here.
+!!! related TS2728 unspecializedConstraints.ts:99:11: 'Parameter' is declared here:
                 super();
             }
             equalsNoReturn(other: Signature): boolean {

@@ -44,6 +44,6 @@ negateOperatorInvalidOperations.ts(12,14): error TS1109: Expression expected.
     var NUMBER =-;
         ~~~~~~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'NUMBER' must be of type 'any', but here has type 'number'.
-!!! related TS6203 negateOperatorInvalidOperations.ts:4:19: 'NUMBER' was also declared here.
+!!! related TS6203 negateOperatorInvalidOperations.ts:4:19: 'NUMBER' was also declared here:
                  ~
 !!! error TS1109: Expression expected.

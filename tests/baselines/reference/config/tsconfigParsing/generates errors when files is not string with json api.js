@@ -10,5 +10,5 @@ configFileName:: /apath/tsconfig.json
 FileNames::
 
 Errors::
-[91merror[0m[90m TS5024: [0mCompiler option 'files' requires a value of type string.
+[91m● [0m [91mError[0m TS5024Compiler option 'files' requires a value of type string.
 

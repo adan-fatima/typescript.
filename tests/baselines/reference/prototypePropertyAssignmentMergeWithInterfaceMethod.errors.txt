@@ -24,7 +24,7 @@ lovefield.js(4,14): error TS2304: Cannot find name 'IThenable'.
         stats(): TransactionStats
                  ~~~~~~~~~~~~~~~~
 !!! error TS2552: Cannot find name 'TransactionStats'. Did you mean 'Transaction'?
-!!! related TS2728 lovefield.js:1:1: 'Transaction' is declared here.
+!!! related TS2728 lovefield.js:1:1: 'Transaction' is declared here:
       }
     }
 ==== lovefield.js (2 errors) ====

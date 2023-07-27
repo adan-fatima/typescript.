@@ -12,4 +12,4 @@
     let _: ns.A = new ns.A(); // Error
                       ~~
 !!! error TS1362: 'ns' cannot be used as a value because it was exported using 'export type'.
-!!! related TS1377 /b.ts:1:13: 'ns' was exported here.
+!!! related TS1377 /b.ts:1:13: 'ns' was exported here:

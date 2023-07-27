@@ -30,7 +30,7 @@ augmentedTypesVar.ts(31,8): error TS2300: Duplicate identifier 'x6b'.
     var x3 = () => { } // error
         ~~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'x3' must be of type 'number', but here has type '() => void'.
-!!! related TS6203 augmentedTypesVar.ts:9:5: 'x3' was also declared here.
+!!! related TS6203 augmentedTypesVar.ts:9:5: 'x3' was also declared here:
     
     // var then class
     var x4 = 1; // error

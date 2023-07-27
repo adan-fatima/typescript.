@@ -50,7 +50,7 @@ excessPropertyCheckWithUnions.ts(112,63): error TS2322: Type 'string' is not ass
     ~~~~~
 !!! error TS2322: Type '{ tag: "D"; }' is not assignable to type 'ADT'.
 !!! error TS2322:   Property 'd20' is missing in type '{ tag: "D"; }' but required in type '{ tag: "D"; d20: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20; }'.
-!!! related TS2728 excessPropertyCheckWithUnions.ts:6:5: 'd20' is declared here.
+!!! related TS2728 excessPropertyCheckWithUnions.ts:6:5: 'd20' is declared here:
     
     type Ambiguous = {
         tag: "A",
@@ -86,7 +86,7 @@ excessPropertyCheckWithUnions.ts(112,63): error TS2322: Type 'string' is not ass
 !!! error TS2322: Type '{ tag: "A"; }' is not assignable to type 'Ambiguous'.
 !!! error TS2322:   Type '{ tag: "A"; }' is not assignable to type '{ tag: "A"; x: string; } | { tag: "A"; y: number; }'.
 !!! error TS2322:     Property 'y' is missing in type '{ tag: "A"; }' but required in type '{ tag: "A"; y: number; }'.
-!!! related TS2728 excessPropertyCheckWithUnions.ts:19:5: 'y' is declared here.
+!!! related TS2728 excessPropertyCheckWithUnions.ts:19:5: 'y' is declared here:
     amb = { tag: "A", z: true }
                       ~
 !!! error TS2322: Type '{ tag: "A"; z: boolean; }' is not assignable to type 'Ambiguous'.

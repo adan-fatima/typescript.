@@ -21,5 +21,5 @@ TypeAcquisition::
  "exclude": []
 }
 Errors::
-[91merror[0m[90m TS17010: [0mUnknown type acquisition option 'enableAutoDiscovy'.
+[91m● [0m [91mError[0m TS17010Unknown type acquisition option 'enableAutoDiscovy'.
 

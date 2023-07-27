@@ -24,5 +24,5 @@ CompilerOptions::
  "configFilePath": "jsconfig.json"
 }
 Errors::
-[91merror[0m[90m TS5023: [0mUnknown compiler option 'modu'.
+[91m● [0m [91mError[0m TS5023Unknown compiler option 'modu'.
 

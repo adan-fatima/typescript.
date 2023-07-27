@@ -50,10 +50,10 @@ declare const console: { log(msg: any): void; };
 
 Output::
 /lib/tsc --p /beta/tsconfig.json --explainFiles
-[96mbeta/b.ts[0m:[93m1[0m:[93m10[0m - [91merror[0m[90m TS2305: [0mModule '"../alpha/a"' has no exported member 'm'.
-
-[7m1[0m import { m } from '../alpha/a'
-[7m [0m [91m         ~[0m
+[91m● [0m[96mbeta/b.ts[0m:[93m1[0m:[93m10[0m  [91mError[0m TS2305
+| import { m } from '../alpha/a'
+  [91m         ▔[0m
+Module '"../alpha/a"' has no exported member 'm'.
 
 lib/lib.d.ts
   Default library for target 'es5'

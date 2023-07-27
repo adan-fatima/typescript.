@@ -146,7 +146,7 @@ Result: WatchOptions::
  "excludeDirectories": []
 }
 Errors::
-[91merror[0m[90m TS5065: [0mFile specification cannot contain a parent directory ('..') that appears after a recursive directory wildcard ('**'): '**/../*'.
+[91m● [0m [91mError[0m TS5065File specification cannot contain a parent directory ('..') that appears after a recursive directory wildcard ('**'): '**/../*'.
 
 
 Fs::
@@ -169,5 +169,5 @@ Result: WatchOptions::
  "excludeFiles": []
 }
 Errors::
-[91merror[0m[90m TS5065: [0mFile specification cannot contain a parent directory ('..') that appears after a recursive directory wildcard ('**'): '**/../*'.
+[91m● [0m [91mError[0m TS5065File specification cannot contain a parent directory ('..') that appears after a recursive directory wildcard ('**'): '**/../*'.
 

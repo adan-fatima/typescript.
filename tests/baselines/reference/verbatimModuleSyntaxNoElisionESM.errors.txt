@@ -32,7 +32,7 @@
     import { AClass } from "./b";
              ~~~~~~
 !!! error TS1485: 'AClass' resolves to a type-only declaration and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-!!! related TS1377 /b.ts:9:15: 'AClass' was exported here.
+!!! related TS1377 /b.ts:9:15: 'AClass' was exported here:
     
 ==== /main4.ts (0 errors) ====
     export default 1; // ok

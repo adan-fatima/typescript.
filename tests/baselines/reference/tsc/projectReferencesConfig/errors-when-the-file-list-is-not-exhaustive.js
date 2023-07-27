@@ -37,10 +37,10 @@ export {}
 
 Output::
 /lib/tsc --p /primary/tsconfig.json
-[96mprimary/a.ts[0m:[93m1[0m:[93m20[0m - [91merror[0m[90m TS6307: [0mFile '/primary/b.ts' is not listed within the file list of project '/primary/tsconfig.json'. Projects must list all files or use an 'include' pattern.
-
-[7m1[0m import * as b from './b'
-[7m [0m [91m                   ~~~~~[0m
+[91m● [0m[96mprimary/a.ts[0m:[93m1[0m:[93m20[0m  [91mError[0m TS6307
+| import * as b from './b'
+  [91m                   ▔▔▔▔▔[0m
+File '/primary/b.ts' is not listed within the file list of project '/primary/tsconfig.json'. Projects must list all files or use an 'include' pattern.
 
 
 Found 1 error in primary/a.ts[90m:1[0m

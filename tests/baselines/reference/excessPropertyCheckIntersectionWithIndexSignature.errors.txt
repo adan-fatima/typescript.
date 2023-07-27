@@ -13,7 +13,7 @@ excessPropertyCheckIntersectionWithIndexSignature.ts(7,24): error TS2322: Type '
           ~
 !!! error TS2322: Type '{ a: 0; }' is not assignable to type '{ a: 0; } & { b: 0; }'.
 !!! error TS2322:   Property 'b' is missing in type '{ a: 0; }' but required in type '{ b: 0; }'.
-!!! related TS2728 excessPropertyCheckIntersectionWithIndexSignature.ts:3:53: 'b' is declared here.
+!!! related TS2728 excessPropertyCheckIntersectionWithIndexSignature.ts:3:53: 'b' is declared here:
     x = { y: { a: 0, b: 0 } };
     x = { y: { a: 0, b: 0, c: 0 } };  // Error
                            ~

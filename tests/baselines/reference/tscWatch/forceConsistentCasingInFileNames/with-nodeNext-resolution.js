@@ -83,7 +83,7 @@ Resolving real path for '/Users/name/projects/web/node_modules/@types/yargs/inde
 File '/a/lib/package.json' does not exist.
 File '/a/package.json' does not exist.
 File '/package.json' does not exist according to earlier cached lookups.
-[91merror[0m[90m TS5110: [0mOption 'module' must be set to 'NodeNext' when option 'moduleResolution' is set to 'NodeNext'.
+[91m● [0m [91mError[0m TS5110Option 'module' must be set to 'NodeNext' when option 'moduleResolution' is set to 'NodeNext'.
 
 ../../../../a/lib/lib.d.ts
   Default library for target 'es5'

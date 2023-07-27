@@ -28,10 +28,10 @@ Output::
 >> Screen clear
 [[90m12:00:15 AM[0m] Starting compilation in watch mode...
 
-[96ma.ts[0m:[93m1[0m:[93m16[0m - [91merror[0m[90m TS2306: [0mFile '/b.d.css.ts' is not a module.
-
-[7m1[0m import {} from './b.css'
-[7m [0m [91m               ~~~~~~~~~[0m
+[91m● [0m[96ma.ts[0m:[93m1[0m:[93m16[0m  [91mError[0m TS2306
+| import {} from './b.css'
+  [91m               ▔▔▔▔▔▔▔▔▔[0m
+File '/b.d.css.ts' is not a module.
 
 [[90m12:00:18 AM[0m] Found 1 error. Watching for file changes.
 
@@ -87,10 +87,10 @@ Output::
 >> Screen clear
 [[90m12:00:21 AM[0m] File change detected. Starting incremental compilation...
 
-[96ma.ts[0m:[93m1[0m:[93m16[0m - [91merror[0m[90m TS6263: [0mModule './b.css' was resolved to '/b.d.css.ts', but '--allowArbitraryExtensions' is not set.
-
-[7m1[0m import {} from './b.css'
-[7m [0m [91m               ~~~~~~~~~[0m
+[91m● [0m[96ma.ts[0m:[93m1[0m:[93m16[0m  [91mError[0m TS6263
+| import {} from './b.css'
+  [91m               ▔▔▔▔▔▔▔▔▔[0m
+Module './b.css' was resolved to '/b.d.css.ts', but '--allowArbitraryExtensions' is not set.
 
 [[90m12:00:25 AM[0m] Found 1 error. Watching for file changes.
 
@@ -139,10 +139,10 @@ Output::
 >> Screen clear
 [[90m12:00:28 AM[0m] File change detected. Starting incremental compilation...
 
-[96ma.ts[0m:[93m1[0m:[93m16[0m - [91merror[0m[90m TS2306: [0mFile '/b.d.css.ts' is not a module.
-
-[7m1[0m import {} from './b.css'
-[7m [0m [91m               ~~~~~~~~~[0m
+[91m● [0m[96ma.ts[0m:[93m1[0m:[93m16[0m  [91mError[0m TS2306
+| import {} from './b.css'
+  [91m               ▔▔▔▔▔▔▔▔▔[0m
+File '/b.d.css.ts' is not a module.
 
 [[90m12:00:32 AM[0m] Found 1 error. Watching for file changes.
 

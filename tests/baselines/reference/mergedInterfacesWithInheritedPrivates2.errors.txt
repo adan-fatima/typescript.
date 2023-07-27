@@ -41,7 +41,7 @@ mergedInterfacesWithInheritedPrivates2.ts(31,12): error TS2341: Property 'w' is 
           ~
 !!! error TS2420: Class 'E' incorrectly implements interface 'A'.
 !!! error TS2420:   Property 'x' is missing in type 'E' but required in type 'A'.
-!!! related TS2728 mergedInterfacesWithInheritedPrivates2.ts:2:13: 'x' is declared here.
+!!! related TS2728 mergedInterfacesWithInheritedPrivates2.ts:2:13: 'x' is declared here:
         w: number;
         y: string;
         z: string;

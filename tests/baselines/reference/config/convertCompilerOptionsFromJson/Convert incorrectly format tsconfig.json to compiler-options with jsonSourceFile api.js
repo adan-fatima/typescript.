@@ -19,8 +19,8 @@ CompilerOptions::
  "configFilePath": "tsconfig.json"
 }
 Errors::
-[96mtsconfig.json[0m:[93m3[0m:[93m3[0m - [91merror[0m[90m TS5023: [0mUnknown compiler option 'modu'.
-
-[7m3[0m   "modu": "commonjs"
-[7m [0m [91m  ~~~~~~[0m
+[91m● [0m[96mtsconfig.json[0m:[93m3[0m:[93m3[0m  [91mError[0m TS5023
+| "modu": "commonjs"
+  [91m▔▔▔▔▔▔[0m
+Unknown compiler option 'modu'.
 

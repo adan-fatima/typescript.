@@ -12,7 +12,7 @@ typeofAmbientExternalModules_2.ts(9,1): error TS2741: Property 'prototype' is mi
     y1 = exp;
     ~~
 !!! error TS2741: Property 'C' is missing in type 'typeof D' but required in type 'typeof import("typeofAmbientExternalModules_0")'.
-!!! related TS2728 typeofAmbientExternalModules_0.ts:1:14: 'C' is declared here.
+!!! related TS2728 typeofAmbientExternalModules_0.ts:1:14: 'C' is declared here:
     var y2: typeof exp = exp;
     y2 = ext;
     ~~

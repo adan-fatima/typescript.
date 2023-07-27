@@ -188,7 +188,7 @@ Info seq  [hh:mm:ss:mss] event:
            },
            "file": "/tsconfig.json"
           },
-          "message": "File is entry point of type library specified here.",
+          "message": "File is entry point of type library specified here:",
           "category": "message",
           "code": 1419
          }
@@ -221,7 +221,7 @@ Info seq  [hh:mm:ss:mss] event:
            },
            "file": "/tsconfig.json"
           },
-          "message": "File is matched by 'files' list specified here.",
+          "message": "File is matched by 'files' list specified here:",
           "category": "message",
           "code": 1410
          }

@@ -44,5 +44,5 @@ varianceAnnotationValidation.ts(27,1): error TS2322: Type 'AnimalContainer<Anima
     ~~
 !!! error TS2322: Type 'AnimalContainer<Animal>' is not assignable to type 'AnimalContainer<Dog>'.
 !!! error TS2322:   Property 'bark' is missing in type 'Animal' but required in type 'Dog'.
-!!! related TS2728 varianceAnnotationValidation.ts:16:2: 'bark' is declared here.
+!!! related TS2728 varianceAnnotationValidation.ts:16:2: 'bark' is declared here:
     

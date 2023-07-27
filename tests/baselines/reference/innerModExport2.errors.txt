@@ -36,4 +36,4 @@ innerModExport2.ts(20,7): error TS2551: Property 'NonExportFunc' does not exist 
     Outer.NonExportFunc();
           ~~~~~~~~~~~~~
 !!! error TS2551: Property 'NonExportFunc' does not exist on type 'typeof Outer'. Did you mean 'ExportFunc'?
-!!! related TS2728 innerModExport2.ts:11:25: 'ExportFunc' is declared here.
+!!! related TS2728 innerModExport2.ts:11:25: 'ExportFunc' is declared here:

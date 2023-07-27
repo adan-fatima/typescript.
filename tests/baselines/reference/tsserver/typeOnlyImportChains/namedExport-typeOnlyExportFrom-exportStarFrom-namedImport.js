@@ -127,7 +127,7 @@ Info seq  [hh:mm:ss:mss] response:
                 },
                 "file": "/b.ts"
               },
-              "message": "'A' was exported here.",
+              "message": "'A' was exported here:",
               "category": "message",
               "code": 1377
             }

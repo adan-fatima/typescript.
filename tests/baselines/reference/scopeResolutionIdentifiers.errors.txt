@@ -28,7 +28,7 @@ scopeResolutionIdentifiers.ts(24,14): error TS2729: Property 's' is used before 
         n = this.s;
                  ~
 !!! error TS2729: Property 's' is used before its initialization.
-!!! related TS2728 scopeResolutionIdentifiers.ts:23:5: 's' is declared here.
+!!! related TS2728 scopeResolutionIdentifiers.ts:23:5: 's' is declared here:
         x() {
             var p = this.n;
             var p: Date;

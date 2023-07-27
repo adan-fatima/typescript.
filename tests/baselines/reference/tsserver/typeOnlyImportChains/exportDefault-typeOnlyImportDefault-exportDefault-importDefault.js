@@ -118,7 +118,7 @@ Info seq  [hh:mm:ss:mss] response:
                 },
                 "file": "/b.ts"
               },
-              "message": "'A' was imported here.",
+              "message": "'A' was imported here:",
               "category": "message",
               "code": 1376
             }

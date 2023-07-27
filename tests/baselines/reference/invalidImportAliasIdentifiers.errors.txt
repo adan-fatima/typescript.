@@ -1,6 +1,6 @@
 invalidImportAliasIdentifiers.ts(5,12): error TS2503: Cannot find namespace 'V'.
-invalidImportAliasIdentifiers.ts(11,12): error TS2702: 'C' only refers to a type, but is being used as a namespace here.
-invalidImportAliasIdentifiers.ts(23,12): error TS2702: 'I' only refers to a type, but is being used as a namespace here.
+invalidImportAliasIdentifiers.ts(11,12): error TS2702: 'C' only refers to a type, but is being used as a namespace here:
+invalidImportAliasIdentifiers.ts(23,12): error TS2702: 'I' only refers to a type, but is being used as a namespace here:
 
 
 ==== invalidImportAliasIdentifiers.ts (3 errors) ====
@@ -18,7 +18,7 @@ invalidImportAliasIdentifiers.ts(23,12): error TS2702: 'I' only refers to a type
     
     import c = C;
                ~
-!!! error TS2702: 'C' only refers to a type, but is being used as a namespace here.
+!!! error TS2702: 'C' only refers to a type, but is being used as a namespace here:
     
     enum E {
         Red, Blue
@@ -32,5 +32,5 @@ invalidImportAliasIdentifiers.ts(23,12): error TS2702: 'I' only refers to a type
     
     import i = I;
                ~
-!!! error TS2702: 'I' only refers to a type, but is being used as a namespace here.
+!!! error TS2702: 'I' only refers to a type, but is being used as a namespace here:
     

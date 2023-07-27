@@ -14,7 +14,7 @@ classExtendsItselfIndirectly2.ts(20,22): error TS2506: 'E2' is referenced direct
 !!! error TS2506: 'C' is referenced directly or indirectly in its own base expression.
                       ~
 !!! error TS2449: Class 'E' used before its declaration.
-!!! related TS2728 classExtendsItselfIndirectly2.ts:9:18: 'E' is declared here.
+!!! related TS2728 classExtendsItselfIndirectly2.ts:9:18: 'E' is declared here:
     
     module M {
         export class D extends C { bar: string; }
@@ -35,7 +35,7 @@ classExtendsItselfIndirectly2.ts(20,22): error TS2506: 'E2' is referenced direct
 !!! error TS2506: 'C2' is referenced directly or indirectly in its own base expression.
                               ~~
 !!! error TS2449: Class 'E2' used before its declaration.
-!!! related TS2728 classExtendsItselfIndirectly2.ts:20:22: 'E2' is declared here.
+!!! related TS2728 classExtendsItselfIndirectly2.ts:20:22: 'E2' is declared here:
     
         module P {
             export class D2<T> extends C2<T> { bar: T; }

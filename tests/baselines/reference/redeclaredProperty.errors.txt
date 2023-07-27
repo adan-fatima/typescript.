@@ -11,7 +11,7 @@ redeclaredProperty.ts(7,12): error TS2729: Property 'b' is used before its initi
       d = this.b;
                ~
 !!! error TS2729: Property 'b' is used before its initialization.
-!!! related TS2728 redeclaredProperty.ts:6:3: 'b' is declared here.
+!!! related TS2728 redeclaredProperty.ts:6:3: 'b' is declared here:
     
       constructor() {
         super();

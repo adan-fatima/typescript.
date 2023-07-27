@@ -1,9 +1,9 @@
 instantiationExpressionErrors.ts(7,13): error TS1477: An instantiation expression cannot be followed by a property access.
 instantiationExpressionErrors.ts(8,13): error TS1477: An instantiation expression cannot be followed by a property access.
 instantiationExpressionErrors.ts(13,12): error TS2365: Operator '>' cannot be applied to types 'boolean' and 'string[]'.
-instantiationExpressionErrors.ts(13,14): error TS2693: 'number' only refers to a type, but is being used as a value here.
+instantiationExpressionErrors.ts(13,14): error TS2693: 'number' only refers to a type, but is being used as a value here:
 instantiationExpressionErrors.ts(18,12): error TS2365: Operator '>' cannot be applied to types 'boolean' and 'number'.
-instantiationExpressionErrors.ts(18,14): error TS2693: 'number' only refers to a type, but is being used as a value here.
+instantiationExpressionErrors.ts(18,14): error TS2693: 'number' only refers to a type, but is being used as a value here:
 instantiationExpressionErrors.ts(18,29): error TS1109: Expression expected.
 instantiationExpressionErrors.ts(19,24): error TS2635: Type '{ (): number; g<U>(): U; }' has no signatures for which the type argument list is applicable.
 instantiationExpressionErrors.ts(23,23): error TS1005: '(' expected.
@@ -37,7 +37,7 @@ instantiationExpressionErrors.ts(45,12): error TS2365: Operator '>' cannot be ap
                ~~~~~~~~~~~~~~
 !!! error TS2365: Operator '>' cannot be applied to types 'boolean' and 'string[]'.
                  ~~~~~~
-!!! error TS2693: 'number' only refers to a type, but is being used as a value here.
+!!! error TS2693: 'number' only refers to a type, but is being used as a value here:
     const a7 = (f<number>)['g'];
     
     // An `<` cannot immediately follow a type argument list
@@ -46,7 +46,7 @@ instantiationExpressionErrors.ts(45,12): error TS2365: Operator '>' cannot be ap
                ~~~~~~~~~~~~~~~~~
 !!! error TS2365: Operator '>' cannot be applied to types 'boolean' and 'number'.
                  ~~~~~~
-!!! error TS2693: 'number' only refers to a type, but is being used as a value here.
+!!! error TS2693: 'number' only refers to a type, but is being used as a value here:
                                 ~
 !!! error TS1109: Expression expected.
     const a9 = (f<number>)<number>;  // Error, no applicable signatures

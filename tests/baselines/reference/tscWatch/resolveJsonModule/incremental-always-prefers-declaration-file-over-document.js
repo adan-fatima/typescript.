@@ -35,10 +35,10 @@ Output::
 >> Screen clear
 [[90m12:00:21 AM[0m] Starting compilation in watch mode...
 
-[96msrc/project/main.ts[0m:[93m1[0m:[93m18[0m - [91merror[0m[90m TS6263: [0mModule './data.json' was resolved to '/src/project/data.d.json.ts', but '--allowArbitraryExtensions' is not set.
-
-[7m1[0m import data from "./data.json"; let x: string = data;
-[7m [0m [91m                 ~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project/main.ts[0m:[93m1[0m:[93m18[0m  [91mError[0m TS6263
+| import data from "./data.json"; let x: string = data;
+  [91m                 ▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Module './data.json' was resolved to '/src/project/data.d.json.ts', but '--allowArbitraryExtensions' is not set.
 
 [[90m12:00:26 AM[0m] Found 1 error. Watching for file changes.
 
@@ -168,10 +168,10 @@ Output::
 >> Screen clear
 [[90m12:00:32 AM[0m] File change detected. Starting incremental compilation...
 
-[96msrc/project/main.ts[0m:[93m1[0m:[93m18[0m - [91merror[0m[90m TS6263: [0mModule './data.json' was resolved to '/src/project/data.d.json.ts', but '--allowArbitraryExtensions' is not set.
-
-[7m1[0m import data from "./data.json"; let x: string = data;
-[7m [0m [91m                 ~~~~~~~~~~~~~[0m
+[91m● [0m[96msrc/project/main.ts[0m:[93m1[0m:[93m18[0m  [91mError[0m TS6263
+| import data from "./data.json"; let x: string = data;
+  [91m                 ▔▔▔▔▔▔▔▔▔▔▔▔▔[0m
+Module './data.json' was resolved to '/src/project/data.d.json.ts', but '--allowArbitraryExtensions' is not set.
 
 [[90m12:00:33 AM[0m] Found 1 error. Watching for file changes.
 

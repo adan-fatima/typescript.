@@ -1,4 +1,4 @@
-invalidUseOfTypeAsNamespace.ts(4,16): error TS2702: 'OhNo' only refers to a type, but is being used as a namespace here.
+invalidUseOfTypeAsNamespace.ts(4,16): error TS2702: 'OhNo' only refers to a type, but is being used as a namespace here:
 
 
 ==== invalidUseOfTypeAsNamespace.ts (1 errors) ====
@@ -7,5 +7,5 @@ invalidUseOfTypeAsNamespace.ts(4,16): error TS2702: 'OhNo' only refers to a type
     
     declare let y: OhNo.hello;
                    ~~~~
-!!! error TS2702: 'OhNo' only refers to a type, but is being used as a namespace here.
+!!! error TS2702: 'OhNo' only refers to a type, but is being used as a namespace here:
     

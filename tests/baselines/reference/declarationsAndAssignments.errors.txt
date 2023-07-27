@@ -91,7 +91,7 @@ declarationsAndAssignments.ts(138,9): error TS2322: Type 'number' is not assigna
         var y: string;
             ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'y' must be of type 'string | number', but here has type 'string'.
-!!! related TS6203 declarationsAndAssignments.ts:56:17: 'y' was also declared here.
+!!! related TS6203 declarationsAndAssignments.ts:56:17: 'y' was also declared here:
     }
     
     function f8() {

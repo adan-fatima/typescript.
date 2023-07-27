@@ -25,8 +25,8 @@ CompilerOptions::
  "configFilePath": "tsconfig.json"
 }
 Errors::
-[96mtsconfig.json[0m:[93m3[0m:[93m14[0m - [91merror[0m[90m TS6046: [0mArgument for '--newLine' option must be: 'crlf', 'lf'.
-
-[7m3[0m   "newLine": "",
-[7m [0m [91m             ~~[0m
+[91m● [0m[96mtsconfig.json[0m:[93m3[0m:[93m14[0m  [91mError[0m TS6046
+| "newLine": "",
+  [91m           ▔▔[0m
+Argument for '--newLine' option must be: 'crlf', 'lf'.
 

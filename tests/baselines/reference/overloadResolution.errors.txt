@@ -144,7 +144,7 @@ overloadResolution.ts(91,22): error TS2339: Property 'toFixed' does not exist on
     var n = fn5((n) => n.toFixed());
         ~
 !!! error TS2403: Subsequent variable declarations must have the same type.  Variable 'n' must be of type 'number', but here has type 'string'.
-!!! related TS6203 overloadResolution.ts:54:5: 'n' was also declared here.
+!!! related TS6203 overloadResolution.ts:54:5: 'n' was also declared here:
                          ~~~~~~~
 !!! error TS2339: Property 'toFixed' does not exist on type 'string'.
     var s = fn5((n) => n.substr(0));
