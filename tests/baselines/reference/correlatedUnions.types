@@ -900,3 +900,202 @@ function getValueConcrete<K extends keyof Foo1>(
 >k : K
 }
 
+// repro from https://github.com/microsoft/TypeScript/issues/54680
+
+type A_54680 = {
+>A_54680 : { type: "A"; value: string; }
+
+  type: "A";
+>type : "A"
+
+  value: string;
+>value : string
+
+};
+
+type B_54680 = {
+>B_54680 : { type: "B"; value: number; }
+
+  type: "B";
+>type : "B"
+
+  value: number;
+>value : number
+
+};
+
+type Message_54680 = A_54680 | B_54680;
+>Message_54680 : A_54680 | B_54680
+
+function handle_54680_1<M extends Message_54680>(callbacks: {
+>handle_54680_1 : <M extends Message_54680>(callbacks: { [K in M["type"]]: (msg: Extract<M, { type: K; }>["value"]) => unknown; }) => void
+>callbacks : { [K in M["type"]]: (msg: Extract<M, { type: K; }>["value"]) => unknown; }
+
+  [K in M["type"]]: (msg: Extract<M, { type: K }>["value"]) => unknown;
+>msg : Extract<M, { type: K; }>["value"]
+>type : K
+
+}) {
+  window.addEventListener("message", (event) => {
+>window.addEventListener("message", (event) => {    const msg = event.data as M;    callbacks[msg.type as keyof typeof callbacks](msg.value);  }) : void
+>window.addEventListener : { <K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void; } & { <K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void; }
+>window : Window & typeof globalThis
+>addEventListener : { <K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void; } & { <K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void; }
+>"message" : "message"
+>(event) => {    const msg = event.data as M;    callbacks[msg.type as keyof typeof callbacks](msg.value);  } : (this: Window, event: MessageEvent<any>) => void
+>event : MessageEvent<any>
+
+    const msg = event.data as M;
+>msg : M
+>event.data as M : M
+>event.data : any
+>event : MessageEvent<any>
+>data : any
+
+    callbacks[msg.type as keyof typeof callbacks](msg.value);
+>callbacks[msg.type as keyof typeof callbacks](msg.value) : unknown
+>callbacks[msg.type as keyof typeof callbacks] : { [K in M["type"]]: (msg: Extract<M, { type: K; }>["value"]) => unknown; }[M["type"]]
+>callbacks : { [K in M["type"]]: (msg: Extract<M, { type: K; }>["value"]) => unknown; }
+>msg.type as keyof typeof callbacks : M["type"]
+>msg.type : "A" | "B"
+>msg : Message_54680
+>type : "A" | "B"
+>callbacks : { [K in M["type"]]: (msg: Extract<M, { type: K; }>["value"]) => unknown; }
+>msg.value : string | number
+>msg : Message_54680
+>value : string | number
+
+  });
+}
+
+function handle_54680_2<M extends Message_54680>(callbacks: {
+>handle_54680_2 : <M extends Message_54680>(callbacks: { [K in M["type"]]: (msg: (M & { type: K; })["value"]) => unknown; }) => void
+>callbacks : { [K in M["type"]]: (msg: (M & { type: K; })["value"]) => unknown; }
+
+  [K in M["type"]]: (msg: (M & { type: K })["value"]) => unknown;
+>msg : (M & { type: K; })["value"]
+>type : K
+
+}) {
+  window.addEventListener("message", (event) => {
+>window.addEventListener("message", (event) => {    const msg = event.data as M;    callbacks[msg.type as keyof typeof callbacks](msg.value);  }) : void
+>window.addEventListener : { <K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void; } & { <K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void; }
+>window : Window & typeof globalThis
+>addEventListener : { <K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void; } & { <K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, options?: boolean | AddEventListenerOptions | undefined): void; (type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions | undefined): void; }
+>"message" : "message"
+>(event) => {    const msg = event.data as M;    callbacks[msg.type as keyof typeof callbacks](msg.value);  } : (this: Window, event: MessageEvent<any>) => void
+>event : MessageEvent<any>
+
+    const msg = event.data as M;
+>msg : M
+>event.data as M : M
+>event.data : any
+>event : MessageEvent<any>
+>data : any
+
+    callbacks[msg.type as keyof typeof callbacks](msg.value);
+>callbacks[msg.type as keyof typeof callbacks](msg.value) : unknown
+>callbacks[msg.type as keyof typeof callbacks] : { [K in M["type"]]: (msg: (M & { type: K; })["value"]) => unknown; }[M["type"]]
+>callbacks : { [K in M["type"]]: (msg: (M & { type: K; })["value"]) => unknown; }
+>msg.type as keyof typeof callbacks : M["type"]
+>msg.type : "A" | "B"
+>msg : Message_54680
+>type : "A" | "B"
+>callbacks : { [K in M["type"]]: (msg: (M & { type: K; })["value"]) => unknown; }
+>msg.value : string | number
+>msg : Message_54680
+>value : string | number
+
+  });
+}
+
+// repro from https://github.com/microsoft/TypeScript/issues/54834
+
+type NumericLiteral_54834 = {
+>NumericLiteral_54834 : { value: number; type: "NumericLiteral"; }
+
+  value: number;
+>value : number
+
+  type: "NumericLiteral";
+>type : "NumericLiteral"
+
+};
+type StringLiteral_54834 = {
+>StringLiteral_54834 : { value: string; type: "StringLiteral"; }
+
+  value: string;
+>value : string
+
+  type: "StringLiteral";
+>type : "StringLiteral"
+
+};
+type Identifier_54834 = {
+>Identifier_54834 : { name: string; type: "Identifier"; }
+
+  name: string;
+>name : string
+
+  type: "Identifier";
+>type : "Identifier"
+
+};
+type CallExpression_54834 = {
+>CallExpression_54834 : { name: string; arguments: DropbearNode_54834[]; type: "CallExpression"; }
+
+  name: string;
+>name : string
+
+  arguments: DropbearNode_54834[];
+>arguments : DropbearNode_54834[]
+
+  type: "CallExpression";
+>type : "CallExpression"
+
+};
+
+type DropbearNode_54834 =
+>DropbearNode_54834 : NumericLiteral_54834 | StringLiteral_54834 | Identifier_54834 | CallExpression_54834
+
+  | NumericLiteral_54834
+  | StringLiteral_54834
+  | Identifier_54834
+  | CallExpression_54834;
+
+type TypeMap_54834 = {
+>TypeMap_54834 : { NumericLiteral: NumericLiteral_54834; StringLiteral: StringLiteral_54834; Identifier: Identifier_54834; CallExpression: CallExpression_54834; }
+
+  [K in DropbearNode_54834["type"]]: Extract<DropbearNode_54834, { type: K }>;
+>type : K
+
+};
+
+type Visitor_54834 = {
+>Visitor_54834 : { NumericLiteral: (node: Readonly<NumericLiteral_54834>) => void; StringLiteral: (node: Readonly<StringLiteral_54834>) => void; Identifier: (node: Readonly<Identifier_54834>) => void; CallExpression: (node: Readonly<CallExpression_54834>) => void; }
+
+  [K in keyof TypeMap_54834]: (node: Readonly<TypeMap_54834[K]>) => void;
+>node : Readonly<TypeMap_54834[K]>
+
+};
+
+function visitNode_54834<K extends keyof TypeMap_54834>(
+>visitNode_54834 : <K extends "NumericLiteral" | "StringLiteral" | "Identifier" | "CallExpression">(node: Readonly<TypeMap_54834[K]>, v: Visitor_54834) => void
+
+  node: Readonly<TypeMap_54834[K]>,
+>node : Readonly<TypeMap_54834[K]>
+
+  v: Visitor_54834
+>v : Visitor_54834
+
+) {
+  v[node.type](node);
+>v[node.type](node) : void
+>v[node.type] : Visitor_54834[TypeMap_54834[K]["type"]]
+>v : Visitor_54834
+>node.type : TypeMap_54834[K]["type"]
+>node : Readonly<TypeMap_54834[K]>
+>type : TypeMap_54834[K]["type"]
+>node : Readonly<TypeMap_54834[K]>
+}
+

@@ -302,6 +302,79 @@ function getValueConcrete<K extends keyof Foo1>(
   return o[k];
 }
 
+// repro from https://github.com/microsoft/TypeScript/issues/54680
+
+type A_54680 = {
+  type: "A";
+  value: string;
+};
+
+type B_54680 = {
+  type: "B";
+  value: number;
+};
+
+type Message_54680 = A_54680 | B_54680;
+
+function handle_54680_1<M extends Message_54680>(callbacks: {
+  [K in M["type"]]: (msg: Extract<M, { type: K }>["value"]) => unknown;
+}) {
+  window.addEventListener("message", (event) => {
+    const msg = event.data as M;
+    callbacks[msg.type as keyof typeof callbacks](msg.value);
+  });
+}
+
+function handle_54680_2<M extends Message_54680>(callbacks: {
+  [K in M["type"]]: (msg: (M & { type: K })["value"]) => unknown;
+}) {
+  window.addEventListener("message", (event) => {
+    const msg = event.data as M;
+    callbacks[msg.type as keyof typeof callbacks](msg.value);
+  });
+}
+
+// repro from https://github.com/microsoft/TypeScript/issues/54834
+
+type NumericLiteral_54834 = {
+  value: number;
+  type: "NumericLiteral";
+};
+type StringLiteral_54834 = {
+  value: string;
+  type: "StringLiteral";
+};
+type Identifier_54834 = {
+  name: string;
+  type: "Identifier";
+};
+type CallExpression_54834 = {
+  name: string;
+  arguments: DropbearNode_54834[];
+  type: "CallExpression";
+};
+
+type DropbearNode_54834 =
+  | NumericLiteral_54834
+  | StringLiteral_54834
+  | Identifier_54834
+  | CallExpression_54834;
+
+type TypeMap_54834 = {
+  [K in DropbearNode_54834["type"]]: Extract<DropbearNode_54834, { type: K }>;
+};
+
+type Visitor_54834 = {
+  [K in keyof TypeMap_54834]: (node: Readonly<TypeMap_54834[K]>) => void;
+};
+
+function visitNode_54834<K extends keyof TypeMap_54834>(
+  node: Readonly<TypeMap_54834[K]>,
+  v: Visitor_54834
+) {
+  v[node.type](node);
+}
+
 
 //// [correlatedUnions.js]
 "use strict";
@@ -432,6 +505,21 @@ function getConfigOrDefault(userConfig, key, defaultValue) {
 }
 function getValueConcrete(o, k) {
     return o[k];
+}
+function handle_54680_1(callbacks) {
+    window.addEventListener("message", function (event) {
+        var msg = event.data;
+        callbacks[msg.type](msg.value);
+    });
+}
+function handle_54680_2(callbacks) {
+    window.addEventListener("message", function (event) {
+        var msg = event.data;
+        callbacks[msg.type](msg.value);
+    });
+}
+function visitNode_54834(node, v) {
+    v[node.type](node);
 }
 
 
@@ -613,3 +701,49 @@ type Foo1 = {
     y: string;
 };
 declare function getValueConcrete<K extends keyof Foo1>(o: Partial<Foo1>, k: K): Foo1[K] | undefined;
+type A_54680 = {
+    type: "A";
+    value: string;
+};
+type B_54680 = {
+    type: "B";
+    value: number;
+};
+type Message_54680 = A_54680 | B_54680;
+declare function handle_54680_1<M extends Message_54680>(callbacks: {
+    [K in M["type"]]: (msg: Extract<M, {
+        type: K;
+    }>["value"]) => unknown;
+}): void;
+declare function handle_54680_2<M extends Message_54680>(callbacks: {
+    [K in M["type"]]: (msg: (M & {
+        type: K;
+    })["value"]) => unknown;
+}): void;
+type NumericLiteral_54834 = {
+    value: number;
+    type: "NumericLiteral";
+};
+type StringLiteral_54834 = {
+    value: string;
+    type: "StringLiteral";
+};
+type Identifier_54834 = {
+    name: string;
+    type: "Identifier";
+};
+type CallExpression_54834 = {
+    name: string;
+    arguments: DropbearNode_54834[];
+    type: "CallExpression";
+};
+type DropbearNode_54834 = NumericLiteral_54834 | StringLiteral_54834 | Identifier_54834 | CallExpression_54834;
+type TypeMap_54834 = {
+    [K in DropbearNode_54834["type"]]: Extract<DropbearNode_54834, {
+        type: K;
+    }>;
+};
+type Visitor_54834 = {
+    [K in keyof TypeMap_54834]: (node: Readonly<TypeMap_54834[K]>) => void;
+};
+declare function visitNode_54834<K extends keyof TypeMap_54834>(node: Readonly<TypeMap_54834[K]>, v: Visitor_54834): void;
