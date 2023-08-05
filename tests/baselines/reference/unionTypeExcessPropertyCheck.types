@@ -1,0 +1,96 @@
+//// [tests/cases/conformance/types/union/unionTypeExcessPropertyCheck.ts] ////
+
+=== unionTypeExcessPropertyCheck.ts ===
+type AC = {
+>AC : { a: string; c: string; }
+
+    a: string, 
+>a : string
+
+    c: string
+>c : string
+
+};
+type B = {
+>B : { b: string; }
+
+    b: string
+>b : string
+
+};
+
+// Fails correctly as `b` is not in `AC`
+const ac_b: AC = {
+>ac_b : AC
+>{        b: '',        c: ''} : { b: string; c: string; }
+
+        b: '',
+>b : string
+>'' : ""
+
+        c: ''
+>c : string
+>'' : ""
+
+};
+// Fails correctly as `c` is not in `B`
+const b_c: B = {
+>b_c : B
+>{        b: '',        c: ''} : { b: string; c: string; }
+
+        b: '',
+>b : string
+>'' : ""
+
+        c: ''
+>c : string
+>'' : ""
+
+};
+// Should fail because `c` is not in `B` while `b` is not in `AB`, but works instead
+const acb_bc: AC|B = {
+>acb_bc : AC | B
+>{        b: '',        c: ''} : { b: string; c: string; }
+
+        b: '',
+>b : string
+>'' : ""
+
+        c: ''
+>c : string
+>'' : ""
+
+};
+// Fails correctly as `x` in in neither `AC` nor `B`
+const acb_bx: AC|B = {
+>acb_bx : AC | B
+>{    b: '',    x: ''} : { b: string; x: string; }
+
+    b: '',
+>b : string
+>'' : ""
+
+    x: ''
+>x : string
+>'' : ""
+
+};
+// Fails correctly as `x` in in neither `AC` nor `B`
+const acb_acx: AC|B = {
+>acb_acx : AC | B
+>{    a: '',    c: '',    x: ''} : { a: string; c: string; x: string; }
+
+    a: '',
+>a : string
+>'' : ""
+
+    c: '',
+>c : string
+>'' : ""
+
+    x: ''
+>x : string
+>'' : ""
+
+};
+

@@ -3663,6 +3663,10 @@
         "category": "Error",
         "code": 2854
     },
+    "Properties '{1}' can't be assigned to any type in union '{2}' and make '{0}' unassignable": {
+        "category": "Error",
+        "code": 2855
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

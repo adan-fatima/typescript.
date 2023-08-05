@@ -1,0 +1,88 @@
+//// [tests/cases/conformance/types/union/unionTypeExcessPropertyCheck.ts] ////
+
+=== unionTypeExcessPropertyCheck.ts ===
+type AC = {
+>AC : Symbol(AC, Decl(unionTypeExcessPropertyCheck.ts, 0, 0))
+
+    a: string, 
+>a : Symbol(a, Decl(unionTypeExcessPropertyCheck.ts, 0, 11))
+
+    c: string
+>c : Symbol(c, Decl(unionTypeExcessPropertyCheck.ts, 1, 14))
+
+};
+type B = {
+>B : Symbol(B, Decl(unionTypeExcessPropertyCheck.ts, 3, 2))
+
+    b: string
+>b : Symbol(b, Decl(unionTypeExcessPropertyCheck.ts, 4, 10))
+
+};
+
+// Fails correctly as `b` is not in `AC`
+const ac_b: AC = {
+>ac_b : Symbol(ac_b, Decl(unionTypeExcessPropertyCheck.ts, 9, 5))
+>AC : Symbol(AC, Decl(unionTypeExcessPropertyCheck.ts, 0, 0))
+
+        b: '',
+>b : Symbol(b, Decl(unionTypeExcessPropertyCheck.ts, 9, 18))
+
+        c: ''
+>c : Symbol(c, Decl(unionTypeExcessPropertyCheck.ts, 10, 14))
+
+};
+// Fails correctly as `c` is not in `B`
+const b_c: B = {
+>b_c : Symbol(b_c, Decl(unionTypeExcessPropertyCheck.ts, 14, 5))
+>B : Symbol(B, Decl(unionTypeExcessPropertyCheck.ts, 3, 2))
+
+        b: '',
+>b : Symbol(b, Decl(unionTypeExcessPropertyCheck.ts, 14, 16))
+
+        c: ''
+>c : Symbol(c, Decl(unionTypeExcessPropertyCheck.ts, 15, 14))
+
+};
+// Should fail because `c` is not in `B` while `b` is not in `AB`, but works instead
+const acb_bc: AC|B = {
+>acb_bc : Symbol(acb_bc, Decl(unionTypeExcessPropertyCheck.ts, 19, 5))
+>AC : Symbol(AC, Decl(unionTypeExcessPropertyCheck.ts, 0, 0))
+>B : Symbol(B, Decl(unionTypeExcessPropertyCheck.ts, 3, 2))
+
+        b: '',
+>b : Symbol(b, Decl(unionTypeExcessPropertyCheck.ts, 19, 22))
+
+        c: ''
+>c : Symbol(c, Decl(unionTypeExcessPropertyCheck.ts, 20, 14))
+
+};
+// Fails correctly as `x` in in neither `AC` nor `B`
+const acb_bx: AC|B = {
+>acb_bx : Symbol(acb_bx, Decl(unionTypeExcessPropertyCheck.ts, 24, 5))
+>AC : Symbol(AC, Decl(unionTypeExcessPropertyCheck.ts, 0, 0))
+>B : Symbol(B, Decl(unionTypeExcessPropertyCheck.ts, 3, 2))
+
+    b: '',
+>b : Symbol(b, Decl(unionTypeExcessPropertyCheck.ts, 24, 22))
+
+    x: ''
+>x : Symbol(x, Decl(unionTypeExcessPropertyCheck.ts, 25, 10))
+
+};
+// Fails correctly as `x` in in neither `AC` nor `B`
+const acb_acx: AC|B = {
+>acb_acx : Symbol(acb_acx, Decl(unionTypeExcessPropertyCheck.ts, 29, 5))
+>AC : Symbol(AC, Decl(unionTypeExcessPropertyCheck.ts, 0, 0))
+>B : Symbol(B, Decl(unionTypeExcessPropertyCheck.ts, 3, 2))
+
+    a: '',
+>a : Symbol(a, Decl(unionTypeExcessPropertyCheck.ts, 29, 23))
+
+    c: '',
+>c : Symbol(c, Decl(unionTypeExcessPropertyCheck.ts, 30, 10))
+
+    x: ''
+>x : Symbol(x, Decl(unionTypeExcessPropertyCheck.ts, 31, 10))
+
+};
+
