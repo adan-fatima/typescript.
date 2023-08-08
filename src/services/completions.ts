@@ -3603,10 +3603,10 @@ function getCompletionData(
                     symbolToOriginInfoMap[index] = { kind: getNullableSymbolOriginInfoKind(SymbolOriginInfoKind.SymbolMemberNoExport) };
                 }
                 else {
-                    const fileName = isExternalModuleNameRelative(stripQuotes(moduleSymbol.name)) ? getSourceFileOfModule(moduleSymbol)?.fileName : undefined;
+                    const moduleFile = isExternalModuleNameRelative(stripQuotes(moduleSymbol.name)) ? getSourceFileOfModule(moduleSymbol) : undefined;
                     const { moduleSpecifier } = (importSpecifierResolver ||= codefix.createImportSpecifierResolver(sourceFile, program, host, preferences)).getModuleSpecifierForBestExportInfo([{
                         exportKind: ExportKind.Named,
-                        moduleFileName: fileName,
+                        moduleFile,
                         isFromPackageJson: false,
                         moduleSymbol,
                         symbol: firstAccessibleSymbol,
@@ -3620,7 +3620,7 @@ function getCompletionData(
                             isDefaultExport: false,
                             symbolName: firstAccessibleSymbol.name,
                             exportName: firstAccessibleSymbol.name,
-                            fileName,
+                            fileName: moduleFile?.fileName,
                             moduleSpecifier,
                         };
                         symbolToOriginInfoMap[index] = origin;
@@ -3958,7 +3958,7 @@ function getCompletionData(
                             symbolName,
                             exportMapKey,
                             exportName: exportInfo.exportKind === ExportKind.ExportEquals ? InternalSymbolName.ExportEquals : exportInfo.symbol.name,
-                            fileName: exportInfo.moduleFileName,
+                            fileName: exportInfo.moduleFile?.fileName,
                             isDefaultExport,
                             moduleSymbol: exportInfo.moduleSymbol,
                             isFromPackageJson: exportInfo.isFromPackageJson,
@@ -3973,8 +3973,7 @@ function getCompletionData(
         );
 
         function isImportableExportInfo(info: SymbolExportInfo) {
-            const moduleFile = tryCast(info.moduleSymbol.valueDeclaration, isSourceFile);
-            if (!moduleFile) {
+            if (!info.moduleFile) {
                 const moduleName = stripQuotes(info.moduleSymbol.name);
                 if (JsTyping.nodeCoreModules.has(moduleName) && startsWith(moduleName, "node:") !== shouldUseUriStyleNodeCoreModules(sourceFile, program)) {
                     return false;
@@ -3986,7 +3985,7 @@ function getCompletionData(
             return isImportableFile(
                 info.isFromPackageJson ? packageJsonAutoImportProvider! : program,
                 sourceFile,
-                moduleFile,
+                info.moduleFile,
                 preferences,
                 packageJsonFilter,
                 getModuleSpecifierResolutionHost(info.isFromPackageJson),
