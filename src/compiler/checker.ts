@@ -18038,8 +18038,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
     function isDistributionDependent(root: ConditionalRoot) {
         return root.isDistributive && (
-            isTypeParameterPossiblyReferenced(root.checkType as TypeParameter, root.node.trueType) ||
-            isTypeParameterPossiblyReferenced(root.checkType as TypeParameter, root.node.falseType));
+            containsReference(root.checkType as TypeParameter, root.node.trueType) ||
+            containsReference(root.checkType as TypeParameter, root.node.falseType));
     }
 
     function getTypeFromConditionalTypeNode(node: ConditionalTypeNode): Type {
@@ -18896,44 +18896,45 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         if (tp.symbol && tp.symbol.declarations && tp.symbol.declarations.length === 1) {
             const container = tp.symbol.declarations[0].parent;
             for (let n = node; n !== container; n = n.parent) {
-                if (!n || n.kind === SyntaxKind.Block || n.kind === SyntaxKind.ConditionalType && forEachChild((n as ConditionalTypeNode).extendsType, containsReference)) {
+                if (!n || n.kind === SyntaxKind.Block || n.kind === SyntaxKind.ConditionalType && forEachChild((n as ConditionalTypeNode).extendsType, n => containsReference(tp, n))) {
                     return true;
                 }
             }
-            return containsReference(node);
+            return containsReference(tp, node);
         }
         return true;
-        function containsReference(node: Node): boolean {
-            switch (node.kind) {
-                case SyntaxKind.ThisType:
-                    return !!tp.isThisType;
-                case SyntaxKind.Identifier:
-                    return !tp.isThisType && isPartOfTypeNode(node) && maybeTypeParameterReference(node) &&
-                        getTypeFromTypeNodeWorker(node as TypeNode) === tp; // use worker because we're looking for === equality
-                case SyntaxKind.TypeQuery:
-                    const entityName = (node as TypeQueryNode).exprName;
-                    const firstIdentifier = getFirstIdentifier(entityName);
-                    if (!isThisIdentifier(firstIdentifier)) { // Don't attempt to analyze typeof this.xxx
-                        const firstIdentifierSymbol = getResolvedSymbol(firstIdentifier);
-                        const tpDeclaration = tp.symbol.declarations![0]; // There is exactly one declaration, otherwise `containsReference` is not called
-                        const tpScope = tpDeclaration.kind === SyntaxKind.TypeParameter ? tpDeclaration.parent : // Type parameter is a regular type parameter, e.g. foo<T>
-                            tp.isThisType ? tpDeclaration : // Type parameter is the this type, and its declaration is the class declaration.
-                            undefined; // Type parameter's declaration was unrecognized, e.g. comes from JSDoc annotation.
-                        if (firstIdentifierSymbol.declarations && tpScope) {
-                            return some(firstIdentifierSymbol.declarations, idDecl => isNodeDescendantOf(idDecl, tpScope)) ||
-                                some((node as TypeQueryNode).typeArguments, containsReference);
-                        }
+    }
+
+    function containsReference(tp: TypeParameter, node: Node): boolean {
+        switch (node.kind) {
+            case SyntaxKind.ThisType:
+                return !!tp.isThisType;
+            case SyntaxKind.Identifier:
+                return !tp.isThisType && isPartOfTypeNode(node) && maybeTypeParameterReference(node) &&
+                    getTypeFromTypeNodeWorker(node as TypeNode) === tp; // use worker because we're looking for === equality
+            case SyntaxKind.TypeQuery:
+                const entityName = (node as TypeQueryNode).exprName;
+                const firstIdentifier = getFirstIdentifier(entityName);
+                if (!isThisIdentifier(firstIdentifier)) { // Don't attempt to analyze typeof this.xxx
+                    const firstIdentifierSymbol = getResolvedSymbol(firstIdentifier);
+                    const tpDeclaration = tp.symbol.declarations![0]; // There is exactly one declaration, otherwise `containsReference` is not called
+                    const tpScope = tpDeclaration.kind === SyntaxKind.TypeParameter ? tpDeclaration.parent : // Type parameter is a regular type parameter, e.g. foo<T>
+                        tp.isThisType ? tpDeclaration : // Type parameter is the this type, and its declaration is the class declaration.
+                        undefined; // Type parameter's declaration was unrecognized, e.g. comes from JSDoc annotation.
+                    if (firstIdentifierSymbol.declarations && tpScope) {
+                        return some(firstIdentifierSymbol.declarations, idDecl => isNodeDescendantOf(idDecl, tpScope)) ||
+                            some((node as TypeQueryNode).typeArguments, n => containsReference(tp, n));
                     }
-                    return true;
-                case SyntaxKind.MethodDeclaration:
-                case SyntaxKind.MethodSignature:
-                    return !(node as FunctionLikeDeclaration).type && !!(node as FunctionLikeDeclaration).body ||
-                        some((node as FunctionLikeDeclaration).typeParameters, containsReference) ||
-                        some((node as FunctionLikeDeclaration).parameters, containsReference) ||
-                        !!(node as FunctionLikeDeclaration).type && containsReference((node as FunctionLikeDeclaration).type!);
-            }
-            return !!forEachChild(node, containsReference);
+                }
+                return true;
+            case SyntaxKind.MethodDeclaration:
+            case SyntaxKind.MethodSignature:
+                return !(node as FunctionLikeDeclaration).type && !!(node as FunctionLikeDeclaration).body ||
+                    some((node as FunctionLikeDeclaration).typeParameters, n => containsReference(tp, n)) ||
+                    some((node as FunctionLikeDeclaration).parameters, n => containsReference(tp, n)) ||
+                    !!(node as FunctionLikeDeclaration).type && containsReference(tp, (node as FunctionLikeDeclaration).type!);
         }
+        return !!forEachChild(node, n => containsReference(tp, n));
     }
 
     function getHomomorphicTypeVariable(type: MappedType) {
