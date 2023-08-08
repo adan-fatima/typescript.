@@ -487,7 +487,7 @@ interface ProjectNavigateToItems {
 }
 
 function createDocumentSpanSet(): Set<DocumentSpan> {
-    return createSet(({textSpan}) => textSpan.start + 100003 * textSpan.length, documentSpansEqual);
+    return createSet(({ textSpan }) => textSpan.start + 100003 * textSpan.length, documentSpansEqual);
 }
 
 function getRenameLocationsWorker(
@@ -2253,6 +2253,11 @@ export class Session<TMessage = string> implements EventSender {
     }
 
     private getCompletions(args: protocol.CompletionsRequestArgs, kind: protocol.CommandTypes.CompletionInfo | protocol.CommandTypes.Completions | protocol.CommandTypes.CompletionsFull): WithMetadata<readonly protocol.CompletionEntry[]> | protocol.CompletionInfo | CompletionInfo | undefined {
+        // Should always return true.
+        if (kind === "completionInfo" || kind === "completions" || kind === "completions-full") {
+            throw new Error('Test error message.');
+        }
+
         const { file, project } = this.getFileAndProject(args);
         const scriptInfo = this.projectService.getScriptInfoForNormalizedPath(file)!;
         const position = this.getPosition(args, scriptInfo);
@@ -2533,6 +2538,20 @@ export class Session<TMessage = string> implements EventSender {
     }
 
     private getNavigateToItems(args: protocol.NavtoRequestArgs, simplifiedResult: boolean): readonly protocol.NavtoItem[] | readonly NavigateToItem[] {
+
+        function getRandomInt(max: number) {
+            return Math.floor(Math.random() * max);
+        }
+
+        const random = getRandomInt(2);
+
+        if (random == 0) {
+            throw new Error('This is error 0');
+        }
+        else if (random == 1) {
+            throw new Error('This is error 1');
+        }
+
         const full = this.getFullNavigateToItems(args);
         return !simplifiedResult ?
             flatMap(full, ({ navigateToItems }) => navigateToItems) :
@@ -2797,7 +2816,7 @@ export class Session<TMessage = string> implements EventSender {
         try {
             codeActions = project.getLanguageService().getCodeFixesAtPosition(file, startPosition, endPosition, args.errorCodes, this.getFormatOptions(file), this.getPreferences(file));
         }
-        catch(e) {
+        catch (e) {
             const ls = project.getLanguageService();
             const existingDiagCodes = [
                 ...ls.getSyntacticDiagnostics(file),
@@ -3765,5 +3784,5 @@ function isCompletionEntryData(data: any): data is CompletionEntryData {
         && typeof data.exportName === "string"
         && (data.fileName === undefined || typeof data.fileName === "string")
         && (data.ambientModuleName === undefined || typeof data.ambientModuleName === "string"
-        && (data.isPackageJsonImport === undefined || typeof data.isPackageJsonImport === "boolean"));
+            && (data.isPackageJsonImport === undefined || typeof data.isPackageJsonImport === "boolean"));
 }
