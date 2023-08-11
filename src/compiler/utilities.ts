@@ -10262,6 +10262,16 @@ export function isJSDocOptionalParameter(node: ParameterDeclaration) {
 }
 
 /** @internal */
+export function getJSDocInitializerParameter(node: ParameterDeclaration | JSDocParameterTag) {
+    if (isJSDocParameterTag(node)) {
+        return node.initializer;
+    }
+
+    const bracketed = getJSDocParameterTags(node).find(({ isBracketed }) => isBracketed);
+    return bracketed?.initializer;
+}
+
+/** @internal */
 export function isOptionalDeclaration(declaration: Declaration): boolean {
     switch (declaration.kind) {
         case SyntaxKind.PropertyDeclaration:

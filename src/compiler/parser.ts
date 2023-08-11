@@ -9198,7 +9198,7 @@ namespace Parser {
                 return token() === SyntaxKind.OpenBraceToken ? parseJSDocTypeExpression() : undefined;
             }
 
-            function parseBracketNameInPropertyAndParamTag(): { name: EntityName, isBracketed: boolean } {
+            function parseBracketNameInPropertyAndParamTag(): { name: EntityName, isBracketed: boolean, initializer: ts.Expression | undefined } {
                 // Looking for something like '[foo]', 'foo', '[foo.bar]' or 'foo.bar'
                 const isBracketed = parseOptionalJsdoc(SyntaxKind.OpenBracketToken);
                 if (isBracketed) {
@@ -9210,17 +9210,18 @@ namespace Parser {
                 if (isBackquoted) {
                     parseExpectedTokenJSDoc(SyntaxKind.BacktickToken);
                 }
+                let initializer: ts.Expression | undefined;
                 if (isBracketed) {
                     skipWhitespace();
                     // May have an optional default, e.g. '[foo = 42]'
                     if (parseOptionalToken(SyntaxKind.EqualsToken)) {
-                        parseExpression();
+                        initializer = parseExpression();
                     }
 
                     parseExpected(SyntaxKind.CloseBracketToken);
                 }
 
-                return { name, isBracketed };
+                return { name, isBracketed, initializer };
             }
 
             function isObjectOrObjectArrayTypeReference(node: TypeNode): boolean {
@@ -9239,7 +9240,7 @@ namespace Parser {
                 let isNameFirst = !typeExpression;
                 skipWhitespaceOrAsterisk();
 
-                const { name, isBracketed } = parseBracketNameInPropertyAndParamTag();
+                const { name, isBracketed, initializer } = parseBracketNameInPropertyAndParamTag();
                 const indentText = skipWhitespaceOrAsterisk();
 
                 if (isNameFirst && !lookAhead(parseJSDocLinkPrefix)) {
@@ -9255,7 +9256,7 @@ namespace Parser {
                 }
                 const result = target === PropertyLikeParse.Property
                     ? factory.createJSDocPropertyTag(tagName, name, isBracketed, typeExpression, isNameFirst, comment)
-                    : factory.createJSDocParameterTag(tagName, name, isBracketed, typeExpression, isNameFirst, comment);
+                    : factory.createJSDocParameterTag(tagName, name, isBracketed, typeExpression, isNameFirst, comment, initializer);
                 return finishNode(result, start);
             }
 

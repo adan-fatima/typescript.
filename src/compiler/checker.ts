@@ -303,6 +303,7 @@ import {
     getJSDocDeprecatedTag,
     getJSDocEnumTag,
     getJSDocHost,
+    getJSDocInitializerParameter,
     getJSDocParameterTags,
     getJSDocRoot,
     getJSDocSatisfiesExpressionType,
@@ -7530,6 +7531,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
 
         function symbolToParameterDeclaration(parameterSymbol: Symbol, context: NodeBuilderContext, preserveModifierFlags?: boolean, privateSymbolVisitor?: (s: Symbol) => void, bundledImports?: boolean): ParameterDeclaration {
+            const includeParameterInitializers = !!(context.flags & NodeBuilderFlags.IncludeParameterInitializers);
             let parameterDeclaration: ParameterDeclaration | JSDocParameterTag | undefined = getDeclarationOfKind<ParameterDeclaration>(parameterSymbol, SyntaxKind.Parameter);
             if (!parameterDeclaration && !isTransientSymbol(parameterSymbol)) {
                 parameterDeclaration = getDeclarationOfKind<JSDocParameterTag>(parameterSymbol, SyntaxKind.JSDocParameterTag);
@@ -7540,6 +7542,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 parameterType = getOptionalType(parameterType);
             }
             const parameterTypeNode = serializeTypeForDeclaration(context, parameterType, parameterSymbol, context.enclosingDeclaration, privateSymbolVisitor, bundledImports);
+
+            let initializer: Expression | undefined;
+            if(includeParameterInitializers) {
+                if (tryCast(parameterDeclaration, isParameter)) {
+                    initializer = parameterDeclaration?.initializer;
+                }
+                if (parameterDeclaration) {
+                    initializer = getJSDocInitializerParameter(parameterDeclaration) ?? initializer;
+                }
+            }
 
             const modifiers = !(context.flags & NodeBuilderFlags.OmitParameterModifiers) && preserveModifierFlags && parameterDeclaration && canHaveModifiers(parameterDeclaration) ? map(getModifiers(parameterDeclaration), factory.cloneNode) : undefined;
             const isRest = parameterDeclaration && isRestParameter(parameterDeclaration) || getCheckFlags(parameterSymbol) & CheckFlags.RestParameter;
@@ -7558,7 +7570,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 name,
                 questionToken,
                 parameterTypeNode,
-                /*initializer*/ undefined);
+                initializer);
             context.approximateLength += symbolName(parameterSymbol).length + 3;
             return parameterNode;
 
@@ -7575,7 +7587,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                             visited.dotDotDotToken,
                             visited.propertyName,
                             visited.name,
-                            /*initializer*/ undefined);
+                            includeParameterInitializers ? visited.initializer : undefined);
                     }
                     if (!nodeIsSynthesized(visited)) {
                         visited = factory.cloneNode(visited);
