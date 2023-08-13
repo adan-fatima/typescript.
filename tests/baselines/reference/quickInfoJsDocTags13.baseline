@@ -1,0 +1,393 @@
+=== /tests/cases/fourslash/quickInfoJsDocTags13.ts ===
+// /**
+//  * @param a - a param
+//  * @param bindingelement1 - for { b, c }
+//  * @param b - b param
+//  * @param bindingelement2 - for { e }
+//  * @param c - c param
+//  * @param d - d param
+//  */
+// function foo(a: string, { b, c }: { b: string, c: string }, d: string, { e }: { e: string }) {
+//     a
+//     ^
+// | ----------------------------------------------------------------------
+// | (parameter) a: string
+// | - a param
+// | @param a - a param
+// | ----------------------------------------------------------------------
+//     b
+//     ^
+// | ----------------------------------------------------------------------
+// | (parameter) b: string
+// | - b param
+// | @param b - b param
+// | ----------------------------------------------------------------------
+//     c
+//     ^
+// | ----------------------------------------------------------------------
+// | (parameter) c: string
+// | - c param
+// | @param c - c param
+// | ----------------------------------------------------------------------
+//     d
+//     ^
+// | ----------------------------------------------------------------------
+// | (parameter) d: string
+// | - d param
+// | @param d - d param
+// | ----------------------------------------------------------------------
+//     e
+//     ^
+// | ----------------------------------------------------------------------
+// | (parameter) e: string
+// | ----------------------------------------------------------------------
+// }
+
+[
+  {
+    "marker": {
+      "fileName": "/tests/cases/fourslash/quickInfoJsDocTags13.ts",
+      "position": 275,
+      "name": "1"
+    },
+    "item": {
+      "kind": "parameter",
+      "kindModifiers": "",
+      "textSpan": {
+        "start": 274,
+        "length": 1
+      },
+      "displayParts": [
+        {
+          "text": "(",
+          "kind": "punctuation"
+        },
+        {
+          "text": "parameter",
+          "kind": "text"
+        },
+        {
+          "text": ")",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "a",
+          "kind": "parameterName"
+        },
+        {
+          "text": ":",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "string",
+          "kind": "keyword"
+        }
+      ],
+      "documentation": [
+        {
+          "text": "- a param",
+          "kind": "text"
+        }
+      ],
+      "tags": [
+        {
+          "name": "param",
+          "text": [
+            {
+              "text": "a",
+              "kind": "parameterName"
+            },
+            {
+              "text": " ",
+              "kind": "space"
+            },
+            {
+              "text": "- a param",
+              "kind": "text"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "marker": {
+      "fileName": "/tests/cases/fourslash/quickInfoJsDocTags13.ts",
+      "position": 281,
+      "name": "2"
+    },
+    "item": {
+      "kind": "parameter",
+      "kindModifiers": "",
+      "textSpan": {
+        "start": 280,
+        "length": 1
+      },
+      "displayParts": [
+        {
+          "text": "(",
+          "kind": "punctuation"
+        },
+        {
+          "text": "parameter",
+          "kind": "text"
+        },
+        {
+          "text": ")",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "b",
+          "kind": "parameterName"
+        },
+        {
+          "text": ":",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "string",
+          "kind": "keyword"
+        }
+      ],
+      "documentation": [
+        {
+          "text": "- b param",
+          "kind": "text"
+        }
+      ],
+      "tags": [
+        {
+          "name": "param",
+          "text": [
+            {
+              "text": "b",
+              "kind": "parameterName"
+            },
+            {
+              "text": " ",
+              "kind": "space"
+            },
+            {
+              "text": "- b param",
+              "kind": "text"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "marker": {
+      "fileName": "/tests/cases/fourslash/quickInfoJsDocTags13.ts",
+      "position": 287,
+      "name": "3"
+    },
+    "item": {
+      "kind": "parameter",
+      "kindModifiers": "",
+      "textSpan": {
+        "start": 286,
+        "length": 1
+      },
+      "displayParts": [
+        {
+          "text": "(",
+          "kind": "punctuation"
+        },
+        {
+          "text": "parameter",
+          "kind": "text"
+        },
+        {
+          "text": ")",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "c",
+          "kind": "parameterName"
+        },
+        {
+          "text": ":",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "string",
+          "kind": "keyword"
+        }
+      ],
+      "documentation": [
+        {
+          "text": "- c param",
+          "kind": "text"
+        }
+      ],
+      "tags": [
+        {
+          "name": "param",
+          "text": [
+            {
+              "text": "c",
+              "kind": "parameterName"
+            },
+            {
+              "text": " ",
+              "kind": "space"
+            },
+            {
+              "text": "- c param",
+              "kind": "text"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "marker": {
+      "fileName": "/tests/cases/fourslash/quickInfoJsDocTags13.ts",
+      "position": 293,
+      "name": "4"
+    },
+    "item": {
+      "kind": "parameter",
+      "kindModifiers": "",
+      "textSpan": {
+        "start": 292,
+        "length": 1
+      },
+      "displayParts": [
+        {
+          "text": "(",
+          "kind": "punctuation"
+        },
+        {
+          "text": "parameter",
+          "kind": "text"
+        },
+        {
+          "text": ")",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "d",
+          "kind": "parameterName"
+        },
+        {
+          "text": ":",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "string",
+          "kind": "keyword"
+        }
+      ],
+      "documentation": [
+        {
+          "text": "- d param",
+          "kind": "text"
+        }
+      ],
+      "tags": [
+        {
+          "name": "param",
+          "text": [
+            {
+              "text": "d",
+              "kind": "parameterName"
+            },
+            {
+              "text": " ",
+              "kind": "space"
+            },
+            {
+              "text": "- d param",
+              "kind": "text"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "marker": {
+      "fileName": "/tests/cases/fourslash/quickInfoJsDocTags13.ts",
+      "position": 299,
+      "name": "5"
+    },
+    "item": {
+      "kind": "parameter",
+      "kindModifiers": "",
+      "textSpan": {
+        "start": 298,
+        "length": 1
+      },
+      "displayParts": [
+        {
+          "text": "(",
+          "kind": "punctuation"
+        },
+        {
+          "text": "parameter",
+          "kind": "text"
+        },
+        {
+          "text": ")",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "e",
+          "kind": "parameterName"
+        },
+        {
+          "text": ":",
+          "kind": "punctuation"
+        },
+        {
+          "text": " ",
+          "kind": "space"
+        },
+        {
+          "text": "string",
+          "kind": "keyword"
+        }
+      ],
+      "documentation": []
+    }
+  }
+]

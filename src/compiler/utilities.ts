@@ -4269,6 +4269,8 @@ export function canHaveJSDoc(node: Node): node is HasJSDoc {
         case SyntaxKind.WhileStatement:
         case SyntaxKind.WithStatement:
             return true;
+        case SyntaxKind.BindingElement:
+            return isParameter(getRootDeclaration(node));
         default:
             return false;
     }
@@ -4310,8 +4312,8 @@ export function getJSDocCommentsAndTags(hostNode: Node, noCache?: boolean): read
             result = addRange(result, filterOwnedJSDocTags(hostNode, last(node.jsDoc!)));
         }
 
-        if (node.kind === SyntaxKind.Parameter) {
-            result = addRange(result, (noCache ? getJSDocParameterTagsNoCache : getJSDocParameterTags)(node as ParameterDeclaration));
+        if (node.kind === SyntaxKind.Parameter || node.kind === SyntaxKind.BindingElement) {
+            result = addRange(result, (noCache ? getJSDocParameterTagsNoCache : getJSDocParameterTags)(node as ParameterDeclaration | BindingElement));
             break;
         }
         if (node.kind === SyntaxKind.TypeParameter) {
