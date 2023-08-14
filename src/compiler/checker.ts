@@ -435,6 +435,7 @@ import {
     InternalSymbolName,
     IntersectionType,
     IntersectionTypeNode,
+    IntraExpressionInferenceSite,
     intrinsicTagNameToString,
     IntrinsicType,
     introducesArgumentsExoticObject,
@@ -13175,12 +13176,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         const modifiers = getMappedTypeModifiers(type.mappedType);
         const readonlyMask = modifiers & MappedTypeModifiers.IncludeReadonly ? false : true;
         const optionalMask = modifiers & MappedTypeModifiers.IncludeOptional ? 0 : SymbolFlags.Optional;
-        const indexInfos = indexInfo ? [createIndexInfo(stringType, inferReverseMappedType(indexInfo.type, type.mappedType, type.constraintType), readonlyMask && indexInfo.isReadonly)] : emptyArray;
+        const indexInfos = indexInfo ? [createIndexInfo(stringType, inferReverseMappedType(indexInfo.type, type.mappedType, type.constraintType, /*sourceValueDeclaration*/ undefined), readonlyMask && indexInfo.isReadonly)] : emptyArray;
         const members = createSymbolTable();
         for (const prop of getPropertiesOfType(type.source)) {
             const checkFlags = CheckFlags.ReverseMapped | (readonlyMask && isReadonlySymbol(prop) ? CheckFlags.Readonly : 0);
             const inferredProp = createSymbol(SymbolFlags.Property | prop.flags & optionalMask, prop.escapedName, checkFlags) as ReverseMappedSymbol;
             inferredProp.declarations = prop.declarations;
+            inferredProp.valueDeclaration = prop.valueDeclaration;
             inferredProp.links.nameType = getSymbolLinks(prop).nameType;
             inferredProp.links.propertyType = getTypeOfSymbol(prop);
             if (type.constraintType.type.flags & TypeFlags.IndexedAccess
@@ -24027,7 +24029,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (!inference.isFixed) {
                 // Before we commit to a particular inference (and thus lock out any further inferences),
                 // we infer from any intra-expression inference sites we have collected.
-                inferFromIntraExpressionSites(context);
+                if (context.intraExpressionInferenceSites) {
+                    inferFromIntraExpressionSites(context.inferences, context.intraExpressionInferenceSites);
+                }
                 clearCachedInferences(context.inferences);
                 inference.isFixed = true;
             }
@@ -24066,17 +24070,14 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     // arrow function. This happens automatically when the arrow functions are discrete arguments (because we
     // infer from each argument before processing the next), but when the arrow functions are elements of an
     // object or array literal, we need to perform intra-expression inferences early.
-    function inferFromIntraExpressionSites(context: InferenceContext) {
-        if (context.intraExpressionInferenceSites) {
-            for (const { node, type } of context.intraExpressionInferenceSites) {
-                const contextualType = node.kind === SyntaxKind.MethodDeclaration ?
-                    getContextualTypeForObjectLiteralMethod(node as MethodDeclaration, ContextFlags.NoConstraints) :
-                    getContextualType(node, ContextFlags.NoConstraints);
-                if (contextualType) {
-                    inferTypes(context.inferences, type, contextualType);
-                }
+    function inferFromIntraExpressionSites(inferences: InferenceInfo[], intraExpressionInferenceSites: IntraExpressionInferenceSite[]) {
+        for (const { node, type } of intraExpressionInferenceSites) {
+            const contextualType = node.kind === SyntaxKind.MethodDeclaration ?
+                getContextualTypeForObjectLiteralMethod(node as MethodDeclaration, ContextFlags.NoConstraints) :
+                getContextualType(node, ContextFlags.NoConstraints);
+            if (contextualType) {
+                inferTypes(inferences, type, contextualType);
             }
-            context.intraExpressionInferenceSites = undefined;
         }
     }
 
@@ -24201,29 +24202,19 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         return type;
     }
 
-    // We consider a type to be partially inferable if it isn't marked non-inferable or if it is
-    // an object literal type with at least one property of an inferable type. For example, an object
-    // literal { a: 123, b: x => true } is marked non-inferable because it contains a context sensitive
-    // arrow function, but is considered partially inferable because property 'a' has an inferable type.
-    function isPartiallyInferableType(type: Type): boolean {
-        return !(getObjectFlags(type) & ObjectFlags.NonInferrableType) ||
-            isObjectLiteralType(type) && some(getPropertiesOfType(type), prop => isPartiallyInferableType(getTypeOfSymbol(prop))) ||
-            isTupleType(type) && some(getElementTypes(type), isPartiallyInferableType);
-    }
-
     function createReverseMappedType(source: Type, target: MappedType, constraint: IndexType) {
         // We consider a source type reverse mappable if it has a string index signature or if
-        // it has one or more properties and is of a partially inferable type.
-        if (!(getIndexInfoOfType(source, stringType) || getPropertiesOfType(source).length !== 0 && isPartiallyInferableType(source))) {
+        // it has one or more properties
+        if (!getIndexInfoOfType(source, stringType) && !getPropertiesOfType(source).length) {
             return undefined;
         }
         // For arrays and tuples we infer new arrays and tuples where the reverse mapping has been
         // applied to the element type(s).
         if (isArrayType(source)) {
-            return createArrayType(inferReverseMappedType(getTypeArguments(source)[0], target, constraint), isReadonlyArrayType(source));
+            return createArrayType(inferReverseMappedType(getTypeArguments(source)[0], target, constraint, /*sourceValueDeclaration*/ undefined), isReadonlyArrayType(source));
         }
         if (isTupleType(source)) {
-            const elementTypes = map(getElementTypes(source), t => inferReverseMappedType(t, target, constraint));
+            const elementTypes = map(getElementTypes(source), t => inferReverseMappedType(t, target, constraint, /*sourceValueDeclaration*/ undefined));
             const elementFlags = getMappedTypeModifiers(target) & MappedTypeModifiers.IncludeOptional ?
                 sameMap(source.target.elementFlags, f => f & ElementFlags.Optional ? ElementFlags.Required : f) :
                 source.target.elementFlags;
@@ -24241,16 +24232,31 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     function getTypeOfReverseMappedSymbol(symbol: ReverseMappedSymbol) {
         const links = getSymbolLinks(symbol);
         if (!links.type) {
-            links.type = inferReverseMappedType(symbol.links.propertyType, symbol.links.mappedType, symbol.links.constraintType);
+            links.type = inferReverseMappedType(symbol.links.propertyType, symbol.links.mappedType, symbol.links.constraintType, symbol.valueDeclaration);
         }
         return links.type;
     }
 
-    function inferReverseMappedType(sourceType: Type, target: MappedType, constraint: IndexType): Type {
+    function inferReverseMappedType(sourceType: Type, target: MappedType, constraint: IndexType, sourceValueDeclaration: Declaration | undefined): Type {
         const typeParameter = getIndexedAccessType(constraint.type, getTypeParameterFromMappedType(target)) as TypeParameter;
         const templateType = getTemplateTypeFromMappedType(target);
         const inference = createInferenceInfo(typeParameter);
         inferTypes([inference], sourceType, templateType);
+        if (sourceValueDeclaration && getObjectFlags(sourceType) & (ObjectFlags.FreshLiteral | ObjectFlags.ArrayLiteral)) {
+            const initializerDeclaration = sourceValueDeclaration.kind === SyntaxKind.PropertyAssignment ?
+                (sourceValueDeclaration as PropertyAssignment).initializer :
+                sourceValueDeclaration;
+            const intraExpressionInferenceSites = getInferenceContext(initializerDeclaration)?.intraExpressionInferenceSites?.filter(site => isNodeDescendantOf(site.node, initializerDeclaration));
+            if (intraExpressionInferenceSites?.length) {
+                const templateType = (getApparentTypeOfContextualType(initializerDeclaration.parent.parent as Expression, ContextFlags.NoConstraints) as MappedType).templateType;
+                if (templateType) {
+                    Debug.assertNode(initializerDeclaration, isExpressionNode);
+                    pushContextualType(initializerDeclaration as any as Expression, templateType, /*isCache*/ false);
+                    inferFromIntraExpressionSites([inference], intraExpressionInferenceSites);
+                    popContextualType();
+                }
+            }
+        }
         return getTypeFromInference(inference) || unknownType;
     }
 
