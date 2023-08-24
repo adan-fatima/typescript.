@@ -26141,7 +26141,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             resolved.members.get("bind" as __String) && isTypeSubtypeOf(type, globalFunctionType));
     }
 
-    function getTypeFacts(type: Type): TypeFacts {
+    function getTypeFacts(type: Type, strictTruthy?: boolean): TypeFacts {
         if (type.flags & (TypeFlags.Intersection | TypeFlags.Instantiable)) {
             type = getBaseConstraintOfType(type) || unknownType;
         }
@@ -26179,7 +26179,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         if (flags & TypeFlags.BooleanLike) {
             return strictNullChecks ?
                 (type === falseType || type === regularFalseType) ? TypeFacts.FalseStrictFacts : TypeFacts.TrueStrictFacts :
-                (type === falseType || type === regularFalseType) ? TypeFacts.FalseFacts : TypeFacts.TrueFacts;
+                (type === falseType || type === regularFalseType) ? TypeFacts.FalseFacts : (strictTruthy ? TypeFacts.TrueFacts & ~TypeFacts.Falsy : TypeFacts.TrueFacts);
         }
         if (flags & TypeFlags.Object) {
             return getObjectFlags(type) & ObjectFlags.Anonymous && isEmptyObjectType(type as ObjectType) ?
@@ -26207,7 +26207,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return TypeFacts.None;
         }
         if (flags & TypeFlags.Union) {
-            return reduceLeft((type as UnionType).types, (facts, t) => facts | getTypeFacts(t), TypeFacts.None);
+            return reduceLeft((type as UnionType).types, (facts, t) => facts | getTypeFacts(t, strictTruthy), TypeFacts.None);
         }
         if (flags & TypeFlags.Intersection) {
             return getIntersectionTypeFacts(type as IntersectionType);
@@ -26233,8 +26233,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         return oredFacts & TypeFacts.OrFactsMask | andedFacts & TypeFacts.AndFactsMask;
     }
 
-    function getTypeWithFacts(type: Type, include: TypeFacts) {
-        return filterType(type, t => (getTypeFacts(t) & include) !== 0);
+    function getTypeWithFacts(type: Type, include: TypeFacts, strictTruthy?: boolean) {
+        return filterType(type, t => (getTypeFacts(t, strictTruthy) & include) !== 0);
     }
 
     // This function is similar to getTypeWithFacts, except that in strictNullChecks mode it replaces type
@@ -27526,7 +27526,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             }
             const access = getDiscriminantPropertyAccess(expr, type);
             if (access) {
-                return narrowTypeByDiscriminant(type, access, t => getTypeWithFacts(t, assumeTrue ? TypeFacts.Truthy : TypeFacts.Falsy));
+                return narrowTypeByDiscriminant(type, access, t => getTypeWithFacts(t, assumeTrue ? TypeFacts.Truthy : TypeFacts.Falsy, /*strictTruthy*/ true));
             }
             return type;
         }
