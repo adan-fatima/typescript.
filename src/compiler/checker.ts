@@ -7065,7 +7065,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             }
 
             function typeReferenceToTypeNode(type: TypeReference) {
-                let typeArguments: readonly Type[] = getTypeArguments(type);
+                const typeArguments = getTypeArguments(type);
                 if (type.target === globalArrayType || type.target === globalReadonlyArrayType) {
                     if (context.flags & NodeBuilderFlags.WriteArrayAsGenericType) {
                         const typeArgumentNode = typeToTypeNodeHelper(typeArguments[0], context);
@@ -7076,7 +7076,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     return type.target === globalArrayType ? arrayType : factory.createTypeOperatorNode(SyntaxKind.ReadonlyKeyword, arrayType);
                 }
                 else if (type.target.objectFlags & ObjectFlags.Tuple) {
-                    typeArguments = sameMap(typeArguments, (t, i) => removeMissingType(t, !!((type.target as TupleType).elementFlags[i] & ElementFlags.Optional)));
                     if (typeArguments.length > 0) {
                         const arity = getTypeReferenceArity(type);
                         const tupleConstituentNodes = mapToTypeNodes(typeArguments.slice(0, arity), context);
@@ -13053,7 +13052,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
         else {
             mapper = createTypeMapper(typeParameters, typeArguments);
-            members = createInstantiatedSymbolTable(source.declaredProperties, mapper, /*mappingThisOnly*/ typeParameters.length === 1);
+            const propertiesMapper = isTupleType(type)
+                ? createTypeMapper(typeParameters, sameMap(typeArguments, (t, i) => addOptionality(t, /*isProperty*/ true, !!(type.target.elementFlags[i] & ElementFlags.Optional))))
+                : mapper;
+            members = createInstantiatedSymbolTable(source.declaredProperties, propertiesMapper, /*mappingThisOnly*/ typeParameters.length === 1);
             callSignatures = instantiateSignatures(source.declaredCallSignatures, mapper);
             constructSignatures = instantiateSignatures(source.declaredConstructSignatures, mapper);
             indexInfos = instantiateIndexInfos(source.declaredIndexInfos, mapper);
@@ -16792,7 +16794,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (flags & (ElementFlags.Optional | ElementFlags.Rest)) {
                 lastOptionalOrRestIndex = expandedFlags.length;
             }
-            expandedTypes.push(flags & ElementFlags.Optional ? addOptionality(type, /*isProperty*/ true) : type);
+            expandedTypes.push(flags & ElementFlags.Optional && !exactOptionalPropertyTypes ? addOptionality(type, /*isProperty*/ true) : type);
             expandedFlags.push(flags);
             expandedDeclarations.push(declaration);
         }
@@ -16831,7 +16833,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function getTypeFromOptionalTypeNode(node: OptionalTypeNode): Type {
-        return addOptionality(getTypeFromTypeNode(node.type), /*isProperty*/ true);
+        const type = getTypeFromTypeNode(node.type);
+        return exactOptionalPropertyTypes ? type : addOptionality(type, /*isProperty*/ true);
     }
 
     function getTypeId(type: Type): TypeId {
@@ -19161,8 +19164,20 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
     function getTypeFromNamedTupleTypeNode(node: NamedTupleMember): Type {
         const links = getNodeLinks(node);
-        return links.resolvedType || (links.resolvedType = node.dotDotDotToken ? getTypeFromRestTypeNode(node) :
-            addOptionality(getTypeFromTypeNode(node.type), /*isProperty*/ true, !!node.questionToken));
+        if (links.resolvedType) {
+            return links.resolvedType;
+        }
+        let type: Type;
+        if (node.dotDotDotToken) {
+            type = getTypeFromRestTypeNode(node);
+        }
+        else {
+            type = getTypeFromTypeNode(node.type);
+            if (!exactOptionalPropertyTypes) {
+                type = addOptionality(type, /*isProperty*/ true, !!node.questionToken);
+            }
+        }
+        return links.resolvedType = type;
     }
 
     function getTypeFromTypeNode(node: TypeNode): Type {
@@ -23085,11 +23100,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                             }
                         }
 
-                        const sourceType = removeMissingType(sourceTypeArguments[sourcePosition], !!(sourceFlags & targetFlags & ElementFlags.Optional));
+                        const sourceType = sourceTypeArguments[sourcePosition];
                         const targetType = targetTypeArguments[targetPosition];
+                        const targetCheckType = sourceFlags & ElementFlags.Variadic && targetFlags & ElementFlags.Rest ? createArrayType(targetType) : targetType;
 
-                        const targetCheckType = sourceFlags & ElementFlags.Variadic && targetFlags & ElementFlags.Rest ? createArrayType(targetType) :
-                            removeMissingType(targetType, !!(targetFlags & ElementFlags.Optional));
                         const related = isRelatedTo(sourceType, targetCheckType, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
                         if (!related) {
                             if (reportErrors && (targetArity > 1 || sourceArity > 1)) {
@@ -30334,7 +30348,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 // If index is before any spread element and within the fixed part of the contextual tuple type, return
                 // the type of the contextual tuple element.
                 if ((firstSpreadIndex === undefined || index < firstSpreadIndex) && index < t.target.fixedLength) {
-                    return removeMissingType(getTypeArguments(t)[index], !!(t.target.elementFlags[index] && ElementFlags.Optional));
+                    return getTypeArguments(t)[index];
                 }
                 // When the length is known and the index is after all spread elements we compute the offset from the element
                 // to the end and the number of ending fixed elements in the contextual tuple type.
@@ -31036,7 +31050,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         const inConstContext = isConstContext(node);
         const contextualType = getApparentTypeOfContextualType(node, /*contextFlags*/ undefined);
         const inTupleContext = isSpreadIntoCallOrNew(node) || !!contextualType && someType(contextualType, isTupleLikeType);
-        let hasOmittedExpression = false;
         for (let i = 0; i < elementCount; i++) {
             const e = elements[i];
             if (e.kind === SyntaxKind.SpreadElement) {
@@ -31073,14 +31086,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
             }
             else if (exactOptionalPropertyTypes && e.kind === SyntaxKind.OmittedExpression) {
-                hasOmittedExpression = true;
-                elementTypes.push(undefinedOrMissingType);
-                elementFlags.push(ElementFlags.Optional);
+                elementTypes.push(undefinedType);
+                elementFlags.push(ElementFlags.Required);
             }
             else {
                 const type = checkExpressionForMutableLocation(e, checkMode, forceTuple);
-                elementTypes.push(addOptionality(type, /*isProperty*/ true, hasOmittedExpression));
-                elementFlags.push(hasOmittedExpression ? ElementFlags.Optional : ElementFlags.Required);
+                elementTypes.push(type);
+                elementFlags.push(ElementFlags.Required);
                 if (inTupleContext && checkMode && checkMode & CheckMode.Inferential && !(checkMode & CheckMode.SkipContextSensitive) && isContextSensitive(e)) {
                     const inferenceContext = getInferenceContext(node);
                     Debug.assert(inferenceContext); // In CheckMode.Inferential we should always have an inference context
