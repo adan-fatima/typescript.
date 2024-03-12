@@ -493,3 +493,14 @@ type Foo2<A extends any[]> = ReturnType<(...args: A) => string>;
 >Foo2 : string
 >args : A
 
+// Infer from an intersected tuple
+type Head<T extends string[]> = T extends [infer THead, ...infer _] ? THead : never;
+>Head : Head<T>
+
+type T100 = Head<["a", "c"] & { foo: "bar" }>; // "a"
+>T100 : "a"
+>foo : "bar"
+
+type T101 = Head<["a", "c"] & readonly ["a", "c"]>; // "a" | "c"
+>T101 : "a" | "c"
+

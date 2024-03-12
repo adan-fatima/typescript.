@@ -1031,6 +1031,12 @@ Info seq  [hh:mm:ss:mss] response:
             "sortText": "15"
           },
           {
+            "name": "TemplateStringsArrayOf",
+            "kind": "type",
+            "kindModifiers": "declare",
+            "sortText": "15"
+          },
+          {
             "name": "ThisParameterType",
             "kind": "type",
             "kindModifiers": "declare",

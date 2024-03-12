@@ -1132,6 +1132,7 @@ export namespace Completion {
         varEntry("Number"),
         interfaceEntry("NumberConstructor"),
         interfaceEntry("TemplateStringsArray"),
+        typeEntry("TemplateStringsArrayOf"),
         interfaceEntry("ImportMeta"),
         interfaceEntry("ImportCallOptions"),
         deprecatedInterfaceEntry("ImportAssertions"),
