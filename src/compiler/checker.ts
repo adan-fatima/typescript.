@@ -11620,8 +11620,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 reportErrorsFromWidening(declaration, type);
             }
 
-            // always widen a 'unique symbol' type if the type was created for a different declaration.
-            if (type.flags & TypeFlags.UniqueESSymbol && (isBindingElement(declaration) || !declaration.type) && type.symbol !== getSymbolOfDeclaration(declaration)) {
+            // always widen a 'unique symbol' type if the type was created for a different declaration and if it isn't accessible
+            if (type.flags & TypeFlags.UniqueESSymbol && !declaration.type && type.symbol !== getSymbolOfDeclaration(declaration) && !isValueSymbolAccessible(type.symbol, type.symbol.valueDeclaration)) {
                 type = esSymbolType;
             }
 
@@ -39293,7 +39293,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function widenTypeInferredFromInitializer(declaration: HasExpressionInitializer, type: Type) {
-        const widened = getCombinedNodeFlagsCached(declaration) & NodeFlags.Constant || isDeclarationReadonly(declaration) ? type : getWidenedLiteralType(type);
+        const widened = getCombinedNodeFlagsCached(declaration) & NodeFlags.Constant || isDeclarationReadonly(declaration) ? type : getWidenedUniqueESSymbolType(getWidenedLiteralType(type));
         if (isInJSFile(declaration)) {
             if (isEmptyLiteralType(widened)) {
                 reportImplicitAny(declaration, anyType);
