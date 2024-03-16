@@ -1494,6 +1494,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     var lastGetCombinedModifierFlagsNode: Declaration | undefined;
     var lastGetCombinedModifierFlagsResult = ModifierFlags.None;
 
+    var checkTypeRelatedToDepth = 0;
+    var checkTypeRelatedToCurrentlyVisitingMap: Map<string, number> | undefined;
     // for public members that accept a Node or one of its subtypes, we must guard against
     // synthetic nodes created during transformations by calling `getParseTreeNode`.
     // for most of these, we perform the guard only on `checker` to avoid any possible
@@ -3567,7 +3569,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 // try to resolve name in /*1*/ which is used in variable position,
                 // we want to check for block-scoped
                 if (
-                    errorLocation &&
+                    result && errorLocation &&
                     (meaning & SymbolFlags.BlockScopedVariable ||
                         ((meaning & SymbolFlags.Class || meaning & SymbolFlags.Enum) && (meaning & SymbolFlags.Value) === SymbolFlags.Value))
                 ) {
@@ -20805,7 +20807,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     /**
      * See signatureRelatedTo, compareSignaturesIdentical
      */
-    function compareSignaturesRelated(source: Signature, target: Signature, checkMode: SignatureCheckMode, reportErrors: boolean, errorReporter: ErrorReporter | undefined, incompatibleErrorReporter: ((source: Type, target: Type) => void) | undefined, compareTypes: TypeComparer, reportUnreliableMarkers: TypeMapper | undefined): Ternary {
+    function compareSignaturesRelated(source: Signature, target: Signature, checkMode: SignatureCheckMode, reportErrors: boolean, errorReporter: ErrorReporter | undefined, incompatibleErrorReporter: ((source: Type, target: Type) => void) | undefined, compareTypes: TypeComparer, reportUnreliableMarkers: TypeMapper | undefined, compareTypesUnilaterally = false): Ternary {
         // TODO (drosen): De-duplicate code between related functions.
         if (source === target) {
             return Ternary.True;
@@ -20883,9 +20885,18 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 const targetSig = checkMode & SignatureCheckMode.Callback || isInstantiatedGenericParameter(target, i) ? undefined : getSingleCallSignature(getNonNullableType(targetType));
                 const callbacks = sourceSig && targetSig && !getTypePredicateOfSignature(sourceSig) && !getTypePredicateOfSignature(targetSig) &&
                     getTypeFacts(sourceType, TypeFacts.IsUndefinedOrNull) === getTypeFacts(targetType, TypeFacts.IsUndefinedOrNull);
-                let related = callbacks ?
-                    compareSignaturesRelated(targetSig, sourceSig, (checkMode & SignatureCheckMode.StrictArity) | (strictVariance ? SignatureCheckMode.StrictCallback : SignatureCheckMode.BivariantCallback), reportErrors, errorReporter, incompatibleErrorReporter, compareTypes, reportUnreliableMarkers) :
-                    !(checkMode & SignatureCheckMode.Callback) && !strictVariance && compareTypes(sourceType, targetType, /*reportErrors*/ false) || compareTypes(targetType, sourceType, reportErrors);
+                let related: Ternary;
+                if (callbacks) {
+                    related = compareSignaturesRelated(targetSig, sourceSig, (checkMode & SignatureCheckMode.StrictArity) | (strictVariance ? SignatureCheckMode.StrictCallback : SignatureCheckMode.BivariantCallback), reportErrors, errorReporter, incompatibleErrorReporter, compareTypes, reportUnreliableMarkers);
+                }
+                else {
+                    if (!compareTypesUnilaterally) {
+                        related = !(checkMode & SignatureCheckMode.Callback) && !strictVariance && compareTypes(sourceType, targetType, /*reportErrors*/ false) || compareTypes(targetType, sourceType, reportErrors);
+                    }
+                    else {
+                        related = compareTypes(sourceType, targetType, reportErrors);
+                    }
+                }
                 // With strict arity, (x: number | undefined) => void is a subtype of (x?: number | undefined) => void
                 if (related && checkMode & SignatureCheckMode.StrictArity && i >= getMinArgumentCount(source) && i < getMinArgumentCount(target) && compareTypes(sourceType, targetType, /*reportErrors*/ false)) {
                     related = Ternary.False;
@@ -21295,6 +21306,24 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
         Debug.assert(relation !== identityRelation || !errorNode, "no error reporting in identity checking");
 
+        const visitingKey = getRelationKey(source, target, /*intersectionState*/ IntersectionState.None, relation, /*ignoreConstraints*/ false);
+        if (checkTypeRelatedToDepth === 0) {
+            checkTypeRelatedToCurrentlyVisitingMap = new Map();
+        }
+        if (!errorNode && !headMessage) {
+            let got = checkTypeRelatedToCurrentlyVisitingMap!.get(visitingKey);
+            const maxSameKey = 1;
+            if (got && got >= maxSameKey) {
+                relation.set(visitingKey, RelationComparisonResult.Succeeded);
+                return true;
+            }
+            else {
+                if (!got) got = 1;
+                else got = got + 1;
+                checkTypeRelatedToCurrentlyVisitingMap!.set(visitingKey, got);
+            }
+        }
+        checkTypeRelatedToDepth++;
         const result = isRelatedTo(source, target, RecursionFlags.Both, /*reportErrors*/ !!errorNode, headMessage);
         if (incompatibleStack) {
             reportIncompatibleStack();
@@ -21349,6 +21378,17 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             Debug.assert(!!errorOutputContainer.errors, "missed opportunity to interact with error.");
         }
 
+        checkTypeRelatedToDepth--;
+        if (checkTypeRelatedToDepth === 0) {
+            checkTypeRelatedToCurrentlyVisitingMap = undefined;
+        }
+        else {
+            const got = checkTypeRelatedToCurrentlyVisitingMap!.get(visitingKey);
+            if (got) {
+                if (got === 1) checkTypeRelatedToCurrentlyVisitingMap!.delete(visitingKey);
+                else checkTypeRelatedToCurrentlyVisitingMap!.set(visitingKey, got - 1);
+            }
+        }
         return result !== Ternary.False;
 
         function resetErrorInfo(saved: ReturnType<typeof captureErrorCalculationState>) {
@@ -21935,6 +21975,127 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return prop.valueDeclaration && container.valueDeclaration && prop.valueDeclaration.parent === container.valueDeclaration;
         }
 
+        /**
+         * Check that an overload instance is assignable to an intersection target.
+         * Algorithm
+         *
+         * Let s[i], i in 0...Ns-1 be the source overloads.
+         *
+         * Let t[j], j in 0...Nt-1 be the target intersection member types.
+         *
+         * Let t[j][k], k in 0...Ntj-1 be the target overloads in type t[j].
+         *
+         * Check that the source has an into mapping to the target:
+         *
+         * SourceDomainMatch(i):==
+         *     For some j,k exists IdentitiyRelation(Parameters<s[i]>,Parameters<t[j][k]>)===true
+         *
+         * SourceRangeMatch(i):==
+         *     Let rt be the union of ReturnTypes<t[j][k]> for all j,k s.t. Parameters<s[i]> assignable to Parameters<t[j][k]>
+         *     ReturnTypes<s[i]> assignable to rt
+         *
+         * TargetDomainMatch(t[j,k]):==
+         *     For some i exists IdentitiyRelation(Parameters<s[i]>,Parameters<t[j][k]>)===true
+         *
+         * Passing conditions:
+         * - For all i, SourceDomainMatch(i)===true
+         * - For all i, SourceRangeMatch(i)===true
+         * - For all j,k, TargetDomainMatch(t[j][k])===true
+         */
+        function checkOverloadsRelatedToIntersection(source: Type, target: Type, _reportErrors: boolean): { computed: boolean; ternary: Ternary; } {
+            const sourceSignatures = getSignaturesOfType(source, SignatureKind.Call);
+            const constructSignatureToString = (signature: Signature, forceReturnType?: Type) => {
+                const origReturnType = signature.resolvedReturnType;
+                signature.resolvedReturnType = forceReturnType;
+                const str = signatureToString(signature, /*enclosingDeclaration*/ undefined, TypeFormatFlags.WriteArrowStyleSignature, SignatureKind.Call);
+                signature.resolvedReturnType = origReturnType;
+                return str;
+            };
+            const mapAssignedToBy: Map</*tti*/ number, Map</*ti*/ number, /*some si*/ true>> = new Map<number, Map<number, true>>();
+            const failed = sourceSignatures.some((ssig, _si) => {
+                if (getReturnTypeOfSignature(ssig) === neverType) return false;
+                const accum = {
+                    hadMatch: false,
+                    gReturn: neverType as Type,
+                    gReturnAllVoid: true,
+                };
+                const matchedTargetSigs: Signature[] = [];
+                (target as IntersectionType).types.forEach((targetMember, _tti) => {
+                    const targetSignatures = getSignaturesOfType(targetMember, SignatureKind.Call);
+                    targetSignatures.forEach((tsig, _ti) => {
+                        const targetReturnType = getReturnTypeOfSignature(tsig);
+                        if (
+                            compareSignaturesRelated(
+                                ssig,
+                                tsig,
+                                SignatureCheckMode.None | SignatureCheckMode.IgnoreReturnTypes,
+                                /*reportErrors*/ false,
+                                /*errorReporter*/ undefined,
+                                /*incompatibleErrorReporter*/ undefined,
+                                compareTypesIdentical, // compareTypesAssignable,
+                                /*reportUnreliableMarkers*/ undefined,
+                                /*compareTypesUnilaterally*/ true,
+                            ) === Ternary.True
+                        ) {
+                            accum.hadMatch = true;
+                            if (targetReturnType !== voidType) {
+                                accum.gReturn = getUnionType([accum.gReturn, targetReturnType]);
+                                accum.gReturnAllVoid = false;
+                            }
+                            matchedTargetSigs.push(tsig);
+                            let mtti = mapAssignedToBy.get(_tti);
+                            if (!mtti) {
+                                mtti = new Map();
+                                mapAssignedToBy.set(_tti, mtti);
+                            }
+                            const setsi = mtti.get(_ti);
+                            if (!setsi) {
+                                mtti.set(_ti, true);
+                            }
+                        }
+                    });
+                });
+                if (!accum.hadMatch) {
+                    if (_reportErrors) {
+                        resetErrorInfo({ skipParentCounter: 0 } as ReturnType<typeof captureErrorCalculationState>);
+                        reportError(Diagnostics.Parameters_of_signature_0_are_not_assignable_to_the_parameters_of_any_signature_in_type_1, constructSignatureToString(ssig), typeToString(target));
+                    }
+                    return true; // failed
+                }
+                else {
+                    const returnType = getReturnTypeOfSignature(ssig);
+                    if (!accum.gReturnAllVoid && !isTypeAssignableTo(returnType, accum.gReturn)) {
+                        if (_reportErrors) {
+                            resetErrorInfo({ skipParentCounter: 0 } as ReturnType<typeof captureErrorCalculationState>);
+                            reportError(Diagnostics.Type_0_is_not_assignable_to_type_1, typeToString(returnType), typeToString(accum.gReturn));
+                            const strset = new Set<string>();
+                            matchedTargetSigs.forEach(tsig => strset.add(constructSignatureToString(tsig)));
+                            const strarr: string[] = [];
+                            strset.forEach(tstr => strarr.push(tstr));
+                            reportError(Diagnostics.Type_0_is_not_assignable_to_type_1, constructSignatureToString(ssig), strarr.join(" | "));
+                        }
+                        return true; // failed
+                    }
+                }
+            });
+            if (failed) return { computed: true, ternary: Ternary.False };
+            const failed2 = (target as IntersectionType).types.some((targetMember, _tti) => {
+                const mtti = mapAssignedToBy.get(_tti);
+                const targetSignatures = getSignaturesOfType(targetMember, SignatureKind.Call);
+                return targetSignatures.some((tsig, _ti) => {
+                    if (!mtti || !mtti.get(_ti)) {
+                        if (_reportErrors) {
+                            resetErrorInfo({ skipParentCounter: 0 } as ReturnType<typeof captureErrorCalculationState>);
+                            reportError(Diagnostics.There_is_no_signature_in_type_0_such_that_its_parameters_are_assignable_to_the_parameters_of_signature_1, typeToString(source), constructSignatureToString(tsig, anyType));
+                            reportError(Diagnostics.Type_0_is_not_assignable_to_type_1, typeToString(source), typeToString(targetMember));
+                        }
+                        return true;
+                    }
+                });
+            });
+            if (failed2) return { computed: true, ternary: Ternary.False };
+            return { computed: true, ternary: Ternary.True };
+        }
         function unionOrIntersectionRelatedTo(source: Type, target: Type, reportErrors: boolean, intersectionState: IntersectionState): Ternary {
             // Note that these checks are specifically ordered to produce correct results. In particular,
             // we need to deconstruct unions before intersections (because unions are always at the top),
@@ -21964,7 +22125,33 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return typeRelatedToSomeType(getRegularTypeOfObjectLiteral(source), target as UnionType, reportErrors && !(source.flags & TypeFlags.Primitive) && !(target.flags & TypeFlags.Primitive), intersectionState);
             }
             if (target.flags & TypeFlags.Intersection) {
-                return typeRelatedToEachType(source, target as IntersectionType, reportErrors, IntersectionState.Target);
+                const result1 = typeRelatedToEachType(source, target as IntersectionType, reportErrors, IntersectionState.Target);
+
+                if (result1 === Ternary.False) {
+                    /**
+                     * [cph] Existing code checks that source supports target, but not that source fits within target.
+                     */
+                    // const target0 = (target as IntersectionType).types[0];
+                    const sourceSignatures = getSignaturesOfType(source, SignatureKind.Call);
+                    if (
+                        sourceSignatures.every(sourceSig => {
+                            return !sourceSig.typeParameters;
+                        })
+                    ) {
+                        if (
+                            source.flags & TypeFlags.Object && getSignaturesOfType(source, SignatureKind.Call).length > 1
+                            // && target.flags & TypeFlags.Object && getSignaturesOfType(target0, SignatureKind.Call).length > 1 // already known to be intersection type
+                        ) {
+                            const { computed, ternary } = checkOverloadsRelatedToIntersection(source, target as IntersectionType, reportErrors);
+                            if (computed) {
+                                Debug.assert(ternary === Ternary.True || ternary === Ternary.False);
+                                return ternary;
+                            }
+                            // if not computed falls through to the reult of the general case: typeRelatedToEachType
+                        }
+                    }
+                }
+                return result1;
             }
             // Source is an intersection. For the comparable relation, if the target is a primitive type we hoist the
             // constraints of all non-primitive types in the source into a new intersection. We do this because the
