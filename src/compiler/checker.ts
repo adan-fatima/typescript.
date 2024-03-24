@@ -37374,6 +37374,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         const nextTypes: Type[] = [];
         const isAsync = (getFunctionFlags(func) & FunctionFlags.Async) !== 0;
         forEachYieldExpression(func.body as Block, yieldExpression => {
+            const statement = findAncestor(yieldExpression, isStatement)!;
+            if (canHaveFlowNode(statement) && !statement.flowNode && !compilerOptions.allowUnreachableCode) {
+                return;
+            }
             const yieldExpressionType = yieldExpression.expression ? checkExpression(yieldExpression.expression, checkMode) : undefinedWideningType;
             pushIfUnique(yieldTypes, getYieldedTypeOfYieldExpression(yieldExpression, yieldExpressionType, anyType, isAsync));
             let nextType: Type | undefined;
@@ -37483,6 +37487,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     checkExpressionCached((expr as CallExpression).expression).symbol === func.symbol
                 ) {
                     hasReturnOfTypeNever = true;
+                    return;
+                }
+
+                if (!returnStatement.flowNode && !compilerOptions.allowUnreachableCode) {
                     return;
                 }
 
