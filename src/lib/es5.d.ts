@@ -1221,7 +1221,7 @@ interface ReadonlyArray<T> {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every<S extends T>(predicate: (value: T, index: number, array: readonly T[]) => value is S, thisArg?: any): this is readonly S[];
+    every<S extends T, U>(predicate: (this: U, value: T, index: number, array: readonly T[]) => value is S, thisArg?: U): this is readonly S[];
     /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
@@ -1230,7 +1230,7 @@ interface ReadonlyArray<T> {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: T, index: number, array: readonly T[]) => unknown, thisArg?: U): boolean;
     /**
      * Determines whether the specified callback function returns true for any element of an array.
      * @param predicate A function that accepts up to three arguments. The some method calls
@@ -1239,31 +1239,31 @@ interface ReadonlyArray<T> {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: T, index: number, array: readonly T[]) => unknown, thisArg?: U): boolean;
     /**
      * Performs the specified action for each element in an array.
      * @param callbackfn  A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: T, index: number, array: readonly T[]) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: T, index: number, array: readonly T[]) => void, thisArg?: U): void;
     /**
      * Calls a defined callback function on each element of an array, and returns an array that contains the results.
      * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
      * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
      */
-    map<U>(callbackfn: (value: T, index: number, array: readonly T[]) => U, thisArg?: any): U[];
+    map<U, V>(callbackfn: (this: V, value: T, index: number, array: readonly T[]) => U, thisArg?: V): U[];
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
      * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      * @param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.
      */
-    filter<S extends T>(predicate: (value: T, index: number, array: readonly T[]) => value is S, thisArg?: any): S[];
+    filter<S extends T, U>(predicate: (this: U, value: T, index: number, array: readonly T[]) => value is S, thisArg?: U): S[];
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
      * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      * @param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any): T[];
+    filter<U>(predicate: (this: U, value: T, index: number, array: readonly T[]) => unknown, thisArg?: U): T[];
     /**
      * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
@@ -1412,7 +1412,7 @@ interface Array<T> {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every<S extends T>(predicate: (value: T, index: number, array: T[]) => value is S, thisArg?: any): this is S[];
+    every<S extends T, U>(predicate: (this: U, value: T, index: number, array: T[]) => value is S, thisArg?: U): this is S[];
     /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
@@ -1421,7 +1421,7 @@ interface Array<T> {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: T, index: number, array: T[]) => unknown, thisArg?: U): boolean;
     /**
      * Determines whether the specified callback function returns true for any element of an array.
      * @param predicate A function that accepts up to three arguments. The some method calls
@@ -1430,31 +1430,31 @@ interface Array<T> {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: T, index: number, array: T[]) => unknown, thisArg?: U): boolean;
     /**
      * Performs the specified action for each element in an array.
      * @param callbackfn  A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: T, index: number, array: T[]) => void, thisArg?: U): void;
     /**
      * Calls a defined callback function on each element of an array, and returns an array that contains the results.
      * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
      * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
      */
-    map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
+    map<U, V>(callbackfn: (this: V, value: T, index: number, array: T[]) => U, thisArg?: V): U[];
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
      * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      * @param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.
      */
-    filter<S extends T>(predicate: (value: T, index: number, array: T[]) => value is S, thisArg?: any): S[];
+    filter<S extends T, U>(predicate: (this: U, value: T, index: number, array: T[]) => value is S, thisArg?: U): S[];
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
      * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      * @param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): T[];
+    filter<U>(predicate: (this: U, value: T, index: number, array: T[]) => unknown, thisArg?: U): T[];
     /**
      * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
@@ -1896,7 +1896,7 @@ interface Int8Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: number, index: number, array: Int8Array) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: number, index: number, array: Int8Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
@@ -1915,7 +1915,7 @@ interface Int8Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: number, index: number, array: Int8Array) => any, thisArg?: any): Int8Array;
+    filter<U>(predicate: (this: U, value: number, index: number, array: Int8Array) => any, thisArg?: U): Int8Array;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -1926,7 +1926,7 @@ interface Int8Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    find(predicate: (value: number, index: number, obj: Int8Array) => boolean, thisArg?: any): number | undefined;
+    find<U>(predicate: (this: U, value: number, index: number, obj: Int8Array) => boolean, thisArg?: U): number | undefined;
 
     /**
      * Returns the index of the first element in the array where predicate is true, and -1
@@ -1937,7 +1937,7 @@ interface Int8Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    findIndex(predicate: (value: number, index: number, obj: Int8Array) => boolean, thisArg?: any): number;
+    findIndex<U>(predicate: (this: U, value: number, index: number, obj: Int8Array) => boolean, thisArg?: U): number;
 
     /**
      * Performs the specified action for each element in an array.
@@ -1946,7 +1946,7 @@ interface Int8Array {
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: number, index: number, array: Int8Array) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: number, index: number, array: Int8Array) => void, thisArg?: U): void;
 
     /**
      * Returns the index of the first occurrence of a value in an array.
@@ -1984,7 +1984,7 @@ interface Int8Array {
      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    map(callbackfn: (value: number, index: number, array: Int8Array) => number, thisArg?: any): Int8Array;
+    map<U>(callbackfn: (this: U, value: number, index: number, array: Int8Array) => number, thisArg?: U): Int8Array;
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -2063,7 +2063,7 @@ interface Int8Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: number, index: number, array: Int8Array) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: number, index: number, array: Int8Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Sorts an array.
@@ -2128,7 +2128,7 @@ interface Int8ArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number, thisArg?: any): Int8Array;
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (this: U, v: T, k: number) => number, thisArg?: U): Int8Array;
 }
 declare var Int8Array: Int8ArrayConstructor;
 
@@ -2176,7 +2176,7 @@ interface Uint8Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: number, index: number, array: Uint8Array) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: number, index: number, array: Uint8Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
@@ -2195,7 +2195,7 @@ interface Uint8Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: number, index: number, array: Uint8Array) => any, thisArg?: any): Uint8Array;
+    filter<U>(predicate: (this: U, value: number, index: number, array: Uint8Array) => any, thisArg?: U): Uint8Array;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -2206,7 +2206,7 @@ interface Uint8Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    find(predicate: (value: number, index: number, obj: Uint8Array) => boolean, thisArg?: any): number | undefined;
+    find<U>(predicate: (this: U, value: number, index: number, obj: Uint8Array) => boolean, thisArg?: U): number | undefined;
 
     /**
      * Returns the index of the first element in the array where predicate is true, and -1
@@ -2217,7 +2217,7 @@ interface Uint8Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    findIndex(predicate: (value: number, index: number, obj: Uint8Array) => boolean, thisArg?: any): number;
+    findIndex<U>(predicate: (this: U, value: number, index: number, obj: Uint8Array) => boolean, thisArg?: U): number;
 
     /**
      * Performs the specified action for each element in an array.
@@ -2226,7 +2226,7 @@ interface Uint8Array {
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: number, index: number, array: Uint8Array) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: number, index: number, array: Uint8Array) => void, thisArg?: U): void;
 
     /**
      * Returns the index of the first occurrence of a value in an array.
@@ -2264,7 +2264,7 @@ interface Uint8Array {
      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    map(callbackfn: (value: number, index: number, array: Uint8Array) => number, thisArg?: any): Uint8Array;
+    map<U>(callbackfn: (this: U, value: number, index: number, array: Uint8Array) => number, thisArg?: U): Uint8Array;
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -2343,7 +2343,7 @@ interface Uint8Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: number, index: number, array: Uint8Array) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: number, index: number, array: Uint8Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Sorts an array.
@@ -2457,7 +2457,7 @@ interface Uint8ClampedArray {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: number, index: number, array: Uint8ClampedArray) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: number, index: number, array: Uint8ClampedArray) => unknown, thisArg?: U): boolean;
 
     /**
      * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
@@ -2476,7 +2476,7 @@ interface Uint8ClampedArray {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: number, index: number, array: Uint8ClampedArray) => any, thisArg?: any): Uint8ClampedArray;
+    filter<U>(predicate: (this: U, value: number, index: number, array: Uint8ClampedArray) => any, thisArg?: U): Uint8ClampedArray;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -2487,7 +2487,7 @@ interface Uint8ClampedArray {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    find(predicate: (value: number, index: number, obj: Uint8ClampedArray) => boolean, thisArg?: any): number | undefined;
+    find<U>(predicate: (this: U, value: number, index: number, obj: Uint8ClampedArray) => boolean, thisArg?: U): number | undefined;
 
     /**
      * Returns the index of the first element in the array where predicate is true, and -1
@@ -2498,7 +2498,7 @@ interface Uint8ClampedArray {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    findIndex(predicate: (value: number, index: number, obj: Uint8ClampedArray) => boolean, thisArg?: any): number;
+    findIndex<U>(predicate: (this: U, value: number, index: number, obj: Uint8ClampedArray) => boolean, thisArg?: U): number;
 
     /**
      * Performs the specified action for each element in an array.
@@ -2507,7 +2507,7 @@ interface Uint8ClampedArray {
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: number, index: number, array: Uint8ClampedArray) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: number, index: number, array: Uint8ClampedArray) => void, thisArg?: U): void;
 
     /**
      * Returns the index of the first occurrence of a value in an array.
@@ -2545,7 +2545,7 @@ interface Uint8ClampedArray {
      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    map(callbackfn: (value: number, index: number, array: Uint8ClampedArray) => number, thisArg?: any): Uint8ClampedArray;
+    map<U>(callbackfn: (this: U, value: number, index: number, array: Uint8ClampedArray) => number, thisArg?: U): Uint8ClampedArray;
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -2624,7 +2624,7 @@ interface Uint8ClampedArray {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: number, index: number, array: Uint8ClampedArray) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: number, index: number, array: Uint8ClampedArray) => unknown, thisArg?: U): boolean;
 
     /**
      * Sorts an array.
@@ -2690,7 +2690,7 @@ interface Uint8ClampedArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number, thisArg?: any): Uint8ClampedArray;
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (this: U, v: T, k: number) => number, thisArg?: U): Uint8ClampedArray;
 }
 declare var Uint8ClampedArray: Uint8ClampedArrayConstructor;
 
@@ -2738,7 +2738,7 @@ interface Int16Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: number, index: number, array: Int16Array) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: number, index: number, array: Int16Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
@@ -2757,7 +2757,7 @@ interface Int16Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: number, index: number, array: Int16Array) => any, thisArg?: any): Int16Array;
+    filter<U>(predicate: (this: U, value: number, index: number, array: Int16Array) => any, thisArg?: U): Int16Array;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -2768,7 +2768,7 @@ interface Int16Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    find(predicate: (value: number, index: number, obj: Int16Array) => boolean, thisArg?: any): number | undefined;
+    find<U>(predicate: (this: U, value: number, index: number, obj: Int16Array) => boolean, thisArg?: U): number | undefined;
 
     /**
      * Returns the index of the first element in the array where predicate is true, and -1
@@ -2779,7 +2779,7 @@ interface Int16Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    findIndex(predicate: (value: number, index: number, obj: Int16Array) => boolean, thisArg?: any): number;
+    findIndex<U>(predicate: (this: U, value: number, index: number, obj: Int16Array) => boolean, thisArg?: U): number;
 
     /**
      * Performs the specified action for each element in an array.
@@ -2788,7 +2788,7 @@ interface Int16Array {
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: number, index: number, array: Int16Array) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: number, index: number, array: Int16Array) => void, thisArg?: U): void;
     /**
      * Returns the index of the first occurrence of a value in an array.
      * @param searchElement The value to locate in the array.
@@ -2825,7 +2825,7 @@ interface Int16Array {
      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    map(callbackfn: (value: number, index: number, array: Int16Array) => number, thisArg?: any): Int16Array;
+    map<U>(callbackfn: (this: U, value: number, index: number, array: Int16Array) => number, thisArg?: U): Int16Array;
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -2904,7 +2904,7 @@ interface Int16Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: number, index: number, array: Int16Array) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: number, index: number, array: Int16Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Sorts an array.
@@ -2970,7 +2970,7 @@ interface Int16ArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number, thisArg?: any): Int16Array;
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (this: U, v: T, k: number) => number, thisArg?: U): Int16Array;
 }
 declare var Int16Array: Int16ArrayConstructor;
 
@@ -3018,7 +3018,7 @@ interface Uint16Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: number, index: number, array: Uint16Array) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: number, index: number, array: Uint16Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
@@ -3037,7 +3037,7 @@ interface Uint16Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: number, index: number, array: Uint16Array) => any, thisArg?: any): Uint16Array;
+    filter<U>(predicate: (this: U, value: number, index: number, array: Uint16Array) => any, thisArg?: U): Uint16Array;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -3048,7 +3048,7 @@ interface Uint16Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    find(predicate: (value: number, index: number, obj: Uint16Array) => boolean, thisArg?: any): number | undefined;
+    find<U>(predicate: (this: U, value: number, index: number, obj: Uint16Array) => boolean, thisArg?: U): number | undefined;
 
     /**
      * Returns the index of the first element in the array where predicate is true, and -1
@@ -3059,7 +3059,7 @@ interface Uint16Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    findIndex(predicate: (value: number, index: number, obj: Uint16Array) => boolean, thisArg?: any): number;
+    findIndex<U>(predicate: (this: U, value: number, index: number, obj: Uint16Array) => boolean, thisArg?: U): number;
 
     /**
      * Performs the specified action for each element in an array.
@@ -3068,7 +3068,7 @@ interface Uint16Array {
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: number, index: number, array: Uint16Array) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: number, index: number, array: Uint16Array) => void, thisArg?: U): void;
 
     /**
      * Returns the index of the first occurrence of a value in an array.
@@ -3106,7 +3106,7 @@ interface Uint16Array {
      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    map(callbackfn: (value: number, index: number, array: Uint16Array) => number, thisArg?: any): Uint16Array;
+    map<U>(callbackfn: (this: U, value: number, index: number, array: Uint16Array) => number, thisArg?: U): Uint16Array;
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -3185,7 +3185,7 @@ interface Uint16Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: number, index: number, array: Uint16Array) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: number, index: number, array: Uint16Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Sorts an array.
@@ -3251,7 +3251,7 @@ interface Uint16ArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number, thisArg?: any): Uint16Array;
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (this: U, v: T, k: number) => number, thisArg?: U): Uint16Array;
 }
 declare var Uint16Array: Uint16ArrayConstructor;
 /**
@@ -3298,7 +3298,7 @@ interface Int32Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: number, index: number, array: Int32Array) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: number, index: number, array: Int32Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
@@ -3317,7 +3317,7 @@ interface Int32Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: number, index: number, array: Int32Array) => any, thisArg?: any): Int32Array;
+    filter<U>(predicate: (this: U, value: number, index: number, array: Int32Array) => any, thisArg?: U): Int32Array;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -3328,7 +3328,7 @@ interface Int32Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    find(predicate: (value: number, index: number, obj: Int32Array) => boolean, thisArg?: any): number | undefined;
+    find<U>(predicate: (this: U, value: number, index: number, obj: Int32Array) => boolean, thisArg?: U): number | undefined;
 
     /**
      * Returns the index of the first element in the array where predicate is true, and -1
@@ -3339,7 +3339,7 @@ interface Int32Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    findIndex(predicate: (value: number, index: number, obj: Int32Array) => boolean, thisArg?: any): number;
+    findIndex<U>(predicate: (this: U, value: number, index: number, obj: Int32Array) => boolean, thisArg?: U): number;
 
     /**
      * Performs the specified action for each element in an array.
@@ -3348,7 +3348,7 @@ interface Int32Array {
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: number, index: number, array: Int32Array) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: number, index: number, array: Int32Array) => void, thisArg?: U): void;
 
     /**
      * Returns the index of the first occurrence of a value in an array.
@@ -3386,7 +3386,7 @@ interface Int32Array {
      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    map(callbackfn: (value: number, index: number, array: Int32Array) => number, thisArg?: any): Int32Array;
+    map<U>(callbackfn: (this: U, value: number, index: number, array: Int32Array) => number, thisArg?: U): Int32Array;
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -3465,7 +3465,7 @@ interface Int32Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: number, index: number, array: Int32Array) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: number, index: number, array: Int32Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Sorts an array.
@@ -3531,7 +3531,7 @@ interface Int32ArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number, thisArg?: any): Int32Array;
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (this: U, v: T, k: number) => number, thisArg?: U): Int32Array;
 }
 declare var Int32Array: Int32ArrayConstructor;
 
@@ -3579,7 +3579,7 @@ interface Uint32Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: number, index: number, array: Uint32Array) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: number, index: number, array: Uint32Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
@@ -3598,7 +3598,7 @@ interface Uint32Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: number, index: number, array: Uint32Array) => any, thisArg?: any): Uint32Array;
+    filter<U>(predicate: (this: U, value: number, index: number, array: Uint32Array) => any, thisArg?: U): Uint32Array;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -3609,7 +3609,7 @@ interface Uint32Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    find(predicate: (value: number, index: number, obj: Uint32Array) => boolean, thisArg?: any): number | undefined;
+    find<U>(predicate: (this: U, value: number, index: number, obj: Uint32Array) => boolean, thisArg?: U): number | undefined;
 
     /**
      * Returns the index of the first element in the array where predicate is true, and -1
@@ -3620,7 +3620,7 @@ interface Uint32Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    findIndex(predicate: (value: number, index: number, obj: Uint32Array) => boolean, thisArg?: any): number;
+    findIndex<U>(predicate: (this: U, value: number, index: number, obj: Uint32Array) => boolean, thisArg?: U): number;
 
     /**
      * Performs the specified action for each element in an array.
@@ -3629,7 +3629,7 @@ interface Uint32Array {
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: number, index: number, array: Uint32Array) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: number, index: number, array: Uint32Array) => void, thisArg?: U): void;
     /**
      * Returns the index of the first occurrence of a value in an array.
      * @param searchElement The value to locate in the array.
@@ -3666,7 +3666,7 @@ interface Uint32Array {
      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    map(callbackfn: (value: number, index: number, array: Uint32Array) => number, thisArg?: any): Uint32Array;
+    map<U>(callbackfn: (this: U, value: number, index: number, array: Uint32Array) => number, thisArg?: U): Uint32Array;
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -3745,7 +3745,7 @@ interface Uint32Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: number, index: number, array: Uint32Array) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: number, index: number, array: Uint32Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Sorts an array.
@@ -3811,7 +3811,7 @@ interface Uint32ArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number, thisArg?: any): Uint32Array;
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (this: U, v: T, k: number) => number, thisArg?: U): Uint32Array;
 }
 declare var Uint32Array: Uint32ArrayConstructor;
 
@@ -3859,7 +3859,7 @@ interface Float32Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: number, index: number, array: Float32Array) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: number, index: number, array: Float32Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
@@ -3878,7 +3878,7 @@ interface Float32Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: number, index: number, array: Float32Array) => any, thisArg?: any): Float32Array;
+    filter<U>(predicate: (this: U, value: number, index: number, array: Float32Array) => any, thisArg?: U): Float32Array;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -3889,7 +3889,7 @@ interface Float32Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    find(predicate: (value: number, index: number, obj: Float32Array) => boolean, thisArg?: any): number | undefined;
+    find<U>(predicate: (this: U, value: number, index: number, obj: Float32Array) => boolean, thisArg?: U): number | undefined;
 
     /**
      * Returns the index of the first element in the array where predicate is true, and -1
@@ -3900,7 +3900,7 @@ interface Float32Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    findIndex(predicate: (value: number, index: number, obj: Float32Array) => boolean, thisArg?: any): number;
+    findIndex<U>(predicate: (this: U, value: number, index: number, obj: Float32Array) => boolean, thisArg?: U): number;
 
     /**
      * Performs the specified action for each element in an array.
@@ -3909,7 +3909,7 @@ interface Float32Array {
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: number, index: number, array: Float32Array) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: number, index: number, array: Float32Array) => void, thisArg?: U): void;
 
     /**
      * Returns the index of the first occurrence of a value in an array.
@@ -3947,7 +3947,7 @@ interface Float32Array {
      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    map(callbackfn: (value: number, index: number, array: Float32Array) => number, thisArg?: any): Float32Array;
+    map<U>(callbackfn: (this: U, value: number, index: number, array: Float32Array) => number, thisArg?: U): Float32Array;
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -4026,7 +4026,7 @@ interface Float32Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: number, index: number, array: Float32Array) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: number, index: number, array: Float32Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Sorts an array.
@@ -4092,7 +4092,7 @@ interface Float32ArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number, thisArg?: any): Float32Array;
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (this: U, v: T, k: number) => number, thisArg?: U): Float32Array;
 }
 declare var Float32Array: Float32ArrayConstructor;
 
@@ -4140,7 +4140,7 @@ interface Float64Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    every(predicate: (value: number, index: number, array: Float64Array) => unknown, thisArg?: any): boolean;
+    every<U>(predicate: (this: U, value: number, index: number, array: Float64Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
@@ -4159,7 +4159,7 @@ interface Float64Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    filter(predicate: (value: number, index: number, array: Float64Array) => any, thisArg?: any): Float64Array;
+    filter<U>(predicate: (this: U, value: number, index: number, array: Float64Array) => any, thisArg?: U): Float64Array;
 
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -4170,7 +4170,7 @@ interface Float64Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    find(predicate: (value: number, index: number, obj: Float64Array) => boolean, thisArg?: any): number | undefined;
+    find<U>(predicate: (this: U, value: number, index: number, obj: Float64Array) => boolean, thisArg?: U): number | undefined;
 
     /**
      * Returns the index of the first element in the array where predicate is true, and -1
@@ -4181,7 +4181,7 @@ interface Float64Array {
      * @param thisArg If provided, it will be used as the this value for each invocation of
      * predicate. If it is not provided, undefined is used instead.
      */
-    findIndex(predicate: (value: number, index: number, obj: Float64Array) => boolean, thisArg?: any): number;
+    findIndex<U>(predicate: (this: U, value: number, index: number, obj: Float64Array) => boolean, thisArg?: U): number;
 
     /**
      * Performs the specified action for each element in an array.
@@ -4190,7 +4190,7 @@ interface Float64Array {
      * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    forEach(callbackfn: (value: number, index: number, array: Float64Array) => void, thisArg?: any): void;
+    forEach<U>(callbackfn: (this: U, value: number, index: number, array: Float64Array) => void, thisArg?: U): void;
 
     /**
      * Returns the index of the first occurrence of a value in an array.
@@ -4228,7 +4228,7 @@ interface Float64Array {
      * @param thisArg An object to which the this keyword can refer in the callbackfn function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    map(callbackfn: (value: number, index: number, array: Float64Array) => number, thisArg?: any): Float64Array;
+    map<U>(callbackfn: (this: U, value: number, index: number, array: Float64Array) => number, thisArg?: U): Float64Array;
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -4307,7 +4307,7 @@ interface Float64Array {
      * @param thisArg An object to which the this keyword can refer in the predicate function.
      * If thisArg is omitted, undefined is used as the this value.
      */
-    some(predicate: (value: number, index: number, array: Float64Array) => unknown, thisArg?: any): boolean;
+    some<U>(predicate: (this: U, value: number, index: number, array: Float64Array) => unknown, thisArg?: U): boolean;
 
     /**
      * Sorts an array.
@@ -4373,7 +4373,7 @@ interface Float64ArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number, thisArg?: any): Float64Array;
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (this: U, v: T, k: number) => number, thisArg?: U): Float64Array;
 }
 declare var Float64Array: Float64ArrayConstructor;
 
