@@ -182,6 +182,7 @@ import {
     RegularExpressionLiteral,
     RestTypeNode,
     ReturnStatement,
+    SatisfiesClause,
     SatisfiesExpression,
     SemicolonClassElement,
     SetAccessorDeclaration,
@@ -983,6 +984,10 @@ export function isHeritageClause(node: Node): node is HeritageClause {
 
 export function isCatchClause(node: Node): node is CatchClause {
     return node.kind === SyntaxKind.CatchClause;
+}
+
+export function isSatisfiesClause(node: Node): node is SatisfiesClause {
+    return node.kind === SyntaxKind.SatisfiesClause;
 }
 
 // Property assignments
