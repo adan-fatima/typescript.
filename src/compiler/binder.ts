@@ -261,7 +261,6 @@ import {
     nodeIsPresent,
     NonNullChain,
     NonNullExpression,
-    objectAllocator,
     ObjectLiteralExpression,
     OptionalChain,
     ParameterDeclaration,
@@ -322,6 +321,7 @@ import {
     WithStatement,
 } from "./_namespaces/ts";
 import * as performance from "./_namespaces/ts.performance";
+import { SymbolObject } from "./objectConstructors";
 
 /** @internal */
 export const enum ModuleInstanceState {
@@ -559,7 +559,6 @@ function createBinder(): (file: SourceFile, options: CompilerOptions) => void {
 
     var symbolCount = 0;
 
-    var Symbol: new (flags: SymbolFlags, name: __String) => Symbol;
     var classifiableNames: Set<__String>;
 
     var unreachableFlow = createFlowNode(FlowFlags.Unreachable, /*node*/ undefined, /*antecedent*/ undefined);
@@ -585,8 +584,6 @@ function createBinder(): (file: SourceFile, options: CompilerOptions) => void {
         inStrictMode = bindInStrictMode(file, opts);
         classifiableNames = new Set();
         symbolCount = 0;
-
-        Symbol = objectAllocator.getSymbolConstructor();
 
         // Attach debugging information if necessary
         Debug.attachFlowNodeDebugInfo(unreachableFlow);
@@ -639,7 +636,7 @@ function createBinder(): (file: SourceFile, options: CompilerOptions) => void {
 
     function createSymbol(flags: SymbolFlags, name: __String): Symbol {
         symbolCount++;
-        return new Symbol(flags, name);
+        return new SymbolObject(flags, name);
     }
 
     function addDeclarationToSymbol(symbol: Symbol, node: Declaration, symbolFlags: SymbolFlags) {

@@ -116,7 +116,6 @@ import {
     getSourceFileOfNode,
     getSpanOfTokenAtPosition,
     getSymbolId,
-    getTextOfIdentifierOrLiteral,
     getTextOfNode,
     getTypesPackageName,
     hasJSFileExtension,
@@ -126,7 +125,6 @@ import {
     Identifier,
     identifierIsThisKeyword,
     identity,
-    idText,
     IfStatement,
     ImportClause,
     ImportDeclaration,
@@ -243,7 +241,6 @@ import {
     isStringDoubleQuoted,
     isStringLiteral,
     isStringLiteralLike,
-    isStringOrNumericLiteralLike,
     isStringTextContainingNode,
     isSyntaxList,
     isTaggedTemplateExpression,
@@ -314,7 +311,6 @@ import {
     ProjectPackageJsonInfo,
     PropertyAccessExpression,
     PropertyAssignment,
-    PropertyName,
     PseudoBigInt,
     pseudoBigIntToString,
     QualifiedName,
@@ -1830,7 +1826,7 @@ function findRightmostToken(n: Node, sourceFile: SourceFileLike): Node | undefin
 /**
  * Finds the rightmost child to the left of `children[exclusiveStartPosition]` which is a non-all-whitespace token or has constituent tokens.
  */
-function findRightmostChildNodeWithTokens(children: Node[], exclusiveStartPosition: number, sourceFile: SourceFileLike, parentKind: SyntaxKind): Node | undefined {
+function findRightmostChildNodeWithTokens(children: readonly Node[], exclusiveStartPosition: number, sourceFile: SourceFileLike, parentKind: SyntaxKind): Node | undefined {
     for (let i = exclusiveStartPosition - 1; i >= 0; i--) {
         const child = children[i];
 
@@ -2444,14 +2440,6 @@ export function repeatString(str: string, count: number): string {
 /** @internal */
 export function skipConstraint(type: Type): Type {
     return type.isTypeParameter() ? type.getConstraint() || type : type;
-}
-
-/** @internal */
-export function getNameFromPropertyName(name: PropertyName): string | undefined {
-    return name.kind === SyntaxKind.ComputedPropertyName
-        // treat computed property names where expression is string/numeric literal as just string/numeric literal
-        ? isStringOrNumericLiteralLike(name.expression) ? name.expression.text : undefined
-        : isPrivateIdentifier(name) ? idText(name) : getTextOfIdentifierOrLiteral(name);
 }
 
 /** @internal */

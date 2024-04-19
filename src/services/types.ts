@@ -7,6 +7,7 @@ import {
     DiagnosticWithLocation,
     DocumentHighlights,
     DocumentPositionMapper,
+    DocumentSpan,
     EmitOutput,
     ExportInfoMap,
     ExportMapInfoKey,
@@ -14,7 +15,9 @@ import {
     GetEffectiveTypeRootsHost,
     HasChangedAutomaticTypeDirectiveNames,
     HasInvalidatedResolutions,
+    IScriptSnapshot,
     JSDocParsingMode,
+    JSDocTagInfo,
     LineAndCharacter,
     MinimalResolutionCacheHost,
     ModuleResolutionCache,
@@ -35,6 +38,7 @@ import {
     SourceMapper,
     StringLiteralLike,
     Symbol,
+    SymbolDisplayPart,
     SymlinkCache,
     TextChangeRange,
     textChanges,
@@ -42,178 +46,6 @@ import {
     TextSpan,
     UserPreferences,
 } from "./_namespaces/ts";
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface Node {
-        getSourceFile(): SourceFile;
-        getChildCount(sourceFile?: SourceFile): number;
-        getChildAt(index: number, sourceFile?: SourceFile): Node;
-        getChildren(sourceFile?: SourceFile): Node[];
-        /** @internal */
-        getChildren(sourceFile?: SourceFileLike): Node[]; // eslint-disable-line @typescript-eslint/unified-signatures
-        getStart(sourceFile?: SourceFile, includeJsDocComment?: boolean): number;
-        /** @internal */
-        getStart(sourceFile?: SourceFileLike, includeJsDocComment?: boolean): number; // eslint-disable-line @typescript-eslint/unified-signatures
-        getFullStart(): number;
-        getEnd(): number;
-        getWidth(sourceFile?: SourceFileLike): number;
-        getFullWidth(): number;
-        getLeadingTriviaWidth(sourceFile?: SourceFile): number;
-        getFullText(sourceFile?: SourceFile): string;
-        getText(sourceFile?: SourceFile): string;
-        getFirstToken(sourceFile?: SourceFile): Node | undefined;
-        /** @internal */
-        getFirstToken(sourceFile?: SourceFileLike): Node | undefined; // eslint-disable-line @typescript-eslint/unified-signatures
-        getLastToken(sourceFile?: SourceFile): Node | undefined;
-        /** @internal */
-        getLastToken(sourceFile?: SourceFileLike): Node | undefined; // eslint-disable-line @typescript-eslint/unified-signatures
-        // See ts.forEachChild for documentation.
-        forEachChild<T>(cbNode: (node: Node) => T | undefined, cbNodeArray?: (nodes: NodeArray<Node>) => T | undefined): T | undefined;
-    }
-}
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface Identifier {
-        readonly text: string;
-    }
-}
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface PrivateIdentifier {
-        readonly text: string;
-    }
-}
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface Symbol {
-        readonly name: string;
-        getFlags(): SymbolFlags;
-        getEscapedName(): __String;
-        getName(): string;
-        getDeclarations(): Declaration[] | undefined;
-        getDocumentationComment(typeChecker: TypeChecker | undefined): SymbolDisplayPart[];
-        /** @internal */
-        getContextualDocumentationComment(context: Node | undefined, checker: TypeChecker | undefined): SymbolDisplayPart[];
-        getJsDocTags(checker?: TypeChecker): JSDocTagInfo[];
-        /** @internal */
-        getContextualJsDocTags(context: Node | undefined, checker: TypeChecker | undefined): JSDocTagInfo[];
-    }
-}
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface Type {
-        getFlags(): TypeFlags;
-        getSymbol(): Symbol | undefined;
-        getProperties(): Symbol[];
-        getProperty(propertyName: string): Symbol | undefined;
-        getApparentProperties(): Symbol[];
-        getCallSignatures(): readonly Signature[];
-        getConstructSignatures(): readonly Signature[];
-        getStringIndexType(): Type | undefined;
-        getNumberIndexType(): Type | undefined;
-        getBaseTypes(): BaseType[] | undefined;
-        getNonNullableType(): Type;
-        /** @internal */ getNonOptionalType(): Type;
-        /** @internal */ isNullableType(): boolean;
-        getConstraint(): Type | undefined;
-        getDefault(): Type | undefined;
-
-        isUnion(): this is UnionType;
-        isIntersection(): this is IntersectionType;
-        isUnionOrIntersection(): this is UnionOrIntersectionType;
-        isLiteral(): this is LiteralType;
-        isStringLiteral(): this is StringLiteralType;
-        isNumberLiteral(): this is NumberLiteralType;
-        isTypeParameter(): this is TypeParameter;
-        isClassOrInterface(): this is InterfaceType;
-        isClass(): this is InterfaceType;
-        isIndexType(): this is IndexType;
-    }
-}
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface TypeReference {
-        typeArguments?: readonly Type[];
-    }
-}
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface Signature {
-        getDeclaration(): SignatureDeclaration;
-        getTypeParameters(): TypeParameter[] | undefined;
-        getParameters(): Symbol[];
-        getTypeParameterAtPosition(pos: number): Type;
-        getReturnType(): Type;
-        getDocumentationComment(typeChecker: TypeChecker | undefined): SymbolDisplayPart[];
-        getJsDocTags(): JSDocTagInfo[];
-    }
-}
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface SourceFile {
-        /** @internal */ version: string;
-        /** @internal */ scriptSnapshot: IScriptSnapshot | undefined;
-        /** @internal */ nameTable: Map<__String, number> | undefined;
-
-        /** @internal */ getNamedDeclarations(): Map<string, readonly Declaration[]>;
-
-        getLineAndCharacterOfPosition(pos: number): LineAndCharacter;
-        getLineEndOfPosition(pos: number): number;
-        getLineStarts(): readonly number[];
-        getPositionOfLineAndCharacter(line: number, character: number): number;
-        update(newText: string, textChangeRange: TextChangeRange): SourceFile;
-
-        /** @internal */ sourceMapper?: DocumentPositionMapper;
-    }
-}
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface SourceFileLike {
-        getLineAndCharacterOfPosition(pos: number): LineAndCharacter;
-    }
-}
-
-declare module "../compiler/types" {
-    // Module transform: converted from interface augmentation
-    export interface SourceMapSource {
-        getLineAndCharacterOfPosition(pos: number): LineAndCharacter;
-    }
-}
-
-/**
- * Represents an immutable snapshot of a script at a specified time.Once acquired, the
- * snapshot is observably immutable. i.e. the same calls with the same parameters will return
- * the same values.
- */
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export interface IScriptSnapshot {
-    /** Gets a portion of the script snapshot specified by [start, end). */
-    getText(start: number, end: number): string;
-
-    /** Gets the length of this script snapshot. */
-    getLength(): number;
-
-    /**
-     * Gets the TextChangeRange that describe how the text changed between this text and
-     * an older version.  This information is used by the incremental parser to determine
-     * what sections of the script need to be re-parsed.  'undefined' can be returned if the
-     * change range cannot be determined.  However, in that case, incremental parsing will
-     * not happen and the entire document will be re - parsed.
-     */
-    getChangeRange(oldSnapshot: IScriptSnapshot): TextChangeRange | undefined;
-
-    /** Releases all resources held by this script snapshot */
-    dispose?(): void;
-}
 
 export namespace ScriptSnapshot {
     class StringScriptSnapshot implements IScriptSnapshot {
@@ -1035,25 +867,6 @@ export interface TextInsertion {
     caretOffset: number;
 }
 
-export interface DocumentSpan {
-    textSpan: TextSpan;
-    fileName: string;
-
-    /**
-     * If the span represents a location that was remapped (e.g. via a .d.ts.map file),
-     * then the original filename and span will be specified here
-     */
-    originalTextSpan?: TextSpan;
-    originalFileName?: string;
-
-    /**
-     * If DocumentSpan.textSpan is the span for name of the declaration,
-     * then this is the span for relevant declaration
-     */
-    contextSpan?: TextSpan;
-    originalContextSpan?: TextSpan;
-}
-
 export interface RenameLocation extends DocumentSpan {
     readonly prefixText?: string;
     readonly suffixText?: string;
@@ -1262,26 +1075,6 @@ export enum SymbolDisplayPartKind {
     link,
     linkName,
     linkText,
-}
-
-export interface SymbolDisplayPart {
-    /**
-     * Text of an item describing the symbol.
-     */
-    text: string;
-    /**
-     * The symbol's kind (such as 'className' or 'parameterName' or plain 'text').
-     */
-    kind: string;
-}
-
-export interface JSDocLinkDisplayPart extends SymbolDisplayPart {
-    target: DocumentSpan;
-}
-
-export interface JSDocTagInfo {
-    name: string;
-    text?: SymbolDisplayPart[];
 }
 
 export interface QuickInfo {

@@ -18,7 +18,6 @@ import {
     AsteriskToken,
     AwaitExpression,
     AwaitKeyword,
-    BaseNodeFactory,
     BigIntLiteral,
     BinaryExpression,
     BinaryOperator,
@@ -55,7 +54,6 @@ import {
     ConstructSignatureDeclaration,
     containsObjectRestOrSpread,
     ContinueStatement,
-    createBaseNodeFactory,
     createNodeConverters,
     createParenthesizerRules,
     createScanner,
@@ -335,7 +333,6 @@ import {
     nullNodeConverters,
     nullParenthesizerRules,
     NumericLiteral,
-    objectAllocator,
     ObjectBindingPattern,
     ObjectLiteralElementLike,
     ObjectLiteralExpression,
@@ -457,6 +454,14 @@ import {
     WithStatement,
     YieldExpression,
 } from "../_namespaces/ts";
+import {
+    IdentifierObject,
+    NodeObject,
+    PrivateIdentifierObject,
+    SourceFileObject,
+    TokenObject,
+} from "../nodeConstructors";
+import { SourceMapSourceObject } from "../objectConstructors";
 
 let nextAutoGenerateId = 0;
 
@@ -471,6 +476,8 @@ export const enum NodeFactoryFlags {
     NoIndentationOnFreshPropertyAccess = 1 << 2,
     // Do not set an `original` pointer when updating a node.
     NoOriginalNode = 1 << 3,
+    // Mark nodes as synthetic
+    MarkSynthetic = 1 << 4,
 }
 
 const nodeFactoryPatchers: ((factory: NodeFactory) => void)[] = [];
@@ -487,7 +494,8 @@ export function addNodeFactoryPatcher(fn: (factory: NodeFactory) => void) {
  *
  * @internal
  */
-export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNodeFactory): NodeFactory {
+export function createNodeFactory(flags: NodeFactoryFlags): NodeFactory {
+    const markSynthetic = (flags & NodeFactoryFlags.MarkSynthetic) === NodeFactoryFlags.MarkSynthetic;
     const setOriginal = flags & NodeFactoryFlags.NoOriginalNode ? identity : setOriginalNode;
 
     // Lazily load the parenthesizer, node converters, and some factory methods until they are used.
@@ -515,7 +523,6 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
         get converters() {
             return converters();
         },
-        baseFactory,
         flags,
         createNodeArray,
         createNumericLiteral,
@@ -1204,7 +1211,9 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
     }
 
     function createBaseNode<T extends Node>(kind: T["kind"]) {
-        return baseFactory.createBaseNode(kind) as Mutable<T>;
+        const node = new NodeObject(kind) as Node as Mutable<T>;
+        if (markSynthetic) node.flags |= NodeFlags.Synthesized;
+        return node;
     }
 
     function createBaseDeclaration<T extends Declaration>(kind: T["kind"]) {
@@ -1299,7 +1308,8 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
     //
 
     function createBaseIdentifier(escapedText: __String) {
-        const node = baseFactory.createBaseIdentifierNode(SyntaxKind.Identifier) as Mutable<Identifier>;
+        const node = new IdentifierObject() as Mutable<Identifier>;
+        if (markSynthetic) node.flags |= NodeFlags.Synthesized;
         node.escapedText = escapedText;
         node.jsDoc = undefined; // initialized by parser (JsDocContainer)
         node.flowNode = undefined; // initialized by binder (FlowContainer)
@@ -1383,7 +1393,8 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
     }
 
     function createBasePrivateIdentifier(escapedText: __String) {
-        const node = baseFactory.createBasePrivateIdentifierNode(SyntaxKind.PrivateIdentifier) as Mutable<PrivateIdentifier>;
+        const node = new PrivateIdentifierObject() as Mutable<PrivateIdentifier>;
+        if (markSynthetic) node.flags |= NodeFlags.Synthesized;
         node.escapedText = escapedText;
         node.transformFlags |= TransformFlags.ContainsClassFields;
         return node;
@@ -1431,7 +1442,9 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
     //
 
     function createBaseToken<T extends Node>(kind: T["kind"]) {
-        return baseFactory.createBaseTokenNode(kind) as Mutable<T>;
+        const node = new TokenObject(kind) as Node as Mutable<T>;
+        if (markSynthetic) node.flags |= NodeFlags.Synthesized;
+        return node;
     }
 
     // @api
@@ -6026,7 +6039,8 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
         endOfFileToken: EndOfFileToken,
         flags: NodeFlags,
     ) {
-        const node = baseFactory.createBaseSourceFileNode(SyntaxKind.SourceFile) as Mutable<SourceFile>;
+        const node = new SourceFileObject() as Mutable<SourceFile>;
+        if (markSynthetic) node.flags |= NodeFlags.Synthesized;
         node.statements = createNodeArray(statements);
         node.endOfFileToken = endOfFileToken;
         node.flags |= flags;
@@ -6115,7 +6129,8 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
     function cloneSourceFileWorker(source: SourceFile) {
         // TODO: This mechanism for cloning results in megamorphic property reads and writes. In future perf-related
         //       work, we should consider switching explicit property assignments instead of using `for..in`.
-        const node = baseFactory.createBaseSourceFileNode(SyntaxKind.SourceFile) as Mutable<SourceFile>;
+        const node = new SourceFileObject() as Mutable<SourceFile>;
+        if (markSynthetic) node.flags |= NodeFlags.Synthesized;
         node.flags |= source.flags & ~NodeFlags.Synthesized;
         for (const p in source) {
             if (hasProperty(node, p) || !hasProperty(source, p)) {
@@ -6209,7 +6224,7 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
     }
 
     // @api
-    function createSyntaxList(children: Node[]) {
+    function createSyntaxList(children: readonly Node[]) {
         const node = createBaseNode<SyntaxList>(SyntaxKind.SyntaxList);
         setNodeChildren(node, children);
         return node;
@@ -6369,11 +6384,12 @@ export function createNodeFactory(flags: NodeFactoryFlags, baseFactory: BaseNode
             return clonePrivateIdentifier(node) as T & PrivateIdentifier;
         }
 
-        const clone = !isNodeKind(node.kind) ? baseFactory.createBaseTokenNode(node.kind) as T :
-            baseFactory.createBaseNode(node.kind) as T;
+        const clone = !isNodeKind(node.kind) ? new TokenObject(node.kind) as Node as Mutable<T> :
+            new NodeObject(node.kind) as Node as Mutable<T>;
 
-        (clone as Mutable<T>).flags |= node.flags & ~NodeFlags.Synthesized;
-        (clone as Mutable<T>).transformFlags = node.transformFlags;
+        if (markSynthetic) clone.flags |= NodeFlags.Synthesized;
+        clone.flags |= node.flags & ~NodeFlags.Synthesized;
+        clone.transformFlags = node.transformFlags;
         setOriginal(clone, node);
 
         for (const key in node) {
@@ -7369,22 +7385,7 @@ export function getTransformFlagsSubtreeExclusions(kind: SyntaxKind) {
     }
 }
 
-const baseFactory = createBaseNodeFactory();
-
-function makeSynthetic(node: Node) {
-    (node as Mutable<Node>).flags |= NodeFlags.Synthesized;
-    return node;
-}
-
-const syntheticFactory: BaseNodeFactory = {
-    createBaseSourceFileNode: kind => makeSynthetic(baseFactory.createBaseSourceFileNode(kind)),
-    createBaseIdentifierNode: kind => makeSynthetic(baseFactory.createBaseIdentifierNode(kind)),
-    createBasePrivateIdentifierNode: kind => makeSynthetic(baseFactory.createBasePrivateIdentifierNode(kind)),
-    createBaseTokenNode: kind => makeSynthetic(baseFactory.createBaseTokenNode(kind)),
-    createBaseNode: kind => makeSynthetic(baseFactory.createBaseNode(kind)),
-};
-
-export const factory = createNodeFactory(NodeFactoryFlags.NoIndentationOnFreshPropertyAccess, syntheticFactory);
+export const factory = createNodeFactory(NodeFactoryFlags.NoIndentationOnFreshPropertyAccess | NodeFactoryFlags.MarkSynthetic);
 
 let SourceMapSource: new (fileName: string, text: string, skipTrivia?: (pos: number) => number) => SourceMapSource;
 
@@ -7392,7 +7393,7 @@ let SourceMapSource: new (fileName: string, text: string, skipTrivia?: (pos: num
  * Create an external source map source file reference
  */
 export function createSourceMapSource(fileName: string, text: string, skipTrivia?: (pos: number) => number): SourceMapSource {
-    return new (SourceMapSource || (SourceMapSource = objectAllocator.getSourceMapSourceConstructor()))(fileName, text, skipTrivia);
+    return new SourceMapSourceObject(fileName, text, skipTrivia);
 }
 
 // Utilities

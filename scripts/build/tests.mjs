@@ -41,6 +41,7 @@ export async function runConsoleTests(runJs, defaultReporter, runInParallel, opt
     const shards = +cmdLineOptions.shards || undefined;
     const shardId = +cmdLineOptions.shardId || undefined;
     const coverage = cmdLineOptions.coverage;
+    const bail = cmdLineOptions.bail;
     if (!cmdLineOptions.dirty) {
         if (options.watching) {
             console.log(chalk.yellowBright(`[watch] cleaning test directories...`));
@@ -90,6 +91,9 @@ export async function runConsoleTests(runJs, defaultReporter, runInParallel, opt
         args.push(mochaJs);
         args.push("-R", findUpFile("scripts/failed-tests.cjs"));
         args.push("-O", '"reporter=' + reporter + (keepFailed ? ",keepFailed=true" : "") + '"');
+        if (bail) {
+            args.push("--bail");
+        }
         if (tests) {
             args.push("-g", `"${tests}"`);
         }

@@ -4210,12 +4210,10 @@ declare namespace ts {
         readonly kind: SyntaxKind;
         readonly flags: NodeFlags;
         readonly parent: Node;
-    }
-    interface Node {
         getSourceFile(): SourceFile;
         getChildCount(sourceFile?: SourceFile): number;
         getChildAt(index: number, sourceFile?: SourceFile): Node;
-        getChildren(sourceFile?: SourceFile): Node[];
+        getChildren(sourceFile?: SourceFile): readonly Node[];
         getStart(sourceFile?: SourceFile, includeJsDocComment?: boolean): number;
         getFullStart(): number;
         getEnd(): number;
@@ -4374,8 +4372,6 @@ declare namespace ts {
          * Text of identifier, but if the identifier begins with two underscores, this will begin with three.
          */
         readonly escapedText: __String;
-    }
-    interface Identifier {
         readonly text: string;
     }
     interface TransientIdentifier extends Identifier {
@@ -4407,8 +4403,6 @@ declare namespace ts {
     interface PrivateIdentifier extends PrimaryExpression {
         readonly kind: SyntaxKind.PrivateIdentifier;
         readonly escapedText: __String;
-    }
-    interface PrivateIdentifier {
         readonly text: string;
     }
     interface Decorator extends Node {
@@ -5801,8 +5795,6 @@ declare namespace ts {
      */
     interface SourceFileLike {
         readonly text: string;
-    }
-    interface SourceFileLike {
         getLineAndCharacterOfPosition(pos: number): LineAndCharacter;
     }
     type ResolutionMode = ModuleKind.ESNext | ModuleKind.CommonJS | undefined;
@@ -5847,13 +5839,32 @@ declare namespace ts {
          * CommonJS-output-format by the node module transformer and type checker, regardless of extension or context.
          */
         impliedNodeFormat?: ResolutionMode;
-    }
-    interface SourceFile {
         getLineAndCharacterOfPosition(pos: number): LineAndCharacter;
         getLineEndOfPosition(pos: number): number;
         getLineStarts(): readonly number[];
         getPositionOfLineAndCharacter(line: number, character: number): number;
         update(newText: string, textChangeRange: TextChangeRange): SourceFile;
+    }
+    /**
+     * Represents an immutable snapshot of a script at a specified time. Once acquired, the
+     * snapshot is observably immutable. i.e. the same calls with the same parameters will return
+     * the same values.
+     */
+    interface IScriptSnapshot {
+        /** Gets a portion of the script snapshot specified by [start, end). */
+        getText(start: number, end: number): string;
+        /** Gets the length of this script snapshot. */
+        getLength(): number;
+        /**
+         * Gets the TextChangeRange that describe how the text changed between this text and
+         * an older version.  This information is used by the incremental parser to determine
+         * what sections of the script need to be re-parsed.  'undefined' can be returned if the
+         * change range cannot be determined.  However, in that case, incremental parsing will
+         * not happen and the entire document will be re - parsed.
+         */
+        getChangeRange(oldSnapshot: IScriptSnapshot): TextChangeRange | undefined;
+        /** Releases all resources held by this script snapshot */
+        dispose?(): void;
     }
     interface Bundle extends Node {
         readonly kind: SyntaxKind.Bundle;
@@ -6399,6 +6410,39 @@ declare namespace ts {
         PropertyOrAccessor = 98308,
         ClassMember = 106500,
     }
+    interface SymbolDisplayPart {
+        /**
+         * Text of an item describing the symbol.
+         */
+        text: string;
+        /**
+         * The symbol's kind (such as 'className' or 'parameterName' or plain 'text').
+         */
+        kind: string;
+    }
+    interface DocumentSpan {
+        textSpan: TextSpan;
+        fileName: string;
+        /**
+         * If the span represents a location that was remapped (e.g. via a .d.ts.map file),
+         * then the original filename and span will be specified here
+         */
+        originalTextSpan?: TextSpan;
+        originalFileName?: string;
+        /**
+         * If DocumentSpan.textSpan is the span for name of the declaration,
+         * then this is the span for relevant declaration
+         */
+        contextSpan?: TextSpan;
+        originalContextSpan?: TextSpan;
+    }
+    interface JSDocLinkDisplayPart extends SymbolDisplayPart {
+        target: DocumentSpan;
+    }
+    interface JSDocTagInfo {
+        name: string;
+        text?: SymbolDisplayPart[];
+    }
     interface Symbol {
         flags: SymbolFlags;
         escapedName: __String;
@@ -6407,8 +6451,6 @@ declare namespace ts {
         members?: SymbolTable;
         exports?: SymbolTable;
         globalExports?: SymbolTable;
-    }
-    interface Symbol {
         readonly name: string;
         getFlags(): SymbolFlags;
         getEscapedName(): __String;
@@ -6518,8 +6560,6 @@ declare namespace ts {
         pattern?: DestructuringPattern;
         aliasSymbol?: Symbol;
         aliasTypeArguments?: readonly Type[];
-    }
-    interface Type {
         getFlags(): TypeFlags;
         getSymbol(): Symbol | undefined;
         getProperties(): Symbol[];
@@ -6619,9 +6659,7 @@ declare namespace ts {
     interface TypeReference extends ObjectType {
         target: GenericType;
         node?: TypeReferenceNode | ArrayTypeNode | TupleTypeNode;
-    }
-    interface TypeReference {
-        typeArguments?: readonly Type[];
+        readonly typeArguments?: readonly Type[];
     }
     interface DeferredTypeReference extends TypeReference {
     }
@@ -6719,11 +6757,9 @@ declare namespace ts {
         typeParameters?: readonly TypeParameter[];
         parameters: readonly Symbol[];
         thisParameter?: Symbol;
-    }
-    interface Signature {
-        getDeclaration(): SignatureDeclaration;
-        getTypeParameters(): TypeParameter[] | undefined;
-        getParameters(): Symbol[];
+        getDeclaration(): JSDocSignature | SignatureDeclaration;
+        getTypeParameters(): readonly TypeParameter[] | undefined;
+        getParameters(): readonly Symbol[];
         getTypeParameterAtPosition(pos: number): Type;
         getReturnType(): Type;
         getDocumentationComment(typeChecker: TypeChecker | undefined): SymbolDisplayPart[];
@@ -7234,8 +7270,6 @@ declare namespace ts {
         fileName: string;
         text: string;
         skipTrivia?: (pos: number) => number;
-    }
-    interface SourceMapSource {
         getLineAndCharacterOfPosition(pos: number): LineAndCharacter;
     }
     enum EmitFlags {
@@ -9828,27 +9862,6 @@ declare namespace ts {
     }
     type InvalidatedProject<T extends BuilderProgram> = UpdateOutputFileStampsProject | BuildInvalidedProject<T>;
     function getDefaultFormatCodeSettings(newLineCharacter?: string): FormatCodeSettings;
-    /**
-     * Represents an immutable snapshot of a script at a specified time.Once acquired, the
-     * snapshot is observably immutable. i.e. the same calls with the same parameters will return
-     * the same values.
-     */
-    interface IScriptSnapshot {
-        /** Gets a portion of the script snapshot specified by [start, end). */
-        getText(start: number, end: number): string;
-        /** Gets the length of this script snapshot. */
-        getLength(): number;
-        /**
-         * Gets the TextChangeRange that describe how the text changed between this text and
-         * an older version.  This information is used by the incremental parser to determine
-         * what sections of the script need to be re-parsed.  'undefined' can be returned if the
-         * change range cannot be determined.  However, in that case, incremental parsing will
-         * not happen and the entire document will be re - parsed.
-         */
-        getChangeRange(oldSnapshot: IScriptSnapshot): TextChangeRange | undefined;
-        /** Releases all resources held by this script snapshot */
-        dispose?(): void;
-    }
     namespace ScriptSnapshot {
         function fromString(text: string): IScriptSnapshot;
     }
@@ -10404,22 +10417,6 @@ declare namespace ts {
         /** The position in newText the caret should point to after the insertion. */
         caretOffset: number;
     }
-    interface DocumentSpan {
-        textSpan: TextSpan;
-        fileName: string;
-        /**
-         * If the span represents a location that was remapped (e.g. via a .d.ts.map file),
-         * then the original filename and span will be specified here
-         */
-        originalTextSpan?: TextSpan;
-        originalFileName?: string;
-        /**
-         * If DocumentSpan.textSpan is the span for name of the declaration,
-         * then this is the span for relevant declaration
-         */
-        contextSpan?: TextSpan;
-        originalContextSpan?: TextSpan;
-    }
     interface RenameLocation extends DocumentSpan {
         readonly prefixText?: string;
         readonly suffixText?: string;
@@ -10572,23 +10569,6 @@ declare namespace ts {
         link = 22,
         linkName = 23,
         linkText = 24,
-    }
-    interface SymbolDisplayPart {
-        /**
-         * Text of an item describing the symbol.
-         */
-        text: string;
-        /**
-         * The symbol's kind (such as 'className' or 'parameterName' or plain 'text').
-         */
-        kind: string;
-    }
-    interface JSDocLinkDisplayPart extends SymbolDisplayPart {
-        target: DocumentSpan;
-    }
-    interface JSDocTagInfo {
-        name: string;
-        text?: SymbolDisplayPart[];
     }
     interface QuickInfo {
         kind: ScriptElementKind;

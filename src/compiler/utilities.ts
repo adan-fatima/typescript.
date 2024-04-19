@@ -497,9 +497,7 @@ import {
     SetAccessorDeclaration,
     ShorthandPropertyAssignment,
     shouldAllowImportingTsExtension,
-    Signature,
     SignatureDeclaration,
-    SignatureFlags,
     singleElementArray,
     singleOrUndefined,
     skipOuterExpressions,
@@ -511,7 +509,6 @@ import {
     SourceFile,
     SourceFileLike,
     SourceFileMayBeEmittedHost,
-    SourceMapSource,
     startsWith,
     startsWithUseStrict,
     Statement,
@@ -541,7 +538,6 @@ import {
     TokenFlags,
     tokenToString,
     toPath,
-    tracing,
     TransformFlags,
     TransientSymbol,
     TriviaSyntaxKind,
@@ -5340,6 +5336,14 @@ export function isPushOrUnshiftIdentifier(node: Identifier) {
     return node.escapedText === "push" || node.escapedText === "unshift";
 }
 
+/** @internal */
+export function getNameFromPropertyName(name: PropertyName): string | undefined {
+    return name.kind === SyntaxKind.ComputedPropertyName
+        // treat computed property names where expression is string/numeric literal as just string/numeric literal
+        ? isStringOrNumericLiteralLike(name.expression) ? name.expression.text : undefined
+        : isPrivateIdentifier(name) ? idText(name) : getTextOfIdentifierOrLiteral(name);
+}
+
 // TODO(jakebailey): this function should not be named this. While it does technically
 // return true if the argument is a ParameterDeclaration, it also returns true for nodes
 // that are children of ParameterDeclarations inside binding elements.
@@ -8194,131 +8198,8 @@ export function getLeftmostExpression(node: Expression, stopAtCallExpressions: b
 }
 
 /** @internal */
-export interface ObjectAllocator {
-    getNodeConstructor(): new (kind: SyntaxKind, pos: number, end: number) => Node;
-    getTokenConstructor(): new <TKind extends SyntaxKind>(kind: TKind, pos: number, end: number) => Token<TKind>;
-    getIdentifierConstructor(): new (kind: SyntaxKind.Identifier, pos: number, end: number) => Identifier;
-    getPrivateIdentifierConstructor(): new (kind: SyntaxKind.PrivateIdentifier, pos: number, end: number) => PrivateIdentifier;
-    getSourceFileConstructor(): new (kind: SyntaxKind.SourceFile, pos: number, end: number) => SourceFile;
-    getSymbolConstructor(): new (flags: SymbolFlags, name: __String) => Symbol;
-    getTypeConstructor(): new (checker: TypeChecker, flags: TypeFlags) => Type;
-    getSignatureConstructor(): new (checker: TypeChecker, flags: SignatureFlags) => Signature;
-    getSourceMapSourceConstructor(): new (fileName: string, text: string, skipTrivia?: (pos: number) => number) => SourceMapSource;
-}
-
-function Symbol(this: Symbol, flags: SymbolFlags, name: __String) {
-    // Note: if modifying this, be sure to update SymbolObject in src/services/services.ts
-    this.flags = flags;
-    this.escapedName = name;
-    this.declarations = undefined;
-    this.valueDeclaration = undefined;
-    this.id = 0;
-    this.mergeId = 0;
-    this.parent = undefined;
-    this.members = undefined;
-    this.exports = undefined;
-    this.exportSymbol = undefined;
-    this.constEnumOnlyModule = undefined;
-    this.isReferenced = undefined;
-    this.lastAssignmentPos = undefined;
-    (this as any).links = undefined; // used by TransientSymbol
-}
-
-function Type(this: Type, checker: TypeChecker, flags: TypeFlags) {
-    // Note: if modifying this, be sure to update TypeObject in src/services/services.ts
-    this.flags = flags;
-    if (Debug.isDebugging || tracing) {
-        this.checker = checker;
-    }
-}
-
-function Signature(this: Signature, checker: TypeChecker, flags: SignatureFlags) {
-    // Note: if modifying this, be sure to update SignatureObject in src/services/services.ts
-    this.flags = flags;
-    if (Debug.isDebugging) {
-        this.checker = checker;
-    }
-}
-
-function Node(this: Mutable<Node>, kind: SyntaxKind, pos: number, end: number) {
-    // Note: if modifying this, be sure to update NodeObject in src/services/services.ts
-    this.pos = pos;
-    this.end = end;
-    this.kind = kind;
-    this.id = 0;
-    this.flags = NodeFlags.None;
-    this.modifierFlagsCache = ModifierFlags.None;
-    this.transformFlags = TransformFlags.None;
-    this.parent = undefined!;
-    this.original = undefined;
-    this.emitNode = undefined;
-}
-
-function Token(this: Mutable<Node>, kind: SyntaxKind, pos: number, end: number) {
-    // Note: if modifying this, be sure to update TokenOrIdentifierObject in src/services/services.ts
-    this.pos = pos;
-    this.end = end;
-    this.kind = kind;
-    this.id = 0;
-    this.flags = NodeFlags.None;
-    this.transformFlags = TransformFlags.None;
-    this.parent = undefined!;
-    this.emitNode = undefined;
-}
-
-function Identifier(this: Mutable<Node>, kind: SyntaxKind, pos: number, end: number) {
-    // Note: if modifying this, be sure to update TokenOrIdentifierObject in src/services/services.ts
-    this.pos = pos;
-    this.end = end;
-    this.kind = kind;
-    this.id = 0;
-    this.flags = NodeFlags.None;
-    this.transformFlags = TransformFlags.None;
-    this.parent = undefined!;
-    this.original = undefined;
-    this.emitNode = undefined;
-}
-
-function SourceMapSource(this: SourceMapSource, fileName: string, text: string, skipTrivia?: (pos: number) => number) {
-    // Note: if modifying this, be sure to update SourceMapSourceObject in src/services/services.ts
-    this.fileName = fileName;
-    this.text = text;
-    this.skipTrivia = skipTrivia || (pos => pos);
-}
-
-/** @internal */
-export const objectAllocator: ObjectAllocator = {
-    getNodeConstructor: () => Node as any,
-    getTokenConstructor: () => Token as any,
-    getIdentifierConstructor: () => Identifier as any,
-    getPrivateIdentifierConstructor: () => Node as any,
-    getSourceFileConstructor: () => Node as any,
-    getSymbolConstructor: () => Symbol as any,
-    getTypeConstructor: () => Type as any,
-    getSignatureConstructor: () => Signature as any,
-    getSourceMapSourceConstructor: () => SourceMapSource as any,
-};
-
-const objectAllocatorPatchers: ((objectAllocator: ObjectAllocator) => void)[] = [];
-
-/**
- * Used by `deprecatedCompat` to patch the object allocator to apply deprecations.
- * @internal
- */
-export function addObjectAllocatorPatcher(fn: (objectAllocator: ObjectAllocator) => void) {
-    objectAllocatorPatchers.push(fn);
-    fn(objectAllocator);
-}
-
-/** @internal */
-export function setObjectAllocator(alloc: ObjectAllocator) {
-    Object.assign(objectAllocator, alloc);
-    forEach(objectAllocatorPatchers, fn => fn(objectAllocator));
-}
-
-/** @internal */
-export function formatStringFromArgs(text: string, args: DiagnosticArguments): string {
-    return text.replace(/{(\d+)}/g, (_match, index: string) => "" + Debug.checkDefined(args[+index]));
+export function formatStringFromArgs(text: string, args: ArrayLike<string | number>, baseIndex = 0): string {
+    return text.replace(/{(\d+)}/g, (_match, index: string) => "" + Debug.checkDefined(args[+index + baseIndex]));
 }
 
 let localizedDiagnosticMessages: MapLike<string> | undefined;

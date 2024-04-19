@@ -14,7 +14,6 @@ export * from "../diagnosticInformationMap.generated";
 export * from "../scanner";
 export * from "../utilitiesPublic";
 export * from "../utilities";
-export * from "../factory/baseNodeFactory";
 export * from "../factory/parenthesizerRules";
 export * from "../factory/nodeConverters";
 export * from "../factory/nodeFactory";
