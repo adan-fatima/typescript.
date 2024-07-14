@@ -11686,3 +11686,10 @@ export function hasInferredType(node: Node): node is HasInferredType {
             return false;
     }
 }
+
+/** @internal */
+export function containsNonPublicProperties(props: Symbol[]) {
+    return some(props, p =>
+        !!(getDeclarationModifierFlagsFromSymbol(p) & ModifierFlags.NonPublicAccessibilityModifier) ||
+        !!p.valueDeclaration && isNamedDeclaration(p.valueDeclaration) && isPrivateIdentifier(p.valueDeclaration.name));
+}
