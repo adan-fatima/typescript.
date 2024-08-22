@@ -65,6 +65,7 @@ import {
     getOutputDeclarationFileName,
     GetPackageJsonEntrypointsHost,
     getStringComparer,
+    getTypeScriptNamespace,
     HasInvalidatedLibResolutions,
     HasInvalidatedResolutions,
     HostCancellationToken,
@@ -2116,12 +2117,12 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
             if (!globalPluginName) continue;
 
             // Skip already-locally-loaded plugins
-            if (options.plugins && options.plugins.some(p => p.name === globalPluginName)) continue;
+            if (options.plugins && options.plugins.some(p => p.type === undefined && p.name === globalPluginName)) continue;
 
             // Provide global: true so plugins can detect why they can't find their config
             this.projectService.logger.info(`Loading global plugin ${globalPluginName}`);
 
-            this.enablePlugin({ name: globalPluginName, global: true } as PluginImport, searchPaths);
+            this.enablePlugin({ name: globalPluginName, global: true }, searchPaths);
         }
     }
 
@@ -2146,7 +2147,7 @@ export abstract class Project implements LanguageServiceHost, ModuleResolutionHo
                 session: this.projectService.session,
             };
 
-            const pluginModule = pluginModuleFactory({ typescript: ts });
+            const pluginModule = pluginModuleFactory({ typescript: getTypeScriptNamespace() });
             const newLS = pluginModule.create(info);
             for (const k of Object.keys(this.languageService)) {
                 // eslint-disable-next-line local/no-in-operator
@@ -3026,7 +3027,9 @@ export class ConfiguredProject extends Project {
         // Enable tsconfig-specified plugins
         if (options.plugins) {
             for (const pluginConfigEntry of options.plugins) {
-                this.enablePlugin(pluginConfigEntry, searchPaths);
+                if (pluginConfigEntry.type === undefined) {
+                    this.enablePlugin(pluginConfigEntry, searchPaths);
+                }
             }
         }
 

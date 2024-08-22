@@ -383,7 +383,7 @@ function entrypointBuildTask(options) {
     return { build, bundle, shim, main, watch };
 }
 
-const { main: tsc, watch: watchTsc } = entrypointBuildTask({
+const { main: tsc, build: buildTsc, watch: watchTsc } = entrypointBuildTask({
     name: "tsc",
     description: "Builds the command-line compiler",
     buildDeps: [generateDiagnostics],
@@ -492,9 +492,20 @@ export const dtsLssl = task({
     },
 });
 
+export const dtsTsc = task({
+    name: "dts-tsc",
+    description: "Bundles tsclibrary.d.ts",
+    dependencies: [buildTsc],
+    run: async () => {
+        if (needsUpdate("./built/local/tsc/tsconfig.tsbuildinfo", ["./built/local/tsclibrary.d.ts", "./built/local/tsclibrary.internal.d.ts"])) {
+            await runDtsBundler("./built/local/tsc/_namespaces/ts.d.ts", "./built/local/tsclibrary.d.ts");
+        }
+    },
+});
+
 export const dts = task({
     name: "dts",
-    dependencies: [dtsServices, dtsLssl],
+    dependencies: [dtsServices, dtsLssl, dtsTsc],
 });
 
 const testRunner = "./built/local/run.js";
@@ -888,6 +899,7 @@ export const produceLKG = task({
             "built/local/tsserver.js",
             "built/local/tsserverlibrary.js",
             "built/local/tsserverlibrary.d.ts",
+            "built/local/tsclibrary.d.ts",
             "built/local/typescript.js",
             "built/local/typescript.d.ts",
             "built/local/typingsInstaller.js",

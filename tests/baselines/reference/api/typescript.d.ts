@@ -6899,8 +6899,14 @@ declare namespace ts {
          */
         Force = 3,
     }
+    type PluginConfig = PluginImport | TransformerPluginImport;
     interface PluginImport {
+        type?: undefined;
         name: string;
+    }
+    interface TransformerPluginImport {
+        type: "transformer";
+        path: string;
     }
     interface ProjectReference {
         /** A normalized path on disk */
@@ -6932,7 +6938,7 @@ declare namespace ts {
         DynamicPriority = 2,
         FixedChunkSize = 3,
     }
-    type CompilerOptionsValue = string | number | boolean | (string | number)[] | string[] | MapLike<string[]> | PluginImport[] | ProjectReference[] | null | undefined;
+    type CompilerOptionsValue = string | number | boolean | (string | number)[] | string[] | MapLike<string[]> | PluginConfig[] | ProjectReference[] | null | undefined;
     interface CompilerOptions {
         allowImportingTsExtensions?: boolean;
         allowJs?: boolean;
@@ -7049,6 +7055,8 @@ declare namespace ts {
         verbatimModuleSyntax?: boolean;
         esModuleInterop?: boolean;
         useDefineForClassFields?: boolean;
+        customTransformers?: string[];
+        allowPlugins?: boolean;
         [option: string]: CompilerOptionsValue | TsConfigSourceFile | undefined;
     }
     interface WatchOptions {
@@ -8339,6 +8347,20 @@ declare namespace ts {
     interface PseudoBigInt {
         negative: boolean;
         base10Value: string;
+    }
+    type CustomTransformersModuleFactory = (mod: {
+        typescript: typeof ts;
+    }) => CustomTransformersModule;
+    interface CustomTransformersModuleWithName {
+        name: string;
+        module: CustomTransformersModule;
+    }
+    interface CustomTransformersModule {
+        create(createInfo: CustomTransformersCreateInfo): CustomTransformers;
+    }
+    interface CustomTransformersCreateInfo {
+        program: Program;
+        config: any;
     }
     enum FileWatcherEventKind {
         Created = 0,
@@ -9832,6 +9854,7 @@ declare namespace ts {
         sourceMap?: boolean;
         inlineSourceMap?: boolean;
         traceResolution?: boolean;
+        allowPlugins?: boolean;
         [option: string]: CompilerOptionsValue | undefined;
     }
     type ReportEmitErrorSummary = (errorCount: number, filesInError: (ReportFileInError | undefined)[]) => void;

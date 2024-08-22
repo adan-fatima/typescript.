@@ -52,6 +52,7 @@ import {
     createTypeChecker,
     createTypeReferenceDirectiveResolutionCache,
     CustomTransformers,
+    CustomTransformersModuleFactory,
     Debug,
     DeclarationWithTypeParameterChildren,
     Diagnostic,
@@ -157,6 +158,7 @@ import {
     getTsBuildInfoEmitOutputFilePath,
     getTsConfigObjectLiteralExpression,
     getTsConfigPropArrayElementValue,
+    getTypeScriptNamespace,
     getTypesPackageName,
     HasChangedAutomaticTypeDirectiveNames,
     hasChangesInResolutions,
@@ -224,6 +226,7 @@ import {
     mapDefined,
     maybeBind,
     memoize,
+    mergeCustomTransformers,
     MethodDeclaration,
     ModeAwareCache,
     ModeAwareCacheKey,
@@ -294,6 +297,7 @@ import {
     ScriptTarget,
     setParent,
     setParentRecursive,
+    shouldAllowPlugins,
     skipTrivia,
     skipTypeChecking,
     some,
@@ -503,6 +507,7 @@ export function createCompilerHostWorker(
         readDirectory: (path, extensions, include, exclude, depth) => system.readDirectory(path, extensions, include, exclude, depth),
         createDirectory: d => system.createDirectory(d),
         createHash: maybeBind(system, system.createHash),
+        require: maybeBind(system, system.require),
     };
     return compilerHost;
 }
@@ -2847,6 +2852,34 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
         return hasEmitBlockingDiagnostics.has(toPath(emitFileName));
     }
 
+    function getCustomTransformers() {
+        if (!host.require) {
+            return emptyArray;
+        }
+
+        const compilerOptions = program.getCompilerOptions();
+        if (!shouldAllowPlugins(compilerOptions)) {
+            return emptyArray;
+        }
+
+        const customTransformers = mapDefined(compilerOptions.plugins, config => {
+            if (config.type !== "transformer") return undefined;
+
+            // TODO(jakebailey): The LS plugin loader is more complicated than this; copy.
+            const result = host.require!(program.getCurrentDirectory(), config.path);
+            // TODO(jakebailey): error handling, only do this once per, etc
+            Debug.assertIsDefined(result.module);
+
+            const factory = result.module as CustomTransformersModuleFactory;
+            Debug.assert(typeof factory === "function");
+
+            const plugin = factory({ typescript: getTypeScriptNamespace() });
+            return plugin.create({ program, config });
+        });
+
+        return customTransformers ?? emptyArray;
+    }
+
     function emitWorker(
         program: Program,
         sourceFile: SourceFile | undefined,
@@ -2879,6 +2912,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
 
         performance.mark("beforeEmit");
 
+        const mergedCustomTransformers = mergeCustomTransformers(...getCustomTransformers(), customTransformers);
         const emitResult = typeChecker.runWithCancellationToken(
             cancellationToken,
             () =>
@@ -2886,7 +2920,7 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
                     emitResolver,
                     getEmitHost(writeFileCallback),
                     sourceFile,
-                    getTransformers(options, customTransformers, emitOnly),
+                    getTransformers(options, mergedCustomTransformers, emitOnly),
                     emitOnly,
                     /*onlyBuildInfo*/ false,
                     forceDtsEmit,
@@ -4569,6 +4603,14 @@ export function createProgram(rootNamesOrOptions: readonly string[] | CreateProg
                 }
                 verifyEmitFilePath(emitFileNames.declarationFilePath, emitFilesSeen);
             });
+        }
+
+        if (options.plugins && !shouldAllowPlugins(options)) {
+            for (const plugin of options.plugins) {
+                if (plugin.type === undefined) continue; // Language service plugins. TODO(jakebailey): give these a type, require type, deprecate missing type?
+                programDiagnostics.add(createCompilerDiagnostic(Diagnostics.Option_allowPlugins_must_be_specified_when_compiler_plugins_are_present));
+                break;
+            }
         }
 
         // Verify that all the emit files are unique and don't overwrite input files
