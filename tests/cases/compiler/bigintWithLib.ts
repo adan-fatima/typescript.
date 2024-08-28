@@ -19,10 +19,18 @@ stringVal = bigintVal.toLocaleString('de-DE', { style: 'currency', currency: 'EU
 let bigIntArray: BigInt64Array = new BigInt64Array();
 bigIntArray = new BigInt64Array(10);
 bigIntArray = new BigInt64Array([1n, 2n, 3n]);
+bigIntArray = new BigInt64Array({0: 1n, 1: 2n, 2: 3n, length: 3});
 bigIntArray = new BigInt64Array([1, 2, 3]); // should error
+bigIntArray = new BigInt64Array({0: 1, 1: 2, 2: 3, length: 3}); // should error
 bigIntArray = new BigInt64Array(new ArrayBuffer(80));
 bigIntArray = new BigInt64Array(new ArrayBuffer(80), 8);
 bigIntArray = new BigInt64Array(new ArrayBuffer(80), 8, 3);
+bigIntArray = BigInt64Array.from([1n, 2n, 3n]);
+bigIntArray = BigInt64Array.from([1n, 2n, 3n], n => n * 10n);
+bigIntArray = BigInt64Array.from({0: 1n, 1: 2n, 2: 3n, length: 3});
+bigIntArray = BigInt64Array.from({0: 1n, 1: 2n, 2: 3n, length: 3}, n => n * 10n);
+bigIntArray = BigInt64Array.from(['1', '2', '3']); // should error
+bigIntArray = BigInt64Array.from(['1', '2', '3'], s => BigInt(s));
 let len: number = bigIntArray.length;
 bigIntArray.length = 10; // should error
 let arrayBufferLike: ArrayBufferView = bigIntArray;
@@ -31,10 +39,18 @@ let arrayBufferLike: ArrayBufferView = bigIntArray;
 let bigUintArray: BigUint64Array = new BigUint64Array();
 bigUintArray = new BigUint64Array(10);
 bigUintArray = new BigUint64Array([1n, 2n, 3n]);
+bigUintArray = new BigUint64Array({0: 1n, 1: 2n, 2: 3n, length: 3});
 bigUintArray = new BigUint64Array([1, 2, 3]); // should error
+bigUintArray = new BigUint64Array({0: 1, 1: 2, 2: 3, length: 3}); // should error
 bigUintArray = new BigUint64Array(new ArrayBuffer(80));
 bigUintArray = new BigUint64Array(new ArrayBuffer(80), 8);
 bigUintArray = new BigUint64Array(new ArrayBuffer(80), 8, 3);
+bigUintArray = BigUint64Array.from([1n, 2n, 3n]);
+bigUintArray = BigUint64Array.from([1n, 2n, 3n], n => n * 10n);
+bigUintArray = BigUint64Array.from({0: 1n, 1: 2n, 2: 3n, length: 3});
+bigUintArray = BigUint64Array.from({0: 1n, 1: 2n, 2: 3n, length: 3}, n => n * 10n);
+bigUintArray = BigUint64Array.from(['1', '2', '3']); // should error
+bigUintArray = BigUint64Array.from(['1', '2', '3'], s => BigInt(s));
 len = bigIntArray.length;
 bigIntArray.length = 10; // should error
 arrayBufferLike = bigIntArray;
