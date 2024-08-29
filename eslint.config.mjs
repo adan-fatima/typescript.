@@ -51,6 +51,12 @@ export default tseslint.config(
         languageOptions: {
             parserOptions: {
                 warnOnUnsupportedTypeScriptVersion: false,
+                tsconfigRootDir: __dirname,
+                projectService: {
+                    // This is a reasonable config to use for loose files.
+                    defaultProject: "./scripts/tsconfig.json",
+                    allowDefaultProject: ["*.js", "*.cjs", "*.mjs"].map(p => [p, `.${p}`]).flat(),
+                },
             },
             globals: globals.node,
         },
@@ -170,24 +176,6 @@ export default tseslint.config(
                 { name: "module" },
                 { name: "exports" },
             ],
-        },
-    },
-    {
-        files: ["src/**"],
-        languageOptions: {
-            parserOptions: {
-                tsconfigRootDir: __dirname,
-                project: "./src/tsconfig-eslint.json",
-            },
-        },
-    },
-    {
-        files: ["scripts/**"],
-        languageOptions: {
-            parserOptions: {
-                tsconfigRootDir: __dirname,
-                project: "./scripts/tsconfig.json",
-            },
         },
     },
     {
