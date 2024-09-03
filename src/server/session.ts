@@ -202,7 +202,7 @@ export const nullCancellationToken: ServerCancellationToken = {
 function hrTimeToMilliseconds(time: [number, number]): number {
     const seconds = time[0];
     const nanoseconds = time[1];
-    return ((1e9 * seconds) + nanoseconds) / 1000000.0;
+    return ((1e9 * seconds) + nanoseconds) / 1000000;
 }
 
 function isDeclarationFileInJSOnlyNonConfiguredProject(project: Project, file: NormalizedPath) {
@@ -2423,7 +2423,7 @@ export class Session<TMessage = string> implements EventSender {
             return {
                 start: scriptInfo.positionToLineOffset(edit.span.start),
                 end: scriptInfo.positionToLineOffset(textSpanEnd(edit.span)),
-                newText: edit.newText ? edit.newText : "",
+                newText: edit.newText || "",
             };
         });
     }
@@ -3069,7 +3069,7 @@ export class Session<TMessage = string> implements EventSender {
         return {
             start: scriptInfo.positionToLineOffset(change.span.start),
             end: scriptInfo.positionToLineOffset(change.span.start + change.span.length),
-            newText: change.newText ? change.newText : "",
+            newText: change.newText || "",
         };
     }
 

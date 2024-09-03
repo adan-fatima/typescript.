@@ -2368,7 +2368,7 @@ function extractUnresolvedImportsFromSourceFile(
             if (
                 (!resolvedModule || !resolutionExtensionIsTSOrJson(resolvedModule.extension)) &&
                 !isExternalModuleNameRelative(name) &&
-                !ambientModules.some(m => m === name)
+                !ambientModules.includes(name)
             ) {
                 unresolvedImports = append(unresolvedImports, parsePackageName(name).packageName);
             }
