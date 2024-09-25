@@ -222,7 +222,7 @@ import {
     isObjectBindingPattern,
     isObjectLiteralExpression,
     isObjectTypeDeclaration,
-    isParameter,
+    isParameterDeclaration,
     isParameterPropertyModifier,
     isPartOfTypeNode,
     isPossiblyTypeArgumentPosition,
@@ -2754,7 +2754,7 @@ export function getCompletionEntriesFromSymbols(
             // `function f<T = /* no 'T' and 'T2' here */>(a: T, b: T2) { }`
             const symbolDeclaration = symbol.valueDeclaration ?? symbol.declarations?.[0];
             if (closestSymbolDeclaration && symbolDeclaration) {
-                if (isParameter(closestSymbolDeclaration) && isParameter(symbolDeclaration)) {
+                if (isParameterDeclaration(closestSymbolDeclaration) && isParameterDeclaration(symbolDeclaration)) {
                     const parameters = closestSymbolDeclaration.parent.parameters;
                     if (symbolDeclaration.pos >= closestSymbolDeclaration.pos && symbolDeclaration.pos < parameters.end) {
                         return false;
@@ -4105,7 +4105,7 @@ function getCompletionData(
                 case SyntaxKind.ColonToken:
                     return parentKind === SyntaxKind.PropertyDeclaration ||
                         parentKind === SyntaxKind.PropertySignature ||
-                        parentKind === SyntaxKind.Parameter ||
+                        parentKind === SyntaxKind.ParameterDeclaration ||
                         parentKind === SyntaxKind.VariableDeclaration ||
                         isFunctionLikeKind(parentKind);
 
@@ -4582,7 +4582,7 @@ function getCompletionData(
             // Also proceed if rootDeclaration is a parameter and if its containing function expression/arrow function is contextually typed -
             // type of parameter will flow in from the contextual type of the function
             let canGetType = hasInitializer(rootDeclaration) || !!getEffectiveTypeAnnotationNode(rootDeclaration) || rootDeclaration.parent.parent.kind === SyntaxKind.ForOfStatement;
-            if (!canGetType && rootDeclaration.kind === SyntaxKind.Parameter) {
+            if (!canGetType && rootDeclaration.kind === SyntaxKind.ParameterDeclaration) {
                 if (isExpression(rootDeclaration.parent)) {
                     canGetType = !!typeChecker.getContextualType(rootDeclaration.parent as Expression);
                 }
@@ -4779,7 +4779,7 @@ function getCompletionData(
     }
 
     function isConstructorParameterCompletion(node: Node): boolean {
-        return !!node.parent && isParameter(node.parent) && isConstructorDeclaration(node.parent.parent)
+        return !!node.parent && isParameterDeclaration(node.parent) && isConstructorDeclaration(node.parent.parent)
             && (isParameterPropertyModifier(node.kind) || isDeclarationName(node));
     }
 
@@ -4945,13 +4945,13 @@ function getCompletionData(
                 return containingNodeKind === SyntaxKind.PropertyDeclaration && !isClassLike(parent.parent);
 
             case SyntaxKind.DotDotDotToken:
-                return containingNodeKind === SyntaxKind.Parameter ||
+                return containingNodeKind === SyntaxKind.ParameterDeclaration ||
                     (!!parent.parent && parent.parent.kind === SyntaxKind.ArrayBindingPattern);  // var [...z|
 
             case SyntaxKind.PublicKeyword:
             case SyntaxKind.PrivateKeyword:
             case SyntaxKind.ProtectedKeyword:
-                return containingNodeKind === SyntaxKind.Parameter && !isConstructorDeclaration(parent.parent);
+                return containingNodeKind === SyntaxKind.ParameterDeclaration && !isConstructorDeclaration(parent.parent);
 
             case SyntaxKind.AsKeyword:
                 return containingNodeKind === SyntaxKind.ImportSpecifier ||
@@ -6014,7 +6014,7 @@ function getClosestSymbolDeclaration(contextToken: Node | undefined, location: N
     let closestDeclaration = findAncestor(contextToken, node =>
         isFunctionBlock(node) || isArrowFunctionBody(node) || isBindingPattern(node)
             ? "quit"
-            : ((isParameter(node) || isTypeParameterDeclaration(node)) && !isIndexSignatureDeclaration(node.parent)));
+            : ((isParameterDeclaration(node) || isTypeParameterDeclaration(node)) && !isIndexSignatureDeclaration(node.parent)));
 
     if (!closestDeclaration) {
         closestDeclaration = findAncestor(location, node =>

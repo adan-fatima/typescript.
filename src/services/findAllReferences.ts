@@ -170,7 +170,7 @@ import {
     isObjectBindingElementWithoutPropertyName,
     isObjectLiteralExpression,
     isObjectLiteralMethod,
-    isParameter,
+    isParameterDeclaration,
     isParameterPropertyDeclaration,
     isPrivateIdentifierClassElementDeclaration,
     isPropertyAccessExpression,
@@ -942,7 +942,7 @@ function declarationIsWriteAccess(decl: Declaration): boolean {
         case SyntaxKind.NamespaceExportDeclaration:
         case SyntaxKind.NamespaceImport:
         case SyntaxKind.NamespaceExport:
-        case SyntaxKind.Parameter:
+        case SyntaxKind.ParameterDeclaration:
         case SyntaxKind.ShorthandPropertyAssignment:
         case SyntaxKind.TypeAliasDeclaration:
         case SyntaxKind.TypeParameter:
@@ -2400,7 +2400,7 @@ export namespace Core {
     }
 
     function isParameterName(node: Node) {
-        return node.kind === SyntaxKind.Identifier && node.parent.kind === SyntaxKind.Parameter && (node.parent as ParameterDeclaration).name === node;
+        return node.kind === SyntaxKind.Identifier && node.parent.kind === SyntaxKind.ParameterDeclaration && (node.parent as ParameterDeclaration).name === node;
     }
 
     function getReferencesForThisKeyword(thisOrSuperKeyword: Node, sourceFiles: readonly SourceFile[], cancellationToken: CancellationToken): SymbolAndEntries[] | undefined {
@@ -2467,7 +2467,7 @@ export namespace Core {
             });
         }).map(n => nodeEntry(n));
 
-        const thisParameter = firstDefined(references, r => isParameter(r.node.parent) ? r.node : undefined);
+        const thisParameter = firstDefined(references, r => isParameterDeclaration(r.node.parent) ? r.node : undefined);
         return [{
             definition: { type: DefinitionKind.This, node: thisParameter || thisOrSuperKeyword },
             references,
@@ -2597,7 +2597,7 @@ export namespace Core {
 
         if (symbol.valueDeclaration && isParameterPropertyDeclaration(symbol.valueDeclaration, symbol.valueDeclaration.parent)) {
             // For a parameter property, now try on the other symbol (property if this was a parameter, parameter if this was a property).
-            const paramProps = checker.getSymbolsOfParameterPropertyDeclaration(cast(symbol.valueDeclaration, isParameter), symbol.name);
+            const paramProps = checker.getSymbolsOfParameterPropertyDeclaration(cast(symbol.valueDeclaration, isParameterDeclaration), symbol.name);
             Debug.assert(paramProps.length === 2 && !!(paramProps[0].flags & SymbolFlags.FunctionScopedVariable) && !!(paramProps[1].flags & SymbolFlags.Property)); // is [parameter, property]
             return fromRoot(symbol.flags & SymbolFlags.FunctionScopedVariable ? paramProps[1] : paramProps[0]);
         }
