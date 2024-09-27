@@ -17,7 +17,6 @@ import {
     chainBundle,
     ClassDeclaration,
     collectExternalModuleInfo,
-    Debug,
     Declaration,
     DefaultClause,
     DestructuringAssignment,
@@ -169,6 +168,7 @@ import {
     WhileStatement,
     WithStatement,
 } from "../../_namespaces/ts.js";
+import * as Debug from "../../debug.js";
 
 /** @internal */
 export function transformModule(context: TransformationContext): (x: SourceFile | Bundle) => SourceFile | Bundle {

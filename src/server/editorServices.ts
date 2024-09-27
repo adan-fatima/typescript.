@@ -1,7 +1,7 @@
+import * as Debug from "../compiler/debug.js";
 import {
     addToSeen,
     arrayFrom,
-    AssertionLevel,
     CachedDirectoryStructureHost,
     canWatchDirectoryOrFilePath,
     cleanExtendedConfigCache,
@@ -20,7 +20,6 @@ import {
     createDocumentRegistryInternal,
     createGetCanonicalFileName,
     createMultiMap,
-    Debug,
     Diagnostic,
     directorySeparator,
     DirectoryStructureHost,
@@ -2187,7 +2186,7 @@ export class ProjectService {
         project.print(/*writeProjectFileNames*/ true, /*writeFileExplaination*/ true, /*writeFileVersionAndText*/ false);
 
         project.close();
-        if (Debug.shouldAssert(AssertionLevel.Normal)) {
+        if (Debug.shouldAssert(Debug.AssertionLevel.Normal)) {
             this.filenameToScriptInfo.forEach(info =>
                 Debug.assert(
                     !info.isAttached(project),

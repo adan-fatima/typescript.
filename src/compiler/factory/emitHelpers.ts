@@ -6,7 +6,6 @@ import {
     compareValues,
     Comparison,
     createExpressionFromEntityName,
-    Debug,
     EmitFlags,
     EmitHelper,
     EmitHelperUniqueNameCallback,
@@ -37,6 +36,7 @@ import {
     TransformationContext,
     UnscopedEmitHelper,
 } from "../_namespaces/ts.js";
+import * as Debug from "../debug.js";
 
 /** @internal */
 export const enum PrivateIdentifierKind {

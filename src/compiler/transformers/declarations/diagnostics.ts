@@ -11,7 +11,6 @@ import {
     ConstructorDeclaration,
     ConstructSignatureDeclaration,
     createDiagnosticForNode,
-    Debug,
     Declaration,
     DeclarationName,
     DiagnosticMessage,
@@ -96,6 +95,7 @@ import {
     TypeParameterDeclaration,
     VariableDeclaration,
 } from "../../_namespaces/ts.js";
+import * as Debug from "../../debug.js";
 
 /** @internal */
 export type GetSymbolAccessibilityDiagnostic = (symbolAccessibilityResult: SymbolAccessibilityResult) => SymbolAccessibilityDiagnostic | undefined;
@@ -669,7 +669,7 @@ export function createGetIsolatedDeclarationErrors(resolver: EmitResolver): (nod
         if ((isPartOfTypeNode(node) || isTypeQueryNode(node.parent)) && (isEntityName(node) || isEntityNameExpression(node))) {
             return createEntityInTypeNodeError(node);
         }
-        Debug.type<WithIsolatedDeclarationDiagnostic>(node);
+        Debug.assertType<WithIsolatedDeclarationDiagnostic>(node);
         switch (node.kind) {
             case SyntaxKind.GetAccessor:
             case SyntaxKind.SetAccessor:
