@@ -28,42 +28,52 @@ jobs:
           - ubuntu-latest
           - windows-latest
           - macos-14
-        node-version:
-          - '22'
-          - '20'
-          - '18'
-          - '16'
-          - '14'
+        runtime:
+          - { name: node, version: '22' }
+          - { name: node, version: 20 }
+          - { name: node, version: 18 }
+          - { name: node, version: 16 }
+          - { name: node, version: 14 }
+          - { name: bun, version: 'latest' }
         bundle:
-          - 'true'
+          - true
         include:
-          - node-version: 'lts/*'
-            bundle: false
-            os: ubuntu-latest
+          - { os: ubuntu-latest, runtime: { name: node, version: 'lts/*' }, bundle: false }
         exclude:
           # No Node 14 on ARM macOS
-          - node-version: '14'
-            os: macos-14
+          - { os: macos-14, runtime: { name: node, version: 14 }, bundle: true }
 
     runs-on: ${{ matrix.os }}
-    name: Test Node ${{ matrix.node-version }} on ${{ matrix.os }}${{ (!matrix.bundle && ' with --no-bundle') || '' }}
+    name: Test ${{ matrix.runtime.name }} ${{ matrix.runtime.version }} on ${{ matrix.os }}${{ (!matrix.bundle && ' with --no-bundle') || '' }}
 
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - name: Use node version ${{ matrix.node-version }}
+
+      - name: Use node version ${{ matrix.runtime.version }}
         uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ matrix.runtime.version }}
           check-latest: true
+        if: matrix.runtime.name == 'node'
+
+      - name: Use bun version ${{ matrix.runtime.version }}
+        uses: oven-sh/setup-bun@9b21598af8d4dfc302e5a30250007de0fda92acc # v1.1.1
+        with:
+          bun-version: ${{ matrix.runtime.version }}
+        if: matrix.runtime.name == 'bun'
+
       - run: npm ci
 
-      - name: Tests
-        id: test
-        # run tests, but lint separately
-        run: npm run test -- --no-lint --bundle=${{ matrix.bundle }}
+      - run: npm run test -- --no-lint --bundle=${{ matrix.bundle }}
+        id: test-node
+        if: matrix.runtime.name == 'node'
+
+      - run: bun run --bun test --no-lint --bundle=${{ matrix.bundle }}
+        id: test-bun
+        if: matrix.runtime.name == 'bun'
 
       - name: Print baseline diff on failure
-        if: ${{ failure() && steps.test.conclusion == 'failure' }}
+        if: ${{ failure() && (steps.test-node.conclusion == 'failure' || steps.test-bun.conclusion == 'failure') }}
         run: |
           npx hereby baseline-accept
           git add tests/baselines/reference
