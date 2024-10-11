@@ -1931,7 +1931,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     };
 
     function getTypeArgumentsForResolvedSignature(signature: Signature) {
-        if (signature.mapper === undefined) return undefined
+        if (signature.mapper === undefined) return undefined;
         return instantiateTypes((signature.target || signature).typeParameters, signature.mapper);
     }
 
