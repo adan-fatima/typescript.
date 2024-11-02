@@ -13,6 +13,7 @@ import {
     BreakOrContinueStatement,
     CallExpression,
     canHaveModifiers,
+    canHaveName,
     CaseClause,
     cast,
     CatchClause,
@@ -280,7 +281,6 @@ import {
     LanguageServiceHost,
     last,
     lastOrUndefined,
-    LiteralExpression,
     map,
     maybeBind,
     Modifier,
@@ -349,6 +349,7 @@ import {
     startsWith,
     StringLiteral,
     StringLiteralLike,
+    StringLiteralLikeNode,
     stringToToken,
     stripQuotes,
     Symbol,
@@ -717,7 +718,7 @@ export function isNameOfModuleDeclaration(node: Node): boolean {
 
 /** @internal */
 export function isNameOfFunctionDeclaration(node: Node): boolean {
-    return isIdentifier(node) && tryCast(node.parent, isFunctionLike)?.name === node;
+    return isIdentifier(node) && tryCast(tryCast(node.parent, isFunctionLike), canHaveName)?.name === node;
 }
 
 /** @internal */
@@ -1855,7 +1856,7 @@ export function isInString(sourceFile: SourceFile, position: number, previousTok
         }
 
         if (position === end) {
-            return !!(previousToken as LiteralExpression).isUnterminated;
+            return !!(previousToken as StringLiteralLikeNode).isUnterminated;
         }
     }
 
