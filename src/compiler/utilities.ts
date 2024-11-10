@@ -12096,3 +12096,8 @@ export function isNewScopeNode(node: Node): node is IntroducesNewScopeNode {
         || isJSDocSignature(node)
         || isMappedTypeNode(node);
 }
+
+/** @internal */
+export function isUnaryTupleTypeNode(node: TypeNode): boolean {
+    return node.kind === SyntaxKind.TupleType && (node as TupleTypeNode).elements.length === 1;
+}
