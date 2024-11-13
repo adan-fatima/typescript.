@@ -8595,6 +8595,7 @@ export function createFileDiagnostic(file: SourceFile, start: number, length: nu
         code: message.code,
         reportsUnnecessary: message.reportsUnnecessary,
         reportsDeprecated: message.reportsDeprecated,
+        reportsExperimental: message.reportsExperimental,
     };
 }
 
@@ -8627,6 +8628,7 @@ export function createCompilerDiagnostic(message: DiagnosticMessage, ...args: Di
         code: message.code,
         reportsUnnecessary: message.reportsUnnecessary,
         reportsDeprecated: message.reportsDeprecated,
+        reportsExperimental: message.reportsExperimental,
     };
 }
 
