@@ -5881,7 +5881,7 @@ export interface EmitResolver {
     getDeclarationStatementsForSourceFile(node: SourceFile, flags: NodeBuilderFlags, internalFlags: InternalNodeBuilderFlags, tracker: SymbolTracker): Statement[] | undefined;
     isImportRequiredByAugmentation(decl: ImportDeclaration): boolean;
     isDefinitelyReferenceToGlobalSymbolObject(node: Node): boolean;
-    createLateBoundIndexSignatures(cls: ClassLikeDeclaration, enclosingDeclaration: Node, flags: NodeBuilderFlags, internalFlags: InternalNodeBuilderFlags, tracker: SymbolTracker): IndexSignatureDeclaration[] | undefined;
+    createLateBoundIndexSignatures(cls: ClassLikeDeclaration, enclosingDeclaration: Node, flags: NodeBuilderFlags, internalFlags: InternalNodeBuilderFlags, tracker: SymbolTracker): (IndexSignatureDeclaration | PropertyDeclaration)[] | undefined;
 }
 
 // dprint-ignore
@@ -7014,11 +7014,14 @@ export const enum IndexKind {
     Number,
 }
 
+export type ElementWithComputedPropertyName = (ClassElement | ObjectLiteralElement) & { name: ComputedPropertyName; };
+
 export interface IndexInfo {
     keyType: Type;
     type: Type;
     isReadonly: boolean;
     declaration?: IndexSignatureDeclaration;
+    components?: ElementWithComputedPropertyName[];
 }
 
 /** @internal */
