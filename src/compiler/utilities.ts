@@ -1558,6 +1558,9 @@ export const getScriptTargetFeatures: () => ScriptTargetFeatures = /* @__PURE__ 
                 "fround",
                 "cbrt",
             ],
+            esnext: [
+                "f16round",
+            ],
         })),
         Map: new Map(Object.entries({
             es2015: [
@@ -1727,6 +1730,10 @@ export const getScriptTargetFeatures: () => ScriptTargetFeatures = /* @__PURE__ 
                 "getBigInt64",
                 "getBigUint64",
             ],
+            esnext: [
+                "setFloat16",
+                "getFloat16",
+            ],
         })),
         BigInt: new Map(Object.entries({
             es2020: emptyArray,
@@ -1828,6 +1835,9 @@ export const getScriptTargetFeatures: () => ScriptTargetFeatures = /* @__PURE__ 
                 "toSpliced",
                 "with",
             ],
+        })),
+        Float16Array: new Map(Object.entries({
+            esnext: emptyArray,
         })),
         Float32Array: new Map(Object.entries({
             es2022: [
